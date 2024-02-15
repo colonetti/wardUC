@@ -70,6 +70,11 @@ n.statistics()
 n.statistics.energy_balance()
 ```
 
+| First Header  | Second Header |
+| ------------- | ------------- |
+| Content Cell  | Content Cell  |
+| Content Cell  | Content Cell  |
+
 There are [more extensive
 examples](https://pypsa.readthedocs.io/en/latest/examples-basic.html) available
 as [Jupyter notebooks](https://jupyter.org/). They are also described in the
