@@ -46,28 +46,16 @@ Additionally, install a solver.
 
 ## Usage
 
-```py
-import pypsa
+On Windows:
 
-# create a new network
-n = pypsa.Network()
-n.add("Bus", "mybus")
-n.add("Load", "myload", bus="mybus", p_set=100)
-n.add("Generator", "mygen", bus="mybus", p_nom=100, marginal_cost=20)
+```
+mpiexec -np 1 python "main.py" %1 [--EXP_NAME=exp_1] [--T=36] [--CASE=1] [PS=ieee118] [--IN_DIR=""] [--OUT_DIR=""] [--THREADS=0] [--VERBOSE=1] [--DISCRETIZATION=1] [--MILP_GAP=0.0001] [--DEFICIT_COST=100000000] [--REDUCE_SYSTEM=0] [--POWER_BASE=100] [--SCAL_OBJ_F=0.001] [--MIN_GEN_CUT_MW=1] [--PTDF_COEFF_TOL=0.00001] [--MAX_NUMBER_OF_CONNECTIONS=20] [--MAX_PROCESS_REDUCE_NETWORK=1] [--NETWORK_MODEL=B_THETA] [--NETWORK_SLACKS=BUS_SLACKS] 
+```
 
-# load an example network
-n = pypsa.examples.ac_dc_meshed()
+On Linux:
 
-# run the optimisation
-n.optimize()
-
-# plot results
-n.generators_t.p.plot()
-n.plot()
-
-# get statistics
-n.statistics()
-n.statistics.energy_balance()
+```
+mpiexec -np 1 python "main.py" %1 [--EXP_NAME=exp_1] [--T=36] [--CASE=1] [PS=ieee118] [--IN_DIR=""] [--OUT_DIR=""] [--THREADS=0] [--VERBOSE=1] [--DISCRETIZATION=1] [--MILP_GAP=0.0001] [--DEFICIT_COST=100000000] [--REDUCE_SYSTEM=0] [--POWER_BASE=100] [--SCAL_OBJ_F=0.001] [--MIN_GEN_CUT_MW=1] [--PTDF_COEFF_TOL=0.00001] [--MAX_NUMBER_OF_CONNECTIONS=20] [--MAX_PROCESS_REDUCE_NETWORK=1] [--NETWORK_MODEL=B_THETA] [--NETWORK_SLACKS=BUS_SLACKS] 
 ```
 
 <p align="center">
