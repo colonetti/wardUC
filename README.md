@@ -70,10 +70,35 @@ n.statistics()
 n.statistics.energy_balance()
 ```
 
-| First Header  | Second Header |
+<p align="center">
+     
+| Command  | Description |
 | ------------- | ------------- |
-| Content Cell  | Content Cell  |
-| Content Cell  | Content Cell  |
+| EXP_NAME | Name that uniquely identifies the current experiment. If an output directory, OUT_DIR, is not provided, then an output directory EXP_NAME will be created, defaults to "exp1" |
+| T | Number of periods in the scheduling horizon, defaults to 36 |
+| TIME_LIMIT | Time limit in seconds, defaults to 3600.0 |
+| CASE | ID of the case under study, defaults to "1" |
+| PS | Name of the power system under study, defaults to "ieee118" |
+| IN_DIR | dir where the input files are located, defaults to ''. If not given, the input directory is assumed to be in the parent directory |
+| OUT_DIR | dir to which the output is to be written to, defaults to ''. If not given, an directory will be created in the parent directory |
+| THREADS | Maximum number of threads available to each process, defaults to 0 |
+| DISCRETIZATION | Length in hours of each time period in the scheduling horizon, defaults to 1.0 |
+| VERBOSE | Flag that indicates whether the optimization solvers console output is enabled, defaults to True|
+| DISCRETIZATION | Length in hours of each time period in the scheduling horizon, defaults to 1.0 |
+| MILP_GAP | Relative gap tolerance for the UC MILP, defaults to 1e-4 |
+| REDUCE_SYSTEM | Flag to indicate whether the transmission system should be reduced, defaults to False |
+| DEFICIT_COST | Unitary cost for load curtailment and generation surplus, defaults to 1e8 |
+| REDUCE_SYSTEM | Flag to indicate whether the transmission system should be reduced, defaults to False |
+| POWER_BASE | Power base in MVA, defaults to 100 |
+| SCAL_OBJ_F | Scaling factor applied to the objective function. The objective function is multiplied by this factor, defaults to 1e-3.|
+| MIN_GEN_CUT_MW | Threshold for the minimum generation of generating units. Units whose minimum generation is strictly less than this value are assumed to have no minimum generation, i.e., the minimum generation is replaced by 0, default to 1.00. |
+| PTDF_COEFF_TOL | Threshold for the coefficient of the PTDF matrix. Coefficients whose magnitudes are less than this value are substituted by 0, defaults to 1e-5. |
+| MAX_NUMBER_OF_CONNECTIONS | In the strategy used to reduce the network, it is possible to determine the maximum number of connections that the network nodes may have after the reduction is applied, defaults to 20 |
+| MAX_PROCESS_REDUCE_NETWORK | Maximum number of processes launched to identify inactive transmission line bounds, defaults to 1 |
+| NETWORK_MODEL | Network model used |
+| NETWORK_SLACKS  | Network slacks to be included (default = `NetworkSlacks.BUS_SLACKS`)  |
+
+</p>
 
 There are [more extensive
 examples](https://pypsa.readthedocs.io/en/latest/examples-basic.html) available
