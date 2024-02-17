@@ -1,3 +1,5 @@
+# Under construction
+
 # Ward Reduction in Unit-Commitment Problems
 
 This is a implementation of the ideas presented in the paper "Ward Reduction in Unit-Commitment Problems",
@@ -23,26 +25,11 @@ For a lack of a better name, in the following, we refer to this package as `the 
 
 ## Documentation
 
-[Documentation](https://pypsa.readthedocs.io/en/latest/index.html)
-
-[Quick start](https://pypsa.readthedocs.io/en/latest/quick_start.html)
-
-[Examples](https://pypsa.readthedocs.io/en/latest/examples-basic.html)
-
-[Known users of
-PyPSA](https://pypsa.readthedocs.io/en/latest/users.html)
+TODO
 
 ## Installation
 
-pip:
-
-```pip install pypsa```
-
-conda/mamba:
-
-```conda install -c conda-forge pypsa```
-
-Additionally, install a solver.
+TODO
 
 ## Usage
 
@@ -55,7 +42,7 @@ mpiexec -np 1 python "main.py" %1 [--EXP_NAME=exp_1] [--T=36] [--CASE=1] [--PS=i
 On Linux:
 
 ```
-mpiexec -np 1 python "main.py" %1 [--EXP_NAME=exp_1] [--T=36] [--CASE=1] [--PS=ieee118] [--IN_DIR=""] [--OUT_DIR=""] [--THREADS=0] [--VERBOSE=1] [--DISCRETIZATION=1] [--MILP_GAP=0.0001] [--DEFICIT_COST=100000000] [--REDUCE_SYSTEM=0] [--POWER_BASE=100] [--SCAL_OBJ_F=0.001] [--MIN_GEN_CUT_MW=1] [--PTDF_COEFF_TOL=0.00001] [--MAX_NUMBER_OF_CONNECTIONS=20] [--MAX_PROCESS_REDUCE_NETWORK=1] [--NETWORK_MODEL=B_THETA] [--NETWORK_SLACKS=BUS_SLACKS] 
+TODO
 ```
 
 <p align="center">
@@ -88,34 +75,7 @@ mpiexec -np 1 python "main.py" %1 [--EXP_NAME=exp_1] [--T=36] [--CASE=1] [--PS=i
 
 </p>
 
-There are [more extensive
-examples](https://pypsa.readthedocs.io/en/latest/examples-basic.html) available
-as [Jupyter notebooks](https://jupyter.org/). They are also described in the
-[doc/examples.rst](doc/examples.rst) and are available as Python scripts in
-[examples/](examples/).
-
-## Screenshots
-
-[PyPSA-Eur](https://github.com/PyPSA/pypsa-eur) optimising capacities of
-generation, storage and transmission lines (9% line volume expansion allowed)
-for a 95% reduction in CO2 emissions in Europe compared to 1990 levels
-
-![image](doc/img/elec_s_256_lv1.09_Co2L-3H.png)
-
-[SciGRID model](https://power.scigrid.de/) simulating the German power system
-for 2015.
-
-![image](doc/img/stacked-gen_and_storage-scigrid.png)
-
-![image](doc/img/lmp_and_line-loading.png)
-
 ## Dependencies
-
-PyPSA is written and tested to be compatible with Python 3.7 and above.
-The last release supporting Python 2.7 was PyPSA 0.15.0.
-
-It leans heavily on the following Python packages:
-
 -   [gurobipy](https://www.gurobi.com/) for solving the optimization models
 -   [numpy](http://www.numpy.org/) and [scipy](http://scipy.org/) matrix computations
 -   [networkx](https://networkx.github.io/) for network computations and plots
@@ -127,12 +87,7 @@ on an Intel machine running Win11. And on Ubuntu 20, with [Open-MPI](https://www
 
 ## Citing
 
-If you want to cide this work, please use
+If you want to cide this work, please use ...
 
 # Licence
 
-Copyright 2015-2023 [PyPSA
-Developers](https://pypsa.readthedocs.io/en/latest/developers.html)
-
-PyPSA is licensed under the open source [MIT
-License](https://github.com/PyPSA/PyPSA/blob/master/LICENSE.txt).
