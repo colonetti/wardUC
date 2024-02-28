@@ -1,5 +1,99 @@
 # Under construction
 
+$$
+ \begin{align}
+  \sum_{g \in \mathcal{G}\_{b}}p_{g} - \sum_{l \in \mathcal{L}^{-}}f_{l} + \sum_{l \in \mathcal{L}^{+}}f_{l} + s_{b} = \mathrm{\mathbf{D}}_{b} & \qquad \forall b \in \mathcal {B}\\
+ \end{align}
+$$ 
+
+$$
+ \begin{align}
+  p_1 - f_{1} - f_{2} = 0 & \qquad \text{(b = 1)}\\
+  p_2 + f_{1} - f_{3} - f_{4} - f_{5} + s_{2} = 1 & \qquad \text{(b = 2)}\\
+  p_3 + f_{3} - f_{6} + s_{3} = 1 & \qquad \text{(b = 3)}\\
+  f_{4} + f_{6} - f_{7} - f_{8} - f_{9} + s_{4} = 1 & \qquad \text{(b = 4)}\\
+  f_{2} + f_{5} f_{7} - f_{10} + s_{5} = 1 & \qquad \text{(b = 5)}\\
+  p_4 + f_{10} - f_{11} - f_{12} + s_{6} = 1 & \qquad \text{(b = 6)}\\
+  f_{8} - f_{13} - f_{14} = 0 & \qquad \text{(b = 7)}\\
+  p_5 + f_{13} = 0 & \qquad \text{(b = 8)}\\
+  f_{9} f_{14} - f_{15} + s_{9} = 1 & \qquad \text{(b = 9)}\\
+  f_{15} - f_{16} + s_{10} = 1 & \qquad \text{(b = 10)}\\
+  f_{11} + f_{16} + s_{11} = 1 & \qquad \text{(b = 11)}\\
+  f_{12} - f_{17} + s_{12} = 1 & \qquad \text{(b = 12)}\\
+  f_{17} - f_{18} + s_{13} = 1 & \qquad \text{(b = 13)}\\
+  f_{18} + s_{14} = 1 & \qquad \text{(b = 14)}\\
+ \end{align}
+$$ 
+
+$$
+ \begin{align}
+  {-}10 \leq 0.103 \cdot \left(p_2 + s_2 - 1 \right)  -0.1273 \cdot  \left(p_3 + s_3 - 1 \right) -0.3576 \cdot \left(s_4 - 1 \right) -0.103 \cdot \left(s_5 - 1 \right) -0.1576 \cdot \left(p_4 + s_6 - 1 \right) -0.3394 \cdot p_5 -0.3212 \cdot \left(s_9 - 1 \right) -0.2667\cdot \left(s_{10} - 1 \right) -0.2121\cdot \left(s_{11} - 1 \right) -0.1576\cdot \left(s_{12} - 1 \right) -0.1576\cdot \left(s_{13} - 1 \right) -0.1576 \cdot \left(s_{14} - 1 \right) \leq 10 & \qquad \text{(l = 4)}\\
+    {-}10 \leq - p_5 \leq 10 & \qquad \text{(l = 13)}\\
+    {-}10 \leq 0.0091 \cdot \left(p_2 + s_2 - 1 \right) + 0.0182 \cdot  \left(p_3 + s_3 - 1 \right) + 0.0273 \cdot \left(s_4 - 1 \right) -0.0091 \cdot \left(s_5 - 1 \right) -0.0727 \cdot \left(p_4 + s_6 - 1 \right) + 0.3818 \cdot p_5 -0.2636 \cdot \left(s_9 - 1 \right) -0.2\cdot \left(s_{10} - 1 \right) -0.1364\cdot \left(s_{11} - 1 \right) -0.0727\cdot \left(s_{12} - 1 \right) -0.0727\cdot \left(s_{13} - 1 \right) -0.0727 \cdot \left(s_{14} - 1 \right) \leq 10 & \qquad \text{(l = 14)}\\
+    {-}10 \leq 0.0273 \cdot \left(p_2 + s_2 - 1 \right) + 0.0545 \cdot  \left(p_3 + s_3 - 1 \right) + 0.0818 \cdot \left(s_4 - 1 \right) -0.0273 \cdot \left(s_5 - 1 \right) -0.2182 \cdot \left(p_4 + s_6 - 1 \right) + 0.1455 \cdot p_5 + 0.2091 \cdot \left(s_9 - 1 \right) + 0.4\cdot \left(s_{10} - 1 \right) -0.4091\cdot \left(s_{11} - 1 \right) -0.2182\cdot \left(s_{12} - 1 \right) -0.2182\cdot \left(s_{13} - 1 \right) -0.2182 \cdot \left(s_{14} - 1 \right) \leq 10 & \qquad \text{(l = 16)}\\
+ \end{align}
+$$ 
+
+$$
+ \begin{align}
+   f_{l} - 10 \cdot \left( \theta_{\text{from}(l)} - \theta_{\text{to}(l)} \right)= 0 & \qquad \forall l \in \mathcal {L}\\
+   {-}10 \leq f_{l} \leq 10                                                           & \qquad \forall l \in \\{4, 13, 14\\}\\
+   {-}inf \leq f_{l} \leq inf                                                         & \qquad \forall l \in \mathcal {L} \setminus \\{4, 13, 14\\}\\
+ \end{align}
+$$ 
+
+After the first iteration:
+$$\mathcal{B} = \mathcal{B} \setminus \\{8, 14\\}$$
+$$\mathcal{L} = \mathcal{L} \setminus \\{13, 18\\}$$
+
+$$
+ \begin{align}
+  \sum_{g \in \mathcal{G}\_{b}}p_{g} - \sum_{l \in \mathcal{L}^{-}}f_{l} + \sum_{l \in \mathcal{L}^{+}}f_{l} + s_{b} = \mathrm{\mathbf{D}}\_{b}& \qquad \forall b \in \mathcal{B} \setminus \\{7, 13\\}\\
+  p_{5} + f_{8} - f_{14} = 0 & \\
+  f_{17} + s_{13} = 1 + 1 & \\
+ \end{align}
+$$ 
+
+$$
+ \begin{align}
+  p_{5} \leq 10 & \\
+ \end{align}
+$$ 
+
+$$
+ \begin{align}
+   f_{l} - 10 \cdot \left( \theta_{\text{from}(l)} - \theta_{\text{to}(l)} \right)= 0 & \qquad \forall l \in \mathcal {L}\\
+   {-}10 \leq f_{l} \leq 10                                                           & \qquad \forall l \in \\{4, 14\\}\\
+   {-}inf \leq f_{l} \leq inf                                                         & \qquad \forall l \in \mathcal {L} \setminus \\{4, 14\\}\\
+ \end{align}
+$$ 
+
+After the third iteration:
+$$\mathcal{B} = \mathcal{B} \setminus \\{8, 14\\}$$
+$$\mathcal{L} = \mathcal{L} \setminus \\{13, 18\\}$$
+
+$$
+ \begin{align}
+  \sum_{g \in \mathcal{G}\_{b}}p_{g} - \sum_{l \in \mathcal{L}^{-}}f_{l} + \sum_{l \in \mathcal{L}^{+}}f_{l} + s_{b} = \mathrm{\mathbf{D}}\_{b}& \qquad \forall b \in \mathcal{B} \setminus \\{7, 13\\}\\
+  p_{5} + f_{8} - f_{14} = 0 & \\
+  f_{17} + s_{13} = 1 + 1 & \\
+ \end{align}
+$$ 
+
+$$
+ \begin{align}
+  p_{5} \leq 10 & \\
+ \end{align}
+$$ 
+
+$$
+ \begin{align}
+   f_{l} - 10 \cdot \left( \theta_{\text{from}(l)} - \theta_{\text{to}(l)} \right)= 0 & \qquad \forall l \in \mathcal {L}\\
+   {-}10 \leq f_{l} \leq 10                                                           & \qquad \forall l \in \\{4, 14\\}\\
+   {-}inf \leq f_{l} \leq inf                                                         & \qquad \forall l \in \mathcal {L} \setminus \\{4, 14\\}\\
+ \end{align}
+$$ 
+
 $$ 
  A = \begin{bmatrix}
           1 & -1 & 0  & 0  &  0 &  0 &  0 &  0 &  0 &  0 &  0 &  0 &  0 & 0\\ 
