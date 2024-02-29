@@ -73,14 +73,6 @@ class Thermals:
         #: Number of hours in the previous status.
         self.N_HOURS_IN_PREVIOUS_STATE: dict[int, int] = {}
 
-        #: A list of increasing generation steps that must be strictly followed by the unit once it
-        #: is started up. If the unit has no start-up trajectory, then the list is empty.
-        self.STUP_TRAJ: dict[int, list[Real]] = {}
-
-        #: A list of decreasing generation steps that must be strictly followed by the unit once it
-        #: is shut down. If the unit has no shut-down trajectory, then the list is empty.
-        self.STDW_TRAJ: dict[int, list[Real]] = {}
-
         #: A string identifier of the reserve requirement to which the unit can contribute to.
         self.RESERVE_ELEGIBILITY: dict[int, str] = {}
 
@@ -137,8 +129,6 @@ class Thermals:
         self.STATE_0[self.ID[-1]] = 0
         self.T_G_0[self.ID[-1]] = 0
         self.N_HOURS_IN_PREVIOUS_STATE[self.ID[-1]] = 0
-
-        self.STUP_TRAJ[self.ID[-1]], self.STDW_TRAJ[self.ID[-1]] = [], []
 
         if header['Reserve eligibility'] is not None:
             self.RESERVE_ELEGIBILITY[self.ID[-1]] = row[header['Reserve eligibility']]

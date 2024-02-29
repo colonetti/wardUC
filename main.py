@@ -4,7 +4,7 @@ from mpi4py import MPI
 
 from read_input.read import read
 from solver.main_solver import run_solver
-from write import write_solution
+from write import write_solution, check_flows_full_network
 from constants import NetworkModel
 
 W_COMM = MPI.COMM_WORLD
@@ -15,7 +15,7 @@ host = MPI.Get_processor_name()
 def main(args):
     """main function"""
 
-    (params, thermals, network) = read(args=args)
+    (params, thermals, network, original_thermals, original_network) = read(args=args)
 
     print(f"{'':#<70}")
     print(f"{' Overview of the system ':#^70}")
@@ -24,6 +24,7 @@ def main(args):
     print(f"Scheduling horizon in hours: {params.T*params.DISCRETIZATION}")
     print(f"Time steps: {params.T}")
     print(f"Time step resolution: {params.DISCRETIZATION} h")
+    print(f"{len(thermals.ID)} generating units")
     print(f"Total installed capacity (MW): {sum(thermals.MAX_P.values())*params.POWER_BASE:,.4f}")
     print("Peak net load (MW): " +
             f"{max(sum(network.NET_LOAD[:, t]) for t in range(params.T))*params.POWER_BASE:,.4f}")
@@ -38,7 +39,7 @@ def main(args):
 
     (m,
      st_up_tg, st_dw_tg, disp_stat_tg,
-     tg, t_g_disp,
+     t_g, t_g_disp,
      s_reserve,
      theta,
      branch_flow,
@@ -51,11 +52,22 @@ def main(args):
         write_solution(params, thermals, network,
                        m,
                        st_up_tg, st_dw_tg, disp_stat_tg,
-                       tg, t_g_disp,
+                       t_g, t_g_disp,
                        s_reserve,
                        theta,
                        branch_flow,
                        s_load_curtailment, s_gen_surplus, s_renew_curtailment)
+
+        if params.REDUCE_SYSTEM and (params.NETWORK_MODEL in (NetworkModel.B_THETA,
+                                                                NetworkModel.FLUXES,
+                                                                NetworkModel.PTDF)):
+            check_flows_full_network(params,
+                                     original_thermals,
+                                     original_network,
+                                     t_g,
+                                     s_load_curtailment,
+                                     s_gen_surplus,
+                                     s_renew_curtailment)
 
 if __name__ == '__main__':
     from treat_args import _treat_args

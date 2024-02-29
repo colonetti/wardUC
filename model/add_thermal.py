@@ -69,9 +69,9 @@ def _add_sec_constraints_only_on_thermals(
                     (var, coeff) = (t_g[g, t], network.SEC_CONSTRS[t][constr_id]
                     ['participants_factors']['thermals'][g])
                     if coeff > 0:
-                        var.lb = max((constr['LB'] - const) / coeff, m.get_lb(var))
+                        var.lb = max((constr['LB'] - const) / coeff, var.lb)
                     elif coeff < 0:
-                        var.ub = min((constr['LB'] - const) / coeff, m.get_ub(var))
+                        var.ub = min((constr['LB'] - const) / coeff, var.ub)
                 else:
                     obj_coeff = params.DEFICIT_COST if t in range(params.T) else 0
 
@@ -88,9 +88,9 @@ def _add_sec_constraints_only_on_thermals(
                     (var, coeff) = (t_g[g, t], network.SEC_CONSTRS[t][constr_id]
                     ['participants_factors']['thermals'][g])
                     if coeff > 0:
-                        var.ub = min((constr['UB'] - const) / coeff, m.get_ub(var))
+                        var.ub = min((constr['UB'] - const) / coeff, var.ub)
                     elif coeff < 0:
-                        var.lb = max((constr['UB'] - const) / coeff, m.get_lb(var))
+                        var.lb = max((constr['UB'] - const) / coeff, var.lb)
                 else:
                     obj_coeff = params.DEFICIT_COST if t in range(params.T) else 0
 
@@ -141,14 +141,13 @@ def _previous_states(params, thermals,
         n_hours = (math.ceil((thermals.MAX_P[g] - thermals.MIN_P[g]) / thermals.RAMP_UP[g])
                    if thermals.RAMP_UP[g] > 0 else 0)
 
-        for t in range(- 4 * thermals.MIN_UP[g] - len(thermals.STUP_TRAJ[g]) - n_hours, 0, 1):
+        for t in range(- 4 * thermals.MIN_UP[g] - n_hours, 0, 1):
             disp_status[g, t] = thermals.STATE_0[g]
             st_up_tg[g, t] = 0
-        for t in range(- max(thermals.MIN_DOWN[g] + len(thermals.STDW_TRAJ[g]),
-                             thermals.MIN_UP[g], len(thermals.STUP_TRAJ[g]) + n_hours, 1), 0, 1):
+        for t in range(- max(thermals.MIN_DOWN[g], thermals.MIN_UP[g], n_hours, 1), 0, 1):
             st_dw_tg[g, t] = 0
 
-        for t in range(params.T, params.T + len(thermals.STDW_TRAJ[g]) + n_hours + 1, 1):
+        for t in range(params.T, params.T + n_hours + 1, 1):
             st_dw_tg[g, t] = 0
 
         for t in range(- n_hours, 0, 1):
@@ -166,12 +165,10 @@ def _previous_states(params, thermals,
             # Thus, the unit was started-up at period 0 minus the number of periods it has been
             # in the dispatch phase (thermals.N_HOURS_IN_PREVIOUS_STATE[g]) minus the number
             # of periods necessary to complete the start-up trajectory
-            st_up_tg[
-                g, min(-len(thermals.STUP_TRAJ[g]) - thermals.N_HOURS_IN_PREVIOUS_STATE[g], -1)] = 1
+            st_up_tg[g, min(- thermals.N_HOURS_IN_PREVIOUS_STATE[g], -1)] = 1
             disp_status[g, -1] = 1
         else:
-            st_dw_tg[
-                g, min(-thermals.N_HOURS_IN_PREVIOUS_STATE[g] - len(thermals.STDW_TRAJ[g]), -1)] = 1
+            st_dw_tg[g, min(-thermals.N_HOURS_IN_PREVIOUS_STATE[g], -1)] = 1
             disp_status[g, -1] = 0
 
 def _get_var_bounds(
@@ -275,11 +272,9 @@ def add_thermal_bin(
 
     # Minimum up time
     for g in [g for g in thermals.ID if thermals.MIN_UP[g] > 0 and st_up_ub[g] == 1]:
-        st_up = len(thermals.STUP_TRAJ[g])
         for t in range(params.T):
             m.addConstr(
-                quicksum(st_up_tg[g, t2] for t2 in range(t - thermals.MIN_UP[g] - st_up + 1,
-                                                       t - st_up + 1, 1)
+                quicksum(st_up_tg[g, t2] for t2 in range(t - thermals.MIN_UP[g] + 1, t + 1, 1)
                        )
                 <= disp_status[g, t],
                 name=f'min_up_{g}_{t}'
@@ -298,25 +293,9 @@ def add_thermal_bin(
     # Logical constraints
     for g in thermals.ID:
         for t in range(params.T):
-            m.addConstr((st_up_tg[g, t - len(thermals.STUP_TRAJ[g])] - st_dw_tg[g, t]
+            m.addConstr((st_up_tg[g, t] - st_dw_tg[g, t]
                           - disp_status[g, t] + disp_status[g, t - 1] == 0), name=f'logical_{g}_{t}'
-                         )
-
-    # Prevent start-ups and shut-downs from happening at the same time
-    for g in thermals.ID:
-        if len(thermals.STUP_TRAJ[g]) > 0:
-            st_up = len(thermals.STUP_TRAJ[g])
-            for t in range(params.T):
-                m.addConstr(quicksum(st_up_tg[g, i] for i in range(t - st_up + 1, t + 1, 1))
-                             <=
-                             (1 - disp_status[g, t]
-                              - quicksum(
-                                         st_dw_tg[g, t2]
-                                         for t2 in range(t - thermals.MIN_DOWN[g] + 1, t + 1, 1)
-                                     )
-                              ),
-                             name=f'simul_st_up_st_dw_{g}_{t}'
-                             )
+                        )
 
     _range_ub = max(range(params.T)) + 1
     st_up_tg = {(g, t): st_up_tg[g, t] for g in thermals.ID for t in range(0, _range_ub, 1)}
@@ -361,40 +340,25 @@ def add_thermal_cont(
 
     st_up_ub, _, st_dw_ub = _get_var_bounds(params, thermals, 'C')
 
-    units_always_on = [g for g in thermals.ID
-                       if (thermals.MIN_P[g] + thermals.CONST_COST[g]) == 0
-                            or (thermals.GEN_COST[g] + thermals.CONST_COST[g]) == 0]
-
-    for g in thermals.ID:
-        for t in range(- len(thermals.STUP_TRAJ[g]), 0, 1):
-            st_up_tg[g, t] = 0
 
     # get the thermal units that need two generation variables: one dispatch, and one total gen
-    _two_vars_units = [g for g in thermals.ID
-                       if thermals.MIN_P[g] > 0
-                       or (len(thermals.STUP_TRAJ[g]) > 0
-                           or len(thermals.STDW_TRAJ[g]) > 0)]
+    _two_vars_units = [g for g in thermals.ID if thermals.MIN_P[g] > 0]
 
     # and the units that need a single generation variable
     _single_var_units = list(set(thermals.ID) - set(_two_vars_units))
     _single_var_units.sort()
 
     t_g_disp = {}
-    for g in units_always_on:
+    for g in _single_var_units:
         t_g_disp.update(
             {(g, t): m.addVar(obj=thermals.GEN_COST[g], ub=thermals.MAX_P[g] - thermals.MIN_P[g],
                                name=f"t_g_disp_{g}_{t}")
              for t in range(params.T)
              }
         )
-    units_not_always_on = list(set(thermals.ID) - set(units_always_on))
-    units_not_always_on.sort()
-    for g in units_not_always_on:
-        t_g_disp.update(
-            {(g, t): m.addVar(obj=thermals.GEN_COST[g], name=f"t_g_disp_{g}_{t}")
-             for t in range(params.T)
-             }
-        )
+
+    for g in _two_vars_units:
+        t_g_disp.update({(g, t): m.addVar(name=f"t_g_disp_{g}_{t}") for t in range(params.T)})
 
     t_g = {(g, t): m.addVar(obj=thermals.GEN_COST[g], name=f'tg_{g}_{t}')
            for t in range(params.T)
@@ -403,37 +367,18 @@ def add_thermal_cont(
 
     t_g.update({(g, t): t_g_disp[g, t] for t in range(params.T) for g in _single_var_units})
 
-    # Start-up trajectory
-    st_up_tj = {(g, t): 0 for t in range(params.T) for g in thermals.ID}
-    for g in [g for g in thermals.ID if len(thermals.STUP_TRAJ[g]) > 0 and st_up_ub[g] == 1]:
-        steps = len(thermals.STUP_TRAJ[g])
-        for t in range(params.T):
-            st_up_tj[g, t] = quicksum(thermals.STUP_TRAJ[g][t - steps - i] * st_up_tg[g, i]
-                                    for i in range(max(t - steps + 1, 0), t + 1, 1))
-
-    # Shut-down trajectory
-    st_dw_tj = {(g, t): 0 for t in range(params.T) for g in thermals.ID}
-    for g in [g for g in thermals.ID if len(thermals.STDW_TRAJ[g]) > 0 and st_dw_ub[g] == 1]:
-        steps = len(thermals.STDW_TRAJ[g])
-        for t in range(params.T):
-            st_dw_tj[g, t] = quicksum(thermals.STDW_TRAJ[g][i] * st_dw_tg[g, t - i]
-                                    for i in [j for j in range(steps) if (t - j) >= 0])
-
     # lower and upper operating limits of thermal units
-    for g in units_not_always_on:
+    for g in [g for g in thermals.ID if thermals.MIN_P[g] > 0]:
         gen_range = thermals.MAX_P[g] - thermals.MIN_P[g]
         for t in range(params.T):
             m.addConstr(t_g_disp[g, t] - gen_range * disp_status[g, t] <= 0, name=f'max_p_{g}_{t}')
 
     # total generation
-    for g in [g for g in thermals.ID if thermals.MIN_P[g] > 0
-                                        or (len(thermals.STUP_TRAJ[g]) > 0
-                                            or len(thermals.STDW_TRAJ[g]) > 0)
-              ]:
+    for g in [g for g in thermals.ID if thermals.MIN_P[g] > 0]:
         for t in range(params.T):
-            m.addConstr(t_g[g, t] - t_g_disp[g, t] - thermals.MIN_P[g] * disp_status[g, t]
-                         - st_up_tj[g, t] - st_dw_tj[g, t] == 0, name=f'gen_{g}_{t}'
-                         )
+            m.addConstr(t_g[g, t] - t_g_disp[g, t] - thermals.MIN_P[g] * disp_status[g, t]  == 0,
+                        name=f'gen_{g}_{t}'
+                        )
 
     # ramp limits
     for g in thermals.ID:

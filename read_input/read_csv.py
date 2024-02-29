@@ -89,7 +89,7 @@ def gross_load_and_renewable_gen(filename_gross_load,
     network.NET_LOAD = np.multiply(np.subtract(network.NET_LOAD, renewable_gen),
                                    1 / params.POWER_BASE)
 
-    f = open(params.OUT_DIR + 'net load - ' + params.PS
+    f = open(params.OUT_DIR + '/net load - ' + params.PS
              + ' - case ' + str(params.CASE) + '.csv', 'w',
              encoding='utf-8')
     f.write('<BEGIN>\nBus/Hour;')

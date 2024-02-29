@@ -385,7 +385,7 @@ def write_branch_flows(params,
 
         m = surrogate_model()
 
-        bus_injections = get_bus_injection_expr(m, params, thermals, network,
+        bus_injections = get_bus_injection_expr(thermals, network,
                                     t_g, h_g,
                                         {}, link_flow,
                                             s_load_curtailment, s_gen_surplus, s_renew_curtailment,

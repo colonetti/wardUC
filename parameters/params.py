@@ -259,12 +259,12 @@ class Params:
 
         #: Threshold for the minimum generation of generating units. Units whose minimum generation
         #: is strictly less than this value are assumed to have no minimum generation, i.e., the
-        #: minimum generation is replaced by 0, default to 1.00.
-        self.MIN_GEN_CUT_MW: Real = 1.00
+        #: minimum generation is replaced by 0, default to 0.00.
+        self.MIN_GEN_CUT_MW: Real = 0.00
 
         #: Threshold for the coefficient of the PTDF matrix. Coefficients whose magnitudes are less
         #: than this value are substituted by 0, defaults to 1e-5.
-        self.PTDF_COEFF_TOL: Real = 1e-5
+        self.PTDF_COEFF_TOL: Real = 1e-4
 
         #: In the strategy used to reduce the network, it is possible to determine the maximum
         #: number of connections that the network nodes may have after the reduction is applied,

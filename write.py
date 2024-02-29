@@ -8,6 +8,107 @@ from model.add_network import get_bus_injection_expr
 
 from constants import NetworkModel, NetworkSlacks, Model
 
+def check_flows_full_network(params,
+                             thermals,
+                             network,
+                             t_g,
+                             s_load_curtailment,
+                             s_gen_surplus,
+                             s_renew_curtailment) -> None:
+    """Take the generations from the reduced network and check the flows that result from them in
+    the full, original network
+    """
+
+    print("\n\nFlows in the full, original network\n\n", flush=True)
+
+    t_g_x = {key: value.x for key, value in t_g.items()}
+    s_load_curtailment_x = {key: value.x for key, value in s_load_curtailment.items()}
+    s_gen_surplus_x = {key: value.x for key, value in s_gen_surplus.items()}
+    s_renew_curtailment_x = {key: value.x for key, value in s_renew_curtailment.items()}
+
+    write_branch_flows(params,
+                        network, thermals,
+                        {},
+                        t_g_x,
+                        s_load_curtailment_x,
+                        s_gen_surplus_x,
+                        s_renew_curtailment_x,
+                        ptdf_threshold=params.PTDF_COEFF_TOL,
+                        write_csv=True
+    )
+
+    # count_active_constrs = 0
+
+    # active_lines = set()
+
+    # table_header = ['Line ID', 'End buses', 'Period', 'UB (MW)', 'LB (MW)', 'Flow (MW)',
+    #                         'Active UB?','Active LB?']
+
+    # table_to_print, violated_lines = [], []
+
+
+    # bus_injections = get_bus_injection_expr(thermals,
+    #                                         network,
+    #                                         t_g_x,
+    #                                         {},
+    #                                         s_load_curtailment_x,
+    #                                         s_gen_surplus_x,
+    #                                         s_renew_curtailment_x,
+    #                                         periods = range(params.T),
+    #                                         include_flows = False)
+
+    # buses_with_injections_idxs = np.array([b for b, bus in enumerate(network.BUS_ID)
+    #                                     if [abs(bus_injections[bus, t].getValue()) != 0
+    #                                             for t in range(params.T)]],
+    #                                                 dtype = 'int64')
+
+    # sub_PTDF_act_lines = network.PTDF[:]
+
+    # for l in network.LINE_ID:
+
+    #     l_idx = network.LINE_ID.index(l)
+    #     non_zeros = np.intersect1d(np.where(abs(sub_PTDF_act_lines[l_idx,:]) > 0)[0],
+    #                                             buses_with_injections_idxs)
+    #     buses_of_interest = [network.BUS_ID[b] for b in non_zeros]
+
+    #     flows = np.inner(
+    #                         np.array([[bus_injections[bus, t].getValue()
+    #                                 for bus in buses_of_interest]
+    #                                 for t in range(params.T)]),
+    #                                 sub_PTDF_act_lines[l_idx, non_zeros]
+    #             )
+    #     for t in range(params.T):
+    #         flow = flows[t]
+    #         if ((flow <= (network.LINE_FLOW_LB[l][t] + 1e-3))
+    #                 or (flow >= (network.LINE_FLOW_UB[l][t] - 1e-3))):
+
+    #             active_lines.add(l)
+    #             count_active_constrs += 1
+    #             table_to_print.append([l, network.LINE_F_T[l], t,
+    #                                     network.LINE_FLOW_UB[l][t]*params.POWER_BASE,
+    #                                     network.LINE_FLOW_LB[l][t]*params.POWER_BASE,
+    #                                     flow*params.POWER_BASE,
+    #                                     network.ACTIVE_UB_PER_PERIOD[l][t],
+    #                                     network.ACTIVE_LB_PER_PERIOD[l][t]])
+
+    #             if ((flow < (network.LINE_FLOW_LB[l][t] - 1/params.POWER_BASE))
+    #                 or (flow > (network.LINE_FLOW_UB[l][t] + 1/params.POWER_BASE))):
+    #                 violated_lines.append([l, network.LINE_F_T[l], t,
+    #                                     network.LINE_FLOW_UB[l][t]*params.POWER_BASE,
+    #                                     network.LINE_FLOW_LB[l][t]*params.POWER_BASE,
+    #                                     flow*params.POWER_BASE,
+    #                                     network.ACTIVE_UB_PER_PERIOD[l][t],
+    #                                     network.ACTIVE_LB_PER_PERIOD[l][t]])
+
+    # print("\n\n")
+    # print(tabulate(table_to_print, headers=table_header))
+    # print(f"{count_active_constrs} transmission line constraints are active", flush=True)
+    # print(f"{len(active_lines)} lines active\n\n\n", flush=True)
+
+    # if len(violated_lines) > 0:
+    #     print(tabulate(violated_lines, headers=table_header))
+    #     print("The list of bounds for the lines above have been violated")
+
 def write_solution(params, thermals, network,
                    m,
                    st_up_t_g, st_dw_t_g, disp_stat_t_g,
@@ -88,7 +189,9 @@ def write_solution(params, thermals, network,
                            t_g_x,
                            s_load_curtailment_x,
                            s_gen_surplus_x,
-                           s_renew_curtailment_x
+                           s_renew_curtailment_x,
+                           ptdf_threshold=params.PTDF_COEFF_TOL,
+                           write_csv=True
         )
 
 
@@ -100,8 +203,14 @@ def write_generation(params, thermals, network,
         along with net load, load curtailment, and generation surpluses
     """
 
-    f = open(params.OUT_DIR + 'generation and load - ' +
+    f = open(params.OUT_DIR + '/generation and load - ' +
                 params.PS + ' - case ' + str(params.CASE) + '.csv', 'w', encoding = 'ISO-8859-1')
+
+    for g, unit_name in thermals.UNIT_NAME.items():
+        f.write(unit_name + ';')
+        for t in range(params.T):
+            f.write(str(round(t_g[g, t]*params.POWER_BASE, 4)) + ';')
+        f.write('\n')
 
     f.write('Load;')
     for t in range(params.T):
@@ -151,7 +260,7 @@ def write_generation(params, thermals, network,
 def write_thermal_operation(params, thermals, stUpt_g, stDwt_g, dispStat, t_gDisp, t_g):
     """Write the decisions for the thermal units"""
 
-    f = open(params.OUT_DIR + 'thermal decisions - ' +
+    f = open(params.OUT_DIR + '/thermal decisions - ' +
                 params.PS + ' - case ' + str(params.CASE) + '.csv', 'w', encoding = 'ISO-8859-1')
     f.write('ID;Name;Period;')
     f.write('Start-up decision;Shut-down decision;Dispatch phase;')
@@ -186,10 +295,13 @@ def write_branch_flows(params,
                         t_g,
                         s_load_curtailment,
                         s_gen_surplus,
-                        s_renew_curtailment) -> None:
-    '''
+                        s_renew_curtailment,
+                        ptdf_threshold=0,
+                        write_csv=True
+                        ) -> None:
+    """
         write branch flows to a csv file
-    '''
+    """
 
     count_active_constrs = 0
 
@@ -200,10 +312,11 @@ def write_branch_flows(params,
 
     table_to_print, violated_lines = [], []
 
-    f = open(params.OUT_DIR + '/branch flows - '+
-                    params.PS + ' - case ' + params.CASE + '.csv', 'w', encoding = 'utf-8')
-    f.write('sep=;\n')
-    f.write('var;x (pu);max (pu);min (pu);violation (pu)\n')
+    if write_csv:
+        f = open(params.OUT_DIR + '/branch flows - '+
+                        params.PS + ' - case ' + params.CASE + '.csv', 'w', encoding = 'utf-8')
+        f.write('sep=;\n')
+        f.write('var;x (pu);max (pu);min (pu);violation (pu)\n')
 
     if len(branch_flow.keys()) > 0:
         for k, flow in branch_flow.items():
@@ -228,24 +341,17 @@ def write_branch_flows(params,
                                             network.ACTIVE_UB_PER_PERIOD[l][t],
                                             network.ACTIVE_LB_PER_PERIOD[l][t]])
 
-            f.write(f"flow_{k[0]}_{k[1]}_{k[2]}_{k[3]};" + str(flow) + ';'
-                    + str(network.LINE_FLOW_UB[l][t]) + ';' +
-                    str(network.LINE_FLOW_LB[l][t]) + ';' +
-                    str(max(max(flow - network.LINE_FLOW_UB[l][t], 0),
-                            max(network.LINE_FLOW_LB[l][t] - flow, 0))) +
-                    '\n')
+            if write_csv:
+                f.write(f"flow_{k[0]}_{k[1]}_{k[2]}_{k[3]};" + str(flow) + ';'
+                        + str(network.LINE_FLOW_UB[l][t]) + ';' +
+                        str(network.LINE_FLOW_LB[l][t]) + ';' +
+                        str(max(max(flow - network.LINE_FLOW_UB[l][t], 0),
+                                max(network.LINE_FLOW_LB[l][t] - flow, 0))) +
+                        '\n')
 
     else:
-        class surrogate_model:
-            """Used so the power injections can be computed without an actual optimization mode.
-                The only thing necessary is that the object has an attribute xsum, which is a
-                sum function"""
-            def __init__(self):
-                self.xsum = sum
 
-        m = surrogate_model()
-
-        bus_injections = get_bus_injection_expr(m, params, thermals, network,
+        bus_injections = get_bus_injection_expr(thermals, network,
                                                 t_g,
                                                 {},
                                                 s_load_curtailment,
@@ -255,12 +361,12 @@ def write_branch_flows(params,
                                                 include_flows = False)
 
         buses_with_injections_idxs = np.array([b for b, bus in enumerate(network.BUS_ID)
-                                            if [abs(bus_injections[bus, t]) != 0
+                                            if [abs(bus_injections[bus, t].getValue()) != 0
                                                     for t in range(params.T)]],
                                                         dtype = 'int64')
 
         sub_PTDF_act_lines = network.PTDF[:]
-        sub_PTDF_act_lines[np.where(abs(sub_PTDF_act_lines) < params.PTDF_COEFF_TOL)] = 0
+        sub_PTDF_act_lines[np.where(abs(sub_PTDF_act_lines) < ptdf_threshold)] = 0
 
         for l in network.LINE_ID:
 
@@ -270,9 +376,10 @@ def write_branch_flows(params,
             buses_of_interest = [network.BUS_ID[b] for b in non_zeros]
 
             flows = np.inner(
-                            np.array([[bus_injections[bus, t] for bus in buses_of_interest]
-                                        for t in range(params.T)]),
-                                        sub_PTDF_act_lines[l_idx, non_zeros]
+                            np.array([[bus_injections[bus, t].getValue()
+                                       for bus in buses_of_interest]
+                                       for t in range(params.T)]),
+                                       sub_PTDF_act_lines[l_idx, non_zeros]
                     )
             for t in range(params.T):
                 flow = flows[t]
@@ -295,8 +402,8 @@ def write_branch_flows(params,
                                             flow*params.POWER_BASE,
                                             network.ACTIVE_UB_PER_PERIOD[l][t],
                                             network.ACTIVE_LB_PER_PERIOD[l][t]])
-
-                f.write(f"flow_{network.LINE_F_T[l][0]}_{network.LINE_F_T[l][1]}_{l}_{t};{flow};"
+                if write_csv:
+                    f.write(f"flow_{network.LINE_F_T[l][0]}_{network.LINE_F_T[l][1]}_{l}_{t};{flow};"
                         + str(network.LINE_FLOW_UB[l][t])+';'+
                         str(network.LINE_FLOW_LB[l][t]) + ';' +
                         str(max(max(flow - network.LINE_FLOW_UB[l][t], 0),
@@ -306,11 +413,13 @@ def write_branch_flows(params,
     del f
 
     print("\n\n")
-    print(tabulate(table_to_print, headers = table_header))
+    print(tabulate(table_to_print, headers=table_header))
     print(f"{count_active_constrs} transmission line constraints are active", flush=True)
     print(f"{len(active_lines)} lines active\n\n\n", flush=True)
 
     if len(violated_lines) > 0:
-        print(tabulate(violated_lines, headers = table_header))
+        print(tabulate(violated_lines, headers=table_header))
         print("The list of bounds for the lines above have been violated")
-        #raise ValueError("The list of bounds for the lines above have been violated")
+    else:
+        print("\n\nNo branch limits were violated\n\n")
+

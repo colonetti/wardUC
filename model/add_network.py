@@ -29,7 +29,7 @@ def PTDF_formulation(
 
     time_0 = dt()
 
-    exp = get_bus_injection_expr(m, params, thermals, network,
+    exp = get_bus_injection_expr(thermals, network,
                                  t_g,
                                  branch_flow,
                                  s_load_curtailment, s_gen_surplus, s_renew_curtailment,
@@ -41,9 +41,9 @@ def PTDF_formulation(
     # these are the buses to which either a load or a generating unit is connected to at some
     # point in time
     buses_with_injections_idxs = np.array([b for b, bus in enumerate(network.BUS_ID)
-                                           if
-                                           any((len(exp[bus, t]) >= 1 or abs(exp[bus, t].const) != 0
-                                                for t in periods))], dtype='int64')
+                                           if any((exp[bus, t].size() >= 1 or
+                                                   abs(exp[bus, t].getConstant()) != 0
+                                                   for t in periods))], dtype='int64')
 
     _PTDF = network.PTDF[:]
     _PTDF[np.where(abs(_PTDF) < params.PTDF_COEFF_TOL)] = 0
@@ -80,7 +80,7 @@ def PTDF_formulation(
 
             flow_exp = flows[ts.index(t)]
 
-            if len(flow_exp) >= 1:
+            if flow_exp.size() >= 1:
                 if network.ACTIVE_UB_PER_PERIOD[l][t]:
                     constrs.append(m.addConstr(
                         flow_exp - s_line_violation[l_key] <= network.LINE_FLOW_UB[l][t],
@@ -99,19 +99,22 @@ def PTDF_formulation(
                     )
                     count_constrs_added += 1
 
+    for constr in constrs:
+        constr.Lazy = 3
+
     disjoint_subsys = _get_isolated_subsystems(network)
 
-    buses_in_system = []
+    buses_in_system = set()
 
-    for disj_subs, sub_sys in disjoint_subsys:
-        buses_in_system += list(sub_sys['nodes'])
+    for disj_subs, sub_sys in disjoint_subsys.items():
+        buses_in_system = buses_in_system | set(sub_sys['nodes'])
         for t in periods:
             m.addConstr(quicksum(exp[bus, t] for bus in sub_sys['nodes']) == 0,
-                         name=f"power_balance_{disj_subs}_{t}")
+                        name=f"power_balance_{disj_subs}_{t}")
 
     #### some buses might not be in any subsystem because they are isolated
     for bus in [bus for bus in network.BUS_ID if bus not in buses_in_system]:
-        for t in [t for t in periods if len(exp[bus, t]) >= 1]:
+        for t in [t for t in periods if exp[bus, t].size() >= 1]:
             m.addConstr(exp[bus, t] == 0, name=f"power_balance_{bus}_{t}")
 
     time_end = dt()
@@ -186,7 +189,7 @@ def single_bus(
                              for disj_subs, sub_sys in disjoint_subsys.items()
                              }
 
-    exps = get_bus_injection_expr(m, params, thermals, network,
+    exps = get_bus_injection_expr(thermals, network,
                                   t_g,
                                   {},
                                   {}, {}, {},
@@ -213,8 +216,6 @@ def single_bus(
 
 
 def get_bus_injection_expr(
-        m: Model,
-        params: Params,
         thermals: Thermals,
         network: Network,
         t_g: dict[tuple[int, int], Var],
@@ -231,10 +232,6 @@ def get_bus_injection_expr(
     power injection expressions, otherwise only the power from generating units, loads and slacks
     are considered.
 
-    :param m: Optimization model.
-    :type m: Model
-    :param params: Parameters of the optimization model and algorithm.
-    :type params: Params
     :param thermals: Data of the thermal units.
     :type thermals: Thermals
     :param network: Data of the network.
@@ -380,7 +377,7 @@ def B_theta_network_model(
     :rtype theta: dict[tuple[int, int], Var]
     """
 
-    exp = get_bus_injection_expr(m, params, thermals, network,
+    exp = get_bus_injection_expr(thermals, network,
                                  t_g,
                                  branch_flow,
                                  s_load_curtailment,
@@ -395,7 +392,7 @@ def B_theta_network_model(
 
     theta = {
         (bus, t):
-            m.addVar(lb=- network.THETA_BOUND, ub=network.THETA_BOUND, name=f'theta_{bus}_{t}')
+            m.addVar(lb=0, name=f'theta_{bus}_{t}')
         for t in periods
         for bus in network.BUS_ID
     }
@@ -403,8 +400,8 @@ def B_theta_network_model(
     # Set the voltage angle reference
     for bus in network.REF_BUS_ID:
         for t in periods:
-            theta[bus, t].lb = 0
-            theta[bus, t].ub = 0
+            theta[bus, t].lb = network.THETA_BOUND
+            theta[bus, t].ub = network.THETA_BOUND
 
     for l in network.LINE_ID:
         ADMT = 1 / network.LINE_X[l]
@@ -542,10 +539,7 @@ def add_network(
                  }
             )
 
-            slack_gen_buses = list(
-                network.get_gen_buses(thermals)
-                - set(renewable_gen_buses)
-            )
+            slack_gen_buses = list(network.get_gen_buses(thermals) - set(renewable_gen_buses))
             slack_gen_buses.sort()
             s_gen_surplus.update(
                 {(bus, t): m.addVar(obj=params.DEFICIT_COST, name=f'slack_gen_surplus_{bus}_{t}')
@@ -585,7 +579,7 @@ def add_network(
                              flow_periods)
 
         elif params.NETWORK_MODEL == NetworkModel.FLUXES:
-            exp = get_bus_injection_expr(m, params, thermals, network,
+            exp = get_bus_injection_expr(thermals, network,
                                          t_g,
                                          branch_flow,
                                          s_load_curtailment,

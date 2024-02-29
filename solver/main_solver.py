@@ -67,10 +67,10 @@ def run_solver(params: Params, thermals: Thermals, network: Network):
 
     print(f'\n\n{dt() - ini:.2f} seconds to build the optimization model.\n\n', flush=True)
 
+    m.setParam("Method", 2)                 # use the barrier method to solve the root relaxation
     m.setParam("Threads", params.THREADS)
     m.setParam("MIPGap", params.MILP_GAP)
     m.setParam("TimeLimit", params._LAST_TIME - dt())
-    m.write("new.lp")
     m.optimize()
 
     return (m,

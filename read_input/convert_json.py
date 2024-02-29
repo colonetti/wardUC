@@ -3,20 +3,30 @@ from numbers import Real
 import json
 import csv
 
-def convert_from_csv_to_json(csv_file_path_generators: str) -> dict:
+def convert_from_csv_to_json(params,
+                             params_file: str,
+                             csv_file_path_generators: str,
+                             csv_file_path_initial_states: str,
+                             csv_file_path_network: str,
+                             csv_file_path_load: str) -> dict:
+    """Convert the input data from csv files to json"""
 
     data = {"SOURCE": "",
             "Parameters": {
                 "Version": "0",
                 "Power balance penalty ($/MW)": 0,
-                "Time horizon (h)": 0
+                "Time horizon (h)": 36
                 },
             "Generators": {},
             "Transmission lines": {},
-            "Contingencies": {},
-            "Buses": {},
-            "Reserves": {}
+            "Buses": {}
             }
+
+    with open(params_file, encoding="ISO-8859-1") as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter = '\t')
+        for row in [r for r in csv_reader if len(r) > 0 and len(r[0]) > 0 and r[0][0]!="#"]:
+            if row[0].strip() == "NETWORK_VIOL_UNIT_COST":
+                data["Parameters"]["Power balance penalty ($/MW)"] = float(row[1].strip())
 
     f = open(csv_file_path_generators, mode = 'r', encoding = 'ISO-8859-1')
     reader = csv.reader(f, delimiter = ';')
@@ -25,7 +35,7 @@ def convert_from_csv_to_json(csv_file_path_generators: str) -> dict:
         row = next(reader)  # <BEGIN>
     row = next(reader)
 
-    while row[0] != '<Thermal generating units>':
+    while row[0] not in ('<Thermal generating units>', '<Thermal plants>'):
         row = next(reader)
 
     row = next(reader) # header
@@ -35,66 +45,38 @@ def convert_from_csv_to_json(csv_file_path_generators: str) -> dict:
             "Ramp-up limit (MW/h)": -9, "Ramp-down limit (MW/h)": -9,
             "Minimum up-time (h)": -9, "Minimum down-time (h)": -9,
             "Standard linear generation cost ($/MWh)": -9,
-            "Constant cost ($)": -9, "Start-up cost ($)": -9, "Shut-down cost ($)": -9,
-            'Minimum reactive generation (MVAr)': 0, 'Maximum reactive generation (MVAr)': 0,
-            'Maximum apparent power (MVA)': 0}
+            "Constant cost ($)": -9, "Start-up cost ($)": -9, "Shut-down cost ($)": -9}
 
     for h in header:
         header[h] = row.index(h)
 
     row = next(reader) # either first unit or end
 
-    while row[0] != '</Thermal generating units>':
+    while row[0] not in ('</Thermal generating units>', '</Thermal plants>'):
         P_ID = int(row[header["Plant\'s ID"]])  # plant id
         U_ID = int(row[header["Unit's ID"]])    # unit id
 
-        data["Generators"] = {"g_" + str(P_ID) + "_" + str(U_ID):
-                              {"Bus": row[header['Bus']],
-                               "Production cost curve (MW)": [],
-                               "Production cost curve ($)": [],
-                               "Startup costs (\$)": [],
-                               "Startup delays (h)": [],
-                               "Ramp up limit (MW)": 0,
-                               "Ramp down limit (MW)": 0,
-                               "Startup limit (MW)": 0,
-                               "Shutdown limit (MW)": 0,
-                               "Minimum uptime (h)": 0,
-                               "Minimum downtime (h)": 0,
-                               "Reserve eligibility": [],
-                               "Initial status (h)": 0,
-                               "Initial power (MW)": 0.0
-                               }
-                              }
-
-        self.UNIT_NAME[(P_ID, U_ID)] = row[header["Plant's Name"]].strip() + '-G-' + str(U_ID)
-        self.UNIT_ID[(P_ID, U_ID)] = U_ID
-        self.PLANT_NAME[(P_ID, U_ID)] = row[header["Plant's Name"]].strip()
-        self.PLANT_ID[(P_ID, U_ID)] = int(row[header["Plant\'s ID"]])
-        self.MIN_P[(P_ID, U_ID)] = float(row[header['Minimum power output (MW)']])/params.POWER_BASE
-        self.MAX_P[(P_ID, U_ID)] = float(row[header['Maximum power output (MW)']])/params.POWER_BASE
-
-        self.MIN_REAC_POWER[(P_ID, U_ID)] =float(row[header['Minimum reactive generation (MVAr)']])\
-                                                                                /params.POWER_BASE
-        self.MAX_REAC_POWER[(P_ID, U_ID)] =float(row[header['Maximum reactive generation (MVAr)']])\
-                                                                                /params.POWER_BASE
-        self.MAX_S[(P_ID, U_ID)] = float(row[header['Maximum apparent power (MVA)']])\
-                                                                                /params.POWER_BASE
-
-        self.RAMP_UP[(P_ID,U_ID)]=(params.DISCRETIZATION*float(row[header["Ramp-up limit (MW/h)"]])/
-                                                                    params.POWER_BASE)
-        self.RAMP_DOWN[(P_ID, U_ID)] = (params.DISCRETIZATION*
-                                    float(row[header["Ramp-down limit (MW/h)"]])/params.POWER_BASE)
-
-        self.MIN_UP[(P_ID, U_ID)] = int(row[header["Minimum up-time (h)"]])
-        self.MIN_DOWN[(P_ID, U_ID)] = int(row[header["Minimum down-time (h)"]])
-        self.BUS[(P_ID, U_ID)] = [int(row[header['Bus']])]
-        self.BUS_COEFF[(P_ID, U_ID)] = {int(row[header['Bus']]): 1.00}
-
-        self.GEN_COST[(P_ID, U_ID)] = params.SCAL_OBJ_FUNC*params.DISCRETIZATION*params.POWER_BASE*\
-                                    float(row[header["Standard linear generation cost ($/MWh)"]])
-        self.CONST_COST[(P_ID, U_ID)] = float(row[header["Constant cost ($)"]])*params.SCAL_OBJ_FUNC
-        self.STUP_COST[(P_ID, U_ID)] = float(row[header["Start-up cost ($)"]])*params.SCAL_OBJ_FUNC
-        self.STDW_COST[(P_ID, U_ID)] = float(row[header["Shut-down cost ($)"]])*params.SCAL_OBJ_FUNC
+        data["Generators"].update({"g" + str(P_ID):
+            {"Bus": row[header['Bus']],
+            "Production cost curve (MW)": [float(row[header['Minimum power output (MW)']]),
+                                            float(row[header['Maximum power output (MW)']])],
+            "Production cost curve ($)": [float(row[header["Standard linear generation cost ($/MWh)"]]) *
+                                            float(row[header['Minimum power output (MW)']]),
+                                            float(row[header["Standard linear generation cost ($/MWh)"]]) *
+                                            float(row[header['Maximum power output (MW)']])],
+            "Startup costs ($)": [float(row[header["Start-up cost ($)"]])],
+            "Startup delays (h)": [1],
+            "Ramp up limit (MW)": float(row[header["Ramp-up limit (MW/h)"]]),
+            "Ramp down limit (MW)": float(row[header["Ramp-down limit (MW/h)"]]),
+            "Startup limit (MW)": float(row[header['Minimum power output (MW)']]),
+            "Shutdown limit (MW)": float(row[header['Minimum power output (MW)']]),
+            "Minimum uptime (h)": int(row[header["Minimum up-time (h)"]]),
+            "Minimum downtime (h)": int(row[header["Minimum down-time (h)"]]),
+            "Reserve eligibility": [],
+            "Initial status (h)": 0,
+            "Initial power (MW)": 0.0
+            }
+        })
 
         row = next(reader)
 
@@ -102,46 +84,139 @@ def convert_from_csv_to_json(csv_file_path_generators: str) -> dict:
     del f
 
 
-    if scaling_factor is None:
-        scaling_factor = max(min(gen["Production cost curve ($)"][-1]
-                                        for gen in data["Generators"].values()
-                                            if gen["Production cost curve ($)"][-1] > 0), 1)
+    f = open(csv_file_path_initial_states, 'r', encoding = 'ISO-8859-1')
+    reader = csv.reader(f, delimiter = ';')
+    row = next(reader)  # sep=; or <BEGIN>
+    while row[0].strip() != '<BEGIN>':
+        row = next(reader)  # <BEGIN>
 
-    if deficit_cost is not None:
-        data['Parameters']['Power balance penalty ($/MW)'] = deficit_cost
+    row = next(reader)  # header
 
-    for g, gen in data["Generators"].items():
-        gen["Production cost curve (MW)"] = [0
-                                        if gen["Production cost curve (MW)"][0] < min_gen_cut_MW
-                                            or len(gen["Production cost curve (MW)"]) == 1
-                                            else gen["Production cost curve (MW)"][0],
-                                                gen["Production cost curve (MW)"][-1]]
-        unitary_cost = gen["Production cost curve ($)"][0]/scaling_factor
-        gen["Production cost curve ($)"] = [unitary_cost*gen["Production cost curve (MW)"][0],
-                                                unitary_cost*gen["Production cost curve (MW)"][-1]]
+    header = {"Plant's Name": 0, "Plant's ID": 0, "Unit's ID": 0, "Initial state (0/1)": 0,
+                "Hours in initial state": 0, "Initial generation (MW)": 0}
+    for h in header:
+        header[h] = row.index(h)
 
-        if (gen["Production cost curve (MW)"][0] < min_gen_cut_MW):
-            gen["Minimum uptime (h)"] = 1
-            gen["Minimum downtime (h)"] = 1
+    row = next(reader)
 
-        if (gen["Minimum uptime (h)"] <= 1 and gen["Minimum downtime (h)"] <= 1
-                and gen["Production cost curve (MW)"][0] < min_gen_cut_MW):
-            gen["Startup costs ($)"] = [0]
+    while row[0].strip() != '</END>':
+        g = "g" + row[header["Plant's ID"]].strip()
+        assert g in data["Generators"].keys(), ("Thermal generating unit " + str(g) +
+                                                " is not in the system ")
+        hours = int(row[header["Hours in initial state"]].strip())
+        state_0 = int(row[header["Initial state (0/1)"]].strip())
+        ini_gen = float(row[header["Initial generation (MW)"]].strip())
+
+        if state_0 == 1:
+            data["Generators"][g]["Initial status (h)"] = hours
+            data["Generators"][g]["Initial power (MW)"] = ini_gen
         else:
-            gen["Startup costs ($)"] = [gen["Startup costs ($)"][-1]/scaling_factor]
+            data["Generators"][g]["Initial status (h)"] = -hours
+            data["Generators"][g]["Initial power (MW)"] = ini_gen
 
-        gen["Startup delays (h)"] = [1]
+        row = next(reader)
 
-        gen["Startup limit (MW)"] = gen["Production cost curve (MW)"][0]
-        gen["Shutdown limit (MW)"] = gen["Production cost curve (MW)"][0]
+    f.close()
+    del f
 
-    data['Contingencies'] = {}
 
-    for l, line in data["Transmission lines"].items():
-        if "Normal flow limit (MW)" in line.keys():
-            line["Emergency flow limit (MW)"] = line["Normal flow limit (MW)"]
-        if "Flow limit penalty ($/MW)" in line.keys():
-            line["Flow limit penalty ($/MW)"] = data['Parameters']['Power balance penalty ($/MW)']
+    f = open(csv_file_path_network, 'r', encoding = 'ISO-8859-1')
+    reader = csv.reader(f, delimiter = ';')
+    row = next(reader)  # sep=; or <BEGIN>
+    while row[0].strip() != '<BEGIN>':
+        row = next(reader)  # <BEGIN>
+    row = next(reader)
+
+    while row[0] != '<GENERAL INFORMATION>':
+        row = next(reader)
+
+    row = next(reader)
+
+    while row[0] != '</GENERAL INFORMATION>':
+        row = next(reader)
+
+    while row[0] != '<BUSES>':
+        row = next(reader)
+
+    row = next(reader)                      # header
+
+    header = {"ID": -999, "Name": -999, "Base voltage (kV)": -999, 'Area': -999,
+                'Subsystem market - Name': -999, 'Subsystem market - ID': -999,
+                "Bus type": -999, "Minimum voltage magnitude (pu 100-MVA and base voltage)": -999,
+                "Maximum voltage magnitude (pu 100-MVA and base voltage)": -999,
+                "Minimum injection of reactive power (MVar)": -999,
+                "Maximum injection of reactive power (MVar)": -999}
+
+    for h in header:
+        header[h] = row.index(h)
+
+    row = next(reader) # either first bus or end
+
+    while row[0] != '</BUSES>':
+        data["Buses"].update({row[header["ID"]]:
+                              {"Load (MW)": data["Parameters"]["Time horizon (h)"] * [0]}})
+        row = next(reader)
+
+    while row[0] != '<AC Transmission lines>':
+        row = next(reader)
+
+    row = next(reader)                      # header
+
+    header = {"ID": -999, "From (ID)": -999, "From (Name)": -999, 'To (ID)': -999,
+                'To (Name)': -999, 'Line rating (MW)': -999, 'Emergency rating (MW)': -999,
+                'Reactance (pu) - 100-MVA base': -999, 'Resistance (pu) - 100-MVA base': -999,
+                "Shunt susceptance in MVar": -999, "Shunt conductance (pu) - 100-MVA base": -999,
+                "Tap setting": -999, "Minimum tap setting": -999,
+                "Maximum tap setting": -999, "Phase shift in degrees": -999,
+                "Controlled bus": -999}
+
+    for h in header:
+        header[h] = row.index(h)
+
+    row = next(reader) # either first line or end
+
+    while row[0] != '</AC Transmission lines>':
+
+        data["Transmission lines"].update(
+            {row[header['ID']].strip():
+             {"Source bus": row[header['From (ID)']].strip(),
+              "Target bus": row[header['To (ID)']].strip(),
+              "Reactance (ohms)": 0,
+              "Susceptance (S)": 100 * (1 / float(row[header['Reactance (pu) - 100-MVA base']].strip())),
+              "Normal flow limit (MW)": float(row[header['Line rating (MW)']].strip()),
+              "Emergency flow limit (MW)": float(row[header['Emergency rating (MW)']].strip()),
+              "Flow limit penalty ($/MW)": data["Parameters"]["Power balance penalty ($/MW)"]}})
+
+        row = next(reader)
+
+    f.close()
+    del f
+
+
+    f = open(csv_file_path_load, 'r', encoding = 'ISO-8859-1')
+    reader = csv.reader(f, delimiter = ';')
+    row = next(reader)  # sep=; or <BEGIN>
+    if row[0].strip() == "sep=":
+        row = next(reader)
+
+    header_gross_load = []
+    for bus in [bus for bus in row[:] if bus != '']:
+        header_gross_load.append(bus.strip())
+
+    assert len(data["Buses"].keys()) == len(header_gross_load), "The number of buses in the load"+\
+                                " file is different form the number of buses in the system"
+
+    for t in range(data["Parameters"]["Time horizon (h)"]):
+        row = next(reader)
+        for b in range(len(header_gross_load)):
+            data["Buses"][header_gross_load[b]]["Load (MW)"][t] = float(row[b])
+
+    f.close()
+    del f
+
+
+    with open(params.IN_DIR + "/csv_input/" + params.PS + ".json", 'w', encoding='utf-8') as f:
+        json.dump(data, f, ensure_ascii=False, indent=4)
 
 def _modify_json(json_file_path: str,
                  min_gen_cut_MW: Real=1.00,
@@ -160,6 +235,13 @@ def _modify_json(json_file_path: str,
     f.close()
     del f
 
+    if "Reserves" in data.keys():
+        if len(data["Reserves"]) == 0:
+            del data["Reserves"]
+
+    if 'Contingencies' in data.keys():
+        del data['Contingencies']
+
     if scaling_factor is None:
         scaling_factor = max(min(gen["Production cost curve ($)"][-1]
                                         for gen in data["Generators"].values()
@@ -174,9 +256,9 @@ def _modify_json(json_file_path: str,
                                             or len(gen["Production cost curve (MW)"]) == 1
                                             else gen["Production cost curve (MW)"][0],
                                                 gen["Production cost curve (MW)"][-1]]
-        unitary_cost = gen["Production cost curve ($)"][0]/scaling_factor
-        gen["Production cost curve ($)"] = [unitary_cost*gen["Production cost curve (MW)"][0],
-                                                unitary_cost*gen["Production cost curve (MW)"][-1]]
+        unitary_cost = gen["Production cost curve ($)"][-1] / gen["Production cost curve (MW)"][-1] if gen["Production cost curve (MW)"][-1] > 0 else 0
+        gen["Production cost curve ($)"] = [unitary_cost * gen["Production cost curve (MW)"][0],
+                                            unitary_cost * gen["Production cost curve (MW)"][-1]]
 
         if (gen["Production cost curve (MW)"][0] < min_gen_cut_MW):
             gen["Minimum uptime (h)"] = 1
@@ -192,8 +274,6 @@ def _modify_json(json_file_path: str,
 
         gen["Startup limit (MW)"] = gen["Production cost curve (MW)"][0]
         gen["Shutdown limit (MW)"] = gen["Production cost curve (MW)"][0]
-
-    data['Contingencies'] = {}
 
     for l, line in data["Transmission lines"].items():
         if "Normal flow limit (MW)" in line.keys():
@@ -344,7 +424,7 @@ def convert_from_json_to_csv(
         # to get the unitary cost, the total cost must be divided by the appropriate amount of
         # generation
         if gen["Production cost curve (MW)"][1] > 0:
-            f.write(str(gen["Production cost curve ($)"][1]/gen["Production cost curve (MW)"][1]))
+            f.write(str(gen["Production cost curve ($)"][1] / gen["Production cost curve (MW)"][1]))
         else:
             f.write(str(gen["Production cost curve ($)"][1]))
         f.write(";")
@@ -449,7 +529,7 @@ def convert_from_json_to_csv(
     f.close()
     del f
 
-    f = open(out_dir + 'case ' + case_name + '/'+
+    f = open(out_dir + '/case ' + case_name + '/'+
                 "gross load - " + system_name + " - case " + case_name + ".csv",
                                                                     'w', encoding = 'ISO-8859-1')
     f.write('<BEGIN>\n')
@@ -472,16 +552,19 @@ def convert_from_json_to_csv(
     f.close()
     del f
 
-    f = open(out_dir + 'case ' + case_name + '/'+
+    if 'Reserves' in data.keys():
+        f = open(out_dir + '/case ' + case_name + '/'+
                 "reserves - " + system_name + " - case " + case_name + ".csv",
                                                                     'w', encoding = 'ISO-8859-1')
-    f.write('<BEGIN>\n')
-    f.write('Reserve ID;Hour;Reservse (MW)\n')
-    for reserve in data['Reserves'].keys():
-        assert data['Reserves'][reserve]['Type'] == 'Spinning'
-        assert len(data['Reserves']['r1']['Amount (MW)']) == data["Parameters"]["Time horizon (h)"]
-        for t, r in enumerate(data['Reserves']['r1']['Amount (MW)']):
-            f.write(reserve + ";" + str(t) + ";" + str(r) + "\n")
-    f.write("</END>")
-    f.close()
-    del f
+        f.write('<BEGIN>\n')
+        f.write('Reserve ID;Hour;Reservse (MW)\n')
+        for reserve in data['Reserves'].keys():
+            assert data['Reserves'][reserve]['Type'] == 'Spinning'
+            assert len(data['Reserves']['r1']['Amount (MW)']) == data["Parameters"]["Time horizon (h)"]
+            for t, r in enumerate(data['Reserves']['r1']['Amount (MW)']):
+                f.write(reserve + ";" + str(t) + ";" + str(r) + "\n")
+        f.write("</END>")
+        f.close()
+        del f
+
+    return data
