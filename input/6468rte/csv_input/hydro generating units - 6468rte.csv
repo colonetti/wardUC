@@ -1,0 +1,5 @@
+<BEGIN>;;;;;;;;;;;;;;;
+<Hydro turbines>;;;;;;;;;;;;;;;
+Name;Hydro reservoir ID;Hydro reservoir name;Group ID;Group name;Unit ID;Bus ID;Minimum generation (MW);Maximum generation (MW);Minimum turbine discharge (m3/s);Maximum turbine discharge (m3/s);Turbine type;Minimum reactive generation (MVAr);Maximum reactive generation (MVAr);Maximum apparent power (MVA);Comments
+</Hydro turbines>;;;;;;;;;;;;;;;
+</END>;;;;;;;;;;;;;;;

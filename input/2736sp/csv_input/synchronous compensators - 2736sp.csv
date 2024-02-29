@@ -1,0 +1,3 @@
+<BEGIN>;;;;;;;;;;;
+Plant type (Hydro, Thermal);ID;Name;Plant ID;Plant name;Unit ID;Minimum reactive generation (MVAr);Maximum reactive generation (MVAr);Maximum apparent power (MVA);Constant active power consumption (MW);Constant cost ($);Comments
+</END>;;;;;;;;;;;

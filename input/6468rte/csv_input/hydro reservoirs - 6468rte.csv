@@ -1,0 +1,5 @@
+<BEGIN>;;;;;;;;;;;;;;
+<Hydro reservoirs>;;;;;;;;;;;;;;
+ID;Name;Minimum reservoir volume (hm3);Maximum reservoir volume (hm3);Name of downriver reservoir;Water travelling time (h);Run-of-river plant? TRUE or FALSE;Minimum forebay level (m);Maximum forebay level (m);Maximum spillage (m3/s);Basin;Influence of spillage on the HPF? Yes or No;Downriver plant of bypass discharge;Maximum bypass discharge (m3/s);Water travel time in bypass (h)
+</Hydro reservoirs>;;;;;;;;;;;;;;
+</END>;;;;;;;;;;;;;;

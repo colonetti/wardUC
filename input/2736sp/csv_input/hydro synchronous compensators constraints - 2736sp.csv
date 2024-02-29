@@ -1,0 +1,3 @@
+<BEGIN>;;;;;;
+Hydro reservoir ID;Hydro reservoir name;Maximum number of units operating as synchronous compensators;Elapsed time to convert to synchronous compensator when off in half-hours;Elapsed time to convert from generator to synchronous compensator in half-hours;Elapsed time to convert from synchronous compensator to generator in half-hours;Elapsed time between conversions to synchronous compensator in half-hours
+</END>;;;;;;
