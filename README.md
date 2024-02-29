@@ -1,42 +1,19 @@
 # Under construction
 
 
-$$ 
- A = \begin{bmatrix}
-          1 & -1 & 0  & 0  &  0 &  0 &  0 &  0 &  0 &  0 &  0 &  0 &  0 & 0\\ 
-          1 & 0  &  0 &  0 & -1 &  0 &  0 &  0 &  0 &  0 &  0 &  0 &  0 & 0\\ 
-          0 & 1  & -1 &  0 &  0 &  0 &  0 &  0 &  0 &  0 &  0 &  0 &  0 & 0\\  
-          0 & 1  &  0 & -1 &  0 &  0 &  0 &  0 &  0 &  0 &  0 &  0 &  0 & 0\\ 
-          0 & 1  &  0 &  0 & -1 &  0 &  0 &  0 &  0 &  0 &  0 &  0 &  0 & 0\\ 
-          0 & 0  &  1 & -1 &  0 &  0 &  0 &  0 &  0 &  0 &  0 &  0 &  0 & 0\\ 
-          0 & 0  &  0 &  1 & -1 &  0 &  0 &  0 &  0 &  0 &  0 &  0 &  0 & 0\\ 
-          0 & 0  &  0 &  1 &  0 &  0 & -1 &  0 &  0 &  0 &  0 &  0 &  0 & 0\\ 
-          0 & 0  &  0 &  1 &  0 &  0 &  0 &  0 & -1 &  0 &  0 &  0 &  0 & 0\\ 
-          0 & 0  &  0 &  0 &  1 & -1 &  0 &  0 &  0 &  0 &  0 &  0 &  0 & 0\\
-          0 & 0  &  0 &  0 &  0 &  1 &  0 &  0 &  0 &  0 & -1 &  0 &  0 & 0\\ 
-          0 & 0  &  0 &  0 &  0 &  1 &  0 &  0 &  0 &  0 &  0 & -1 &  0 & 0\\ 
-          0 & 0  &  0 &  0 &  0 &  0 &  1 & -1 &  0 &  0 &  0 &  0 &  0 & 0\\ 
-          0 & 0  &  0 &  0 &  0 &  0 &  1 &  0 & -1 &  0 &  0 &  0 &  0 & 0\\ 
-          0 & 0  &  0 &  0 &  0 &  0 &  0 &  0 &  1 & -1 &  0 &  0 &  0 & 0\\ 
-          0 & 0  &  0 &  0 &  0 &  0 &  0 &  0 &  0 &  1 & -1 &  0 &  0 & 0\\
-          0 & 0  &  0 &  0 &  0 &  0 &  0 &  0 &  0 &  0 &  0 &  1 & -1 & 0\\ 
-          0 & 0  &  0 &  0 &  0 &  0 &  0 &  0 &  0 &  0 &  0 &  0 &  1 &-1\\ 
-     \end{bmatrix} 
-$$
+## Original system
 
-$$ 
- Y = diag(\begin{bmatrix}
-          10 & 10 & 10 & 10 & 10 & 10 & 10 & 10 & 10 & 10 & 10 & 10 & 10 & 10 & 10 & 10 & 10 & 10 \\
-         \end{bmatrix}) 
-$$
+Consider the following 14-node system.
 
-$$
- B = A ^ \top \cdot (Y \cdot A)
-$$
+<img src="https://drive.google.com/uc?id=1xeFtii1CcXhDphXqDH5UOAmYSSBtGnJD"
+     alt="original system"
+     style="width: 50%" />
 
-$$
- PTDF = (Y \cdot A) \cdot \hat{B} 
-$$
+The system has 18 branches, 5 generators (represented in green), and 11 nodes with load (represented by the red arrows). 
+Assume for simplicity that all branches have reactances of 0.1 p.u.. Moreover, throughout this example, node 2 is used as the reference node for the voltage angles.
+The first order of businness is to compute the Power Transfer Distribution Factors (PTDF) matrix for this system.
+
+For this system, the PTDF matrix (rounded) is
 
 $$
  PTDF =     \begin{bmatrix}
@@ -63,11 +40,11 @@ $$
 
 The above steps are taken in https://github.com/colonetti/ward_UC_pscc2024/blob/e71b4caff9d4ca70743ca9296af9262a6ec3dfd7/pre_processing/build_ptdf.py#L148.
 
-$$
- \begin{align}
-  \sum_{g \in \mathcal{G}\_{b}}p_{g} - \sum_{l \in \mathcal{L}^{-}}f_{l} + \sum_{l \in \mathcal{L}^{+}}f_{l} + s_{b} = \mathrm{\mathbf{D}}_{b} & \qquad \forall b \in \mathcal {B}\\
- \end{align}
-$$ 
+Now, assume that the individual loads are 1 p.u., then adding up to a total system load of 11 p.u..
+Moreover, assume that only 4 of all 18 branches can possibly reach their limits under any feasible operation of this system for this load profile --- these are the branches 4, 13, 14 and 16, represented in red in the image.
+For the possibly binding branches, assume lower and upper limits for the flows of 10 p.u.. For all other branches, the limits -inf and +inf.
+
+For this example, the power flow equations under the B-theta formulation are the following.
 
 $$
  \begin{align}
@@ -88,14 +65,9 @@ $$
  \end{align}
 $$ 
 
-$$
- \begin{align}
-  {-}10 \leq -0.103 \cdot p_1 -0.23 \cdot (p_3 + s_3 - 1)  -0.461 \cdot (s_4 - 1 ) -0.206 \cdot (s_5 - 1) -0.261 \cdot (p_4 + s_6 - 1) -0.442 \cdot p_5 -0.424 \cdot (s_9 - 1) -0.37 \cdot (s_{10} - 1) -0.315 \cdot (s_{11} - 1) -0.261 \cdot (s_{12} - 1) -0.261 \cdot (s_{13} - 1) -0.261 \cdot (s_{14} - 1) \leq 10 & \qquad \text{(l = 4)}\\
-    {-}10 \leq - p_5 \leq 10 & \qquad \text{(l = 13)}\\
-    {-}10 \leq -0.009 \cdot p_1  +  0.009 \cdot (p_3 + s_3 - 1) +  0.018 \cdot (s_4 - 1 )  -0.018 \cdot (s_5 - 1) -0.082 \cdot (p_4 + s_6 - 1) + 0.373 \cdot p_5 -0.273 \cdot (s_9 - 1) -0.209 \cdot (s_{10} - 1) -0.145 \cdot (s_{11} - 1) -0.082 \cdot (s_{12} - 1) -0.082 \cdot (s_{13} - 1) -0.082 \cdot (s_{14} - 1) \leq 10 & \qquad \text{(l = 14)}\\
-    {-}10 \leq -0.027 \cdot p_1 +  0.027 \cdot (p_3 + s_3 - 1) +  0.055 \cdot (s_4 - 1 ) -0.055 \cdot (s_5 - 1) -0.245 \cdot (p_4 + s_6 - 1) + 0.118 \cdot p_5 + 0.182 \cdot (s_9 - 1) + 0.373 \cdot (s_{10} - 1) -0.436 \cdot (s_{11} - 1) -0.245 \cdot (s_{12} - 1) -0.245 \cdot (s_{13} - 1) -0.245 \cdot (s_{14} - 1) \leq 10 & \qquad \text{(l = 16)}\\
- \end{align}
-$$ 
+Where $p$ are generation outputs, $f$ are flows in the branches, and $s$ are slack variables that account for shortage of generation.
+
+For this formulation, the flow expressions and their respective limits are as follows.
 
 $$
  \begin{align}
@@ -105,17 +77,50 @@ $$
  \end{align}
 $$ 
 
-After the first iteration:
-$$\mathcal{B} = \mathcal{B} \setminus \\{8, 14\\}$$
-$$\mathcal{L} = \mathcal{L} \setminus \\{13, 18\\}$$
+On the other hand, for the PTDF formulation, we first have the flow expressions and limits of the possibly binding branches, as below.
 
 $$
  \begin{align}
-  \sum_{g \in \mathcal{G}\_{b}}p_{g} - \sum_{l \in \mathcal{L}^{-}}f_{l} + \sum_{l \in \mathcal{L}^{+}}f_{l} + s_{b} = \mathrm{\mathbf{D}}\_{b}& \qquad \forall b \in \mathcal{B} \setminus \\{7, 13\\}\\
+  {-}10 \leq -0.103 \cdot p_1 -0.23 \cdot (p_3 + s_3 - 1)  -0.461 \cdot (s_4 - 1 ) -0.206 \cdot (s_5 - 1) -0.261 \cdot (p_4 + s_6 - 1) -0.442 \cdot p_5 -0.424 \cdot (s_9 - 1) -0.37 \cdot (s_{10} - 1) -0.315 \cdot (s_{11} - 1) -0.261 \cdot (s_{12} - 1) -0.261 \cdot (s_{13} - 1) -0.261 \cdot (s_{14} - 1) \leq 10 & \qquad \text{(l = 4)}\\
+    {-}10 \leq - p_5 \leq 10 & \qquad \text{(l = 13)}\\
+    {-}10 \leq -0.009 \cdot p_1  +  0.009 \cdot (p_3 + s_3 - 1) +  0.018 \cdot (s_4 - 1 )  -0.018 \cdot (s_5 - 1) -0.082 \cdot (p_4 + s_6 - 1) + 0.373 \cdot p_5 -0.273 \cdot (s_9 - 1) -0.209 \cdot (s_{10} - 1) -0.145 \cdot (s_{11} - 1) -0.082 \cdot (s_{12} - 1) -0.082 \cdot (s_{13} - 1) -0.082 \cdot (s_{14} - 1) \leq 10 & \qquad \text{(l = 14)}\\
+    {-}10 \leq -0.027 \cdot p_1 +  0.027 \cdot (p_3 + s_3 - 1) +  0.055 \cdot (s_4 - 1 ) -0.055 \cdot (s_5 - 1) -0.245 \cdot (p_4 + s_6 - 1) + 0.118 \cdot p_5 + 0.182 \cdot (s_9 - 1) + 0.373 \cdot (s_{10} - 1) -0.436 \cdot (s_{11} - 1) -0.245 \cdot (s_{12} - 1) -0.245 \cdot (s_{13} - 1) -0.245 \cdot (s_{14} - 1) \leq 10 & \qquad \text{(l = 16)}\\
+ \end{align}
+$$ 
+
+And the global power balance for the system.
+
+$$
+ \begin{align}
+  p_1 + p_2 + p_3 + p_4 + p_5 + s_2 + s_3 + s_4 + s_5 + s_6 + s_9 + s_{10} + s_{11} + s_{12} + s_{13} + s_{14} == 11\\
+ \end{align}
+$$ 
+
+The above formulations are used when the network is not reduced. That is, for the full network, or original system.
+As the network is reduced, nodes, branches and slack variables are eliminated from the model. Thus reflecting in changes both in the B-theta and the PTDF formulations
+
+Below we show the step-by-step transformation that these formulations undergo as the network is reduced.
+
+### First iteration
+
+At the first iteration, nodes 8 and 14 are removed and their respective injections are reassigned.
+The load previously allocated to node 14 goes to node 13, and the generator then connected to node 8 is now placed at node 7.
+
+<img src="https://drive.google.com/uc?id=1xhHf9JmMk1Fjzs-Ar2V0nPQ_Psa8oapB"
+     alt="system after removing nodes 8 and 14"
+     style="width: 50%" />
+
+In the B-theta formulation, in addition to removing the constraints associated with nodes 8 and 14 and branches 13 and 18, the power balance constraints of nodes 7 and 14 now become
+
+$$
+ \begin{align}
   p_{5} + f_{8} - f_{14} = 0 & \\
   f_{17} + s_{13} = 1 + 1 & \\
  \end{align}
 $$ 
+
+In our strategy, because the limits of branch 13 are possibly binding but it has been removed, its limits are now enforced on the injections connected to the node being deleted.
+For branch 13, this simply means enforcing its limits on the generation of G5.
 
 $$
  \begin{align}
@@ -123,13 +128,7 @@ $$
  \end{align}
 $$ 
 
-$$
- \begin{align}
-   f_{l} - 10 \cdot \left( \theta_{\text{from}(l)} - \theta_{\text{to}(l)} \right)= 0 & \qquad \forall l \in \mathcal {L}\\
-   {-}10 \leq f_{l} \leq 10                                                           & \qquad \forall l \in \\{4, 14\\}\\
-   {-}inf \leq f_{l} \leq inf                                                         & \qquad \forall l \in \mathcal {L} \setminus \\{4, 14\\}\\
- \end{align}
-$$ 
+For the PTDF formulation, the changes in the flow expressions are due to the deletion of the slack variables, as seen below.
 
 $$
  \begin{align}
@@ -139,53 +138,82 @@ $$
  \end{align}
 $$ 
 
-After the second iteration:
-$$\mathcal{B} = \mathcal{B} \setminus \\{13\\}$$
-$$\mathcal{L} = \mathcal{L} \setminus \\{17\\}$$
-
-After the third iteration:
-$$\mathcal{B} = \mathcal{B} \setminus \\{12\\}$$
-$$\mathcal{L} = \mathcal{L} \setminus \\{12\\}$$
+Naturally, the slack variables associated with the deleted nodes 8 and 14 also need to be removed from the global balance equation.
 
 $$
  \begin{align}
-  \sum_{g \in \mathcal{G}\_{b}}p_{g} - \sum_{l \in \mathcal{L}^{-}}f_{l} + \sum_{l \in \mathcal{L}^{+}}f_{l} + s_{b} = \mathrm{\mathbf{D}}\_{b}& \qquad \forall b \in \mathcal{B} \setminus \\{6, 7\\}\\
-  p_{4} + f_{10} - f_{11} + s_{6} = 4 & \\
-  p_{5} + f_{8} - f_{14} = 0 & \\
+  p_1 + p_2 + p_3 + p_4 + p_5 + s_2 + s_3 + s_4 + s_5 + s_6 + s_9 + s_{10} + s_{11} + s_{12} + s_{13} == 11\\
  \end{align}
 $$ 
 
-$$
- \begin{align}
-  p_{5} \leq 10 & \\
- \end{align}
-$$ 
+### Second iteration
 
-$$
- \begin{align}
-   f_{l} - 10 \cdot \left( \theta_{\text{from}(l)} - \theta_{\text{to}(l)} \right)= 0 & \qquad \forall l \in \mathcal {L}\\
-   {-}10 \leq f_{l} \leq 10                                                           & \qquad \forall l \in \\{4, 14\\}\\
-   {-}inf \leq f_{l} \leq inf                                                         & \qquad \forall l \in \mathcal {L} \setminus \\{4, 14\\}\\
- \end{align}
-$$ 
+Now node 13 is removed and the load connected to it is transfered to node 12.
+
+<img src="https://drive.google.com/uc?id=1xiSH66igfQHCcyNyEzn6_MeAqEqGYKHN"
+     alt="system after removing node 13"
+     style="width: 50%" />
+     
+The implications of removing node 13 to the formulation are similar to what happened in the previous iteration.
+
+### Third iteration
+
+The next step is to remove node 12.
+
+<img src="https://drive.google.com/uc?id=1xiyhlPZYVeFgEhG5Za-HZXoDiN3Ei0Pm"
+     alt="system after removing node 12"
+     style="width: 50%" />
+
+After removing the end-of-line nodes 8, 14, 13 and 12, the system`s PTDFs for the remaining monitored branches 4, 14 and 16 have not changed w.r.t. the remaining nodes. As seen below
 
 $$
  PTDF =     \begin{bmatrix}
-              0 & -0.615 & -0.23 & -0.103 & -0.13 & -0.221 & -0.212 & -0.185 & -0.158\\
-              0 & -0.23 & -0.461 & -0.206 & -0.261 & -0.442 & -0.424 & -0.37 & -0.315\\
-              0 & 0.385 & -0.23 & -0.103 & -0.13 & -0.221 & -0.212 & -0.185 & -0.158\\
-              0 & 0.127 & 0.255 & -0.255 & -0.145 & 0.218 & 0.182 & 0.073 & -0.036\\
-              0 & 0.009 & 0.018 & -0.018 & -0.082 & -0.627 & -0.273 & -0.209 & -0.145\\
-              0 & 0.018 & 0.036 & -0.036 & -0.164 & -0.255 & -0.545 & -0.418 & -0.291\\
-              0 & -0.027 & -0.055 & 0.055 & -0.755 & -0.118 & -0.182 & -0.373 & -0.564\\
-              0 & -0.027 & -0.055 & 0.055 & 0.245 & -0.118 & -0.182 & -0.373 & -0.564\\
-              0 & 0.009 & 0.018 & -0.018 & -0.082 & 0.373 & -0.273 & -0.209 & -0.145\\
-              0 & 0.027 & 0.055 & -0.055 & -0.245 & 0.118 & 0.182 & -0.627 & -0.436\\
-              0 & 0.027 & 0.055 & -0.055 & -0.245 & 0.118 & 0.182 & 0.373 & -0.436\\
-              0 & -0.155 & -0.309 & -0.691 & -0.609 & -0.336 & -0.364 & -0.445 & -0.527\\
+              0.615&0&0.052&0.103&0.23&0.203&0.112&0.121&0.148&0.176\\
+              0.385&0&-0.052&-0.103&-0.23&-0.203&-0.112&-0.121&-0.148&-0.176\\
+              -0.052&0&-0.615&-0.23&-0.103&-0.13&-0.221&-0.212&-0.185&-0.158\\
+              -0.103&0&-0.23&-0.461&-0.206&-0.261&-0.442&-0.424&-0.37&-0.315\\
+              -0.23&0&-0.103&-0.206&-0.461&-0.406&-0.224&-0.242&-0.297&-0.352\\
+              -0.052&0&0.385&-0.23&-0.103&-0.13&-0.221&-0.212&-0.185&-0.158\\
+              -0.127&0&0.127&0.255&-0.255&-0.145&0.218&0.182&0.073&-0.036\\
+              -0.009&0&0.009&0.018&-0.018&-0.082&-0.627&-0.273&-0.209&-0.145\\
+              -0.018&0&0.018&0.036&-0.036&-0.164&-0.255&-0.545&-0.418&-0.291\\
+              0.027&0&-0.027&-0.055&0.055&-0.755&-0.118&-0.182&-0.373&-0.564\\
+              0.027&0&-0.027&-0.055&0.055&0.245&-0.118&-0.182&-0.373&-0.564\\
+              -0.009&0&0.009&0.018&-0.018&-0.082&0.373&-0.273&-0.209&-0.145\\
+              -0.027&0&0.027&0.055&-0.055&-0.245&0.118&0.182&-0.627&-0.436\\
+              -0.027&0&0.027&0.055&-0.055&-0.245&0.118&0.182&0.373&-0.436\\
            \end{bmatrix}
 $$
 
+### Fourth iteration
+
+Now nodes 1 and 6 are removed. Different from the previous nodes, they are not connected to a single branch. Thus, the reassignment of their injections is not as straightforward.
+Moreover, after removing them, new connections will be created.
+
+<img src="https://drive.google.com/uc?id=1xj7OeO--F4eKBktQBJHkzb7onh7IoK1x"
+     alt="system after removing node 12"
+     style="width: 50%" />
+
+After removing the end-of-line nodes 8, 14, 13 and 12, the system`s PTDFs for the remaining monitored branches 4, 14 and 16 have not changed w.r.t. the remaining nodes. As seen below
+
+$$
+ PTDF =     \begin{bmatrix}
+              0.615&0&0.052&0.103&0.23&0.203&0.112&0.121&0.148&0.176\\
+              0.385&0&-0.052&-0.103&-0.23&-0.203&-0.112&-0.121&-0.148&-0.176\\
+              -0.052&0&-0.615&-0.23&-0.103&-0.13&-0.221&-0.212&-0.185&-0.158\\
+              -0.103&0&-0.23&-0.461&-0.206&-0.261&-0.442&-0.424&-0.37&-0.315\\
+              -0.23&0&-0.103&-0.206&-0.461&-0.406&-0.224&-0.242&-0.297&-0.352\\
+              -0.052&0&0.385&-0.23&-0.103&-0.13&-0.221&-0.212&-0.185&-0.158\\
+              -0.127&0&0.127&0.255&-0.255&-0.145&0.218&0.182&0.073&-0.036\\
+              -0.009&0&0.009&0.018&-0.018&-0.082&-0.627&-0.273&-0.209&-0.145\\
+              -0.018&0&0.018&0.036&-0.036&-0.164&-0.255&-0.545&-0.418&-0.291\\
+              0.027&0&-0.027&-0.055&0.055&-0.755&-0.118&-0.182&-0.373&-0.564\\
+              0.027&0&-0.027&-0.055&0.055&0.245&-0.118&-0.182&-0.373&-0.564\\
+              -0.009&0&0.009&0.018&-0.018&-0.082&0.373&-0.273&-0.209&-0.145\\
+              -0.027&0&0.027&0.055&-0.055&-0.245&0.118&0.182&-0.627&-0.436\\
+              -0.027&0&0.027&0.055&-0.055&-0.245&0.118&0.182&0.373&-0.436\\
+           \end{bmatrix}
+$$
 
 
 # Ward Reduction in Unit-Commitment Problems
