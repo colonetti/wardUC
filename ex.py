@@ -21,7 +21,8 @@ def compute_PTDF(ref, Y, A, B, n_nodes):
 
     return np.matmul(np.matmul(Y, A), B_with_ref_inv)
 
-#              1    2    3    4    5    6    7    8   9    10   11   12   13  14
+
+#              1    2    3    4    5    6    7    8    9   10   11   12   13  14
 A = np.array([[1 , -1 , 0  , 0  ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 , 0],
               [1 , 0  ,  0 ,  0 , -1 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 , 0],
               [0 , 1  , -1 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 , 0],
@@ -45,7 +46,30 @@ Y = np.diag(10 * np.ones(18, dtype='d'))
 
 B = np.matmul(np.transpose(A), np.matmul(Y, A))
 
-PTDF = compute_PTDF(ref=1, Y=Y, A=A, B=B, n_nodes=14)
+original_PTDF = compute_PTDF(ref=1, Y=Y, A=A, B=B, n_nodes=14)
+
+
+#              1    2    3    4    5    6    7    9   10   11
+A = np.array([[1 , -1 , 0  , 0  ,  0 ,  0 ,  0 ,  0 ,  0 ,  0],
+              [1 , 0  ,  0 ,  0 , -1 ,  0 ,  0 ,  0 ,  0 ,  0],
+              [0 , 1  , -1 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0],
+              [0 , 1  ,  0 , -1 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0],
+              [0 , 1  ,  0 ,  0 , -1 ,  0 ,  0 ,  0 ,  0 ,  0],
+              [0 , 0  ,  1 , -1 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0],
+              [0 , 0  ,  0 ,  1 , -1 ,  0 ,  0 ,  0 ,  0 ,  0],
+              [0 , 0  ,  0 ,  1 ,  0 ,  0 , -1 ,  0 ,  0 ,  0],
+              [0 , 0  ,  0 ,  1 ,  0 ,  0 ,  0 , -1 ,  0 ,  0],
+              [0 , 0  ,  0 ,  0 ,  1 , -1 ,  0 ,  0 ,  0 ,  0],
+              [0 , 0  ,  0 ,  0 ,  0 ,  1 ,  0 ,  0 ,  0 , -1],
+              [0 , 0  ,  0 ,  0 ,  0 ,  0 ,  1 , -1 ,  0 ,  0],
+              [0 , 0  ,  0 ,  0 ,  0 ,  0 ,  0 ,  1 , -1 ,  0],
+              [0 , 0  ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  1 , -1]], dtype='d')
+
+Y = np.diag(10 * np.ones(14, dtype='d'))
+
+B = np.matmul(np.transpose(A), np.matmul(Y, A))
+
+PTDF_after_end_line_nodes = compute_PTDF(ref=1, Y=Y, A=A, B=B, n_nodes=10)
 
 
 # assume that the external node is the first one. nodes 1 and 2 are then frontier nodes.
@@ -87,6 +111,6 @@ Y[11, 11] = - B_front_front_new[0][1] + 10
 
 B = np.matmul(np.transpose(A), np.matmul(Y, A))
 
-PTDF_2 = compute_PTDF(ref=0, Y=Y, A=A, B=B, n_nodes=9)
+PTDF_after_node_6 = compute_PTDF(ref=0, Y=Y, A=A, B=B, n_nodes=9)
 
 print("wait")
