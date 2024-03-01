@@ -191,7 +191,7 @@ $$
 Now nodes 1, 3 and 6 are removed. Different from the previous nodes, they are not connected to a single branch. Thus, the reassignment of their injections is not as straightforward.
 Moreover, after removing them, new connections will be created.
 
-<img src="https://drive.google.com/uc?id=1xj7OeO--F4eKBktQBJHkzb7onh7IoK1x"
+<img src="https://drive.google.com/uc?id=1xk-njjVJx0yhjpim0q93uHyBFVwQ59P1"
      alt="system after removing nodes 1, 3 and 6"
      style="width: 50%" />
 
@@ -259,6 +259,16 @@ $$
 $$ 
 
 Note that, apart from the deletion of the slack variables associated with node 6 and the rounding we applied here, the expression are exactly the same as those for the original network. Naturally, this is not unexpected since what we did was a exact reformulation of the model.
+
+### Fifth iteration
+
+The next node to be removed is node 10.
+
+<img src="https://drive.google.com/uc?id=1xkOXUOm49qWvnGeb7_jf1ayEyrFiLLaH"
+     alt="system after removing node 10"
+     style="width: 50%" />
+
+Different from the other nodes removed, node 10 is connected to two lines and one of them is possibly binding. Although the procedures to compute the reassignments of the injection and the reactance of the new branch are the same as previously introduced, we also need that the new branch reflects the limits previously enforced on branch 16.
 
 # Ward Reduction in Unit-Commitment Problems
 
