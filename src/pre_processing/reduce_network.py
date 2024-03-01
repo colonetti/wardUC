@@ -823,6 +823,7 @@ def _remove_mid_bus_with_inj(params, network, thermals,
                                                                                     addition_to_cap
             network.LINE_FLOW_LB[line_id_to_keep] = network.LINE_FLOW_LB[line_id_to_del] +\
                                                                                     addition_to_cap
+
         else:
             # the flow wrt to the new to-bus has been reversed.
             # in this case, the lower bound on the old line of bus buses_of_new_connection[1]

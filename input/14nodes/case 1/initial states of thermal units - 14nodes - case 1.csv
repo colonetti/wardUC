@@ -1,0 +1,10 @@
+<BEGIN>
+<Thermal plants>
+ID;Name;Generation in time t = -1 in MW;State in t = -1. Either 1, if up, or 0, if down;Start-up trajectory (TRUE or FALSE);Shut-down trajectory (TRUE or FALSE);Number of hours (> 0) in the state of t = -1
+1;g1;0.0;0;FALSE;FALSE;24;
+2;g2;0.0;0;FALSE;FALSE;24;
+3;g3;0.0;0;FALSE;FALSE;24;
+4;g4;0.0;0;FALSE;FALSE;24;
+5;g5;0.0;0;FALSE;FALSE;24;
+</Thermal plants>
+</END>

@@ -73,44 +73,24 @@ PTDF_after_end_line_nodes = compute_PTDF(ref=1, Y=Y, A=A, B=B, n_nodes=10)
 
 
 # assume that the external node is the first one. nodes 1 and 2 are then frontier nodes.
-#              1   2   5
-A = np.array([[1, -1,  0],
-              [1,  0, -1]], dtype='d')
+#              2    4    5    7    9   10   11
+A = np.array([[0 ,  1 , -1 ,  0 ,  0 ,  0 ,  0],
+              [0 ,  1 ,  0 , -1 ,  0 ,  0 ,  0],
+              [0 ,  1 ,  0 ,  0 , -1 ,  0 ,  0],
+              [0 ,  0 ,  0 ,  1 , -1 ,  0 ,  0],
+              [0 ,  0 ,  0 ,  0 ,  1 , -1 ,  0],
+              [0 ,  0 ,  0 ,  0 ,  0 ,  1 , -1],
+              [1 , -1 ,  0 ,  0 ,  0 ,  0 ,  0],
+              [1 ,  0 , -1 ,  0 ,  0 ,  0 ,  0],
+              [0 ,  0 ,  1 ,  0 ,  0 ,  0 , -1]], dtype='d')
 
-Y = np.diag(10 * np.ones(2, dtype='d'))
-B = np.matmul(np.transpose(A), np.matmul(Y, A))
-
-b_front_idxs = [1, 2]
-
-B_front_ext = B[b_front_idxs, :][:, [0]]
-
-B_ext_ext_inv = np.linalg.inv(B[[0], :][:, [0]])
-
-B_front_front_new = B[b_front_idxs, :][:, b_front_idxs] - np.matmul(B_front_ext,
-                                                        np.matmul(B_ext_ext_inv,
-                                                                B[[0], :][:, b_front_idxs]))
-
-B_ext_impact = -1*np.matmul(B_front_ext, B_ext_ext_inv)
-
-#              2    3    4    5    6    7    9   10   11
-A = np.array([[1 , -1 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0],
-              [1 , 0  , -1 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0],
-              [0 , 1  , -1 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0],
-              [0 , 0  ,  1 , -1 ,  0 ,  0 ,  0 ,  0 ,  0],
-              [0 , 0  ,  1 ,  0 ,  0 , -1 ,  0 ,  0 ,  0],
-              [0 , 0  ,  1 ,  0 ,  0 ,  0 , -1 ,  0 ,  0],
-              [0 , 0  ,  0 ,  1 , -1 ,  0 ,  0 ,  0 ,  0],
-              [0 , 0  ,  0 ,  0 ,  1 ,  0 ,  0 ,  0 , -1],
-              [0 , 0  ,  0 ,  0 ,  0 ,  1 , -1 ,  0 ,  0],
-              [0 , 0  ,  0 ,  0 ,  0 ,  0 ,  1 , -1 ,  0],
-              [0 , 0  ,  0 ,  0 ,  0 ,  0 ,  0 ,  1 , -1],
-              [1 , 0  ,  0 , -1 ,  0 ,  0 ,  0 ,  0 ,  0]], dtype='d')
-
-Y = np.diag(10 * np.ones(12, dtype='d'))
-Y[11, 11] = - B_front_front_new[0][1] + 10
+Y = np.diag(10 * np.ones(9, dtype='d'))
+Y[6, 6] = 5 + 10        # susceptance of 5 from the new branch plus 10 from the parallel branch
+Y[7, 7] = 5 + 10        # susceptance of 5 from the new branch plus 10 from the parallel branch
+Y[8, 8] = 5             # the new branch has a susceptance of 5
 
 B = np.matmul(np.transpose(A), np.matmul(Y, A))
 
-PTDF_after_node_6 = compute_PTDF(ref=0, Y=Y, A=A, B=B, n_nodes=9)
+PTDF_after_nodes_1_and_3_and_6 = compute_PTDF(ref=0, Y=Y, A=A, B=B, n_nodes=7)
 
 print("wait")
