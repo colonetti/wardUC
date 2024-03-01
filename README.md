@@ -132,9 +132,10 @@ For the PTDF formulation, the changes in the flow expressions are due to the del
 
 $$
  \begin{align}
-  {-}10 \leq 0.103 \cdot \left(p_2 + s_2 - 1 \right)  -0.1273 \cdot  \left(p_3 + s_3 - 1 \right) -0.3576 \cdot \left(s_4 - 1 \right) -0.103 \cdot \left(s_5 - 1 \right) -0.1576 \cdot \left(p_4 + s_6 - 1 \right) -0.3394 \cdot p_5 -0.3212 \cdot \left(s_9 - 1 \right) -0.2667\cdot \left(s_{10} - 1 \right) -0.2121\cdot \left(s_{11} - 1 \right) -0.1576\cdot \left(s_{12} - 1 \right) -0.1576\cdot \left(s_{13} - 2 \right)  \leq 10 & \qquad \text{(l = 4)}\\
-    {-}10 \leq 0.0091 \cdot \left(p_2 + s_2 - 1 \right) + 0.0182 \cdot  \left(p_3 + s_3 - 1 \right) + 0.0273 \cdot \left(s_4 - 1 \right) -0.0091 \cdot \left(s_5 - 1 \right) -0.0727 \cdot \left(p_4 + s_6 - 1 \right) + 0.3818 \cdot p_5 -0.2636 \cdot \left(s_9 - 1 \right) -0.2\cdot \left(s_{10} - 1 \right) -0.1364\cdot \left(s_{11} - 1 \right) -0.0727\cdot \left(s_{12} - 1 \right) -0.0727\cdot \left(s_{13} - 2 \right)  \leq 10 & \qquad \text{(l = 14)}\\
-    {-}10 \leq 0.0273 \cdot \left(p_2 + s_2 - 1 \right) + 0.0545 \cdot  \left(p_3 + s_3 - 1 \right) + 0.0818 \cdot \left(s_4 - 1 \right) -0.0273 \cdot \left(s_5 - 1 \right) -0.2182 \cdot \left(p_4 + s_6 - 1 \right) + 0.1455 \cdot p_5 + 0.2091 \cdot \left(s_9 - 1 \right) + 0.4\cdot \left(s_{10} - 1 \right) -0.4091\cdot \left(s_{11} - 1 \right) -0.2182\cdot \left(s_{12} - 1 \right) -0.2182\cdot \left(s_{13} - 2 \right)  \leq 10 & \qquad \text{(l = 16)}\\
+  {-}10 \leq -0.103 \cdot p_1 -0.23 \cdot (p_3 + s_3 - 1)  -0.461 \cdot (s_4 - 1 ) -0.206 \cdot (s_5 - 1) -0.261 \cdot (p_4 + s_6 - 1) -0.442 \cdot p_5 -0.424 \cdot (s_9 - 1) -0.37 \cdot (s_{10} - 1) -0.315 \cdot (s_{11} - 1) -0.261 \cdot (s_{12} - 1) -0.261 \cdot (s_{13} - 2) \leq 10 & \qquad \text{(l = 4)}\\
+    {-}10 \leq - p_5 \leq 10 & \qquad \text{(l = 13)}\\
+    {-}10 \leq -0.009 \cdot p_1  +  0.009 \cdot (p_3 + s_3 - 1) +  0.018 \cdot (s_4 - 1 )  -0.018 \cdot (s_5 - 1) -0.082 \cdot (p_4 + s_6 - 1) + 0.373 \cdot p_5 -0.273 \cdot (s_9 - 1) -0.209 \cdot (s_{10} - 1) -0.145 \cdot (s_{11} - 1) -0.082 \cdot (s_{12} - 1) -0.082 \cdot (s_{13} - 2)  \leq 10 & \qquad \text{(l = 14)}\\
+    {-}10 \leq -0.027 \cdot p_1 +  0.027 \cdot (p_3 + s_3 - 1) +  0.055 \cdot (s_4 - 1 ) -0.055 \cdot (s_5 - 1) -0.245 \cdot (p_4 + s_6 - 1) + 0.118 \cdot p_5 + 0.182 \cdot (s_9 - 1) + 0.373 \cdot (s_{10} - 1) -0.436 \cdot (s_{11} - 1) -0.245 \cdot (s_{12} - 1) -0.245 \cdot (s_{13} - 2)  \leq 10 & \qquad \text{(l = 16)}\\
  \end{align}
 $$ 
 
@@ -227,7 +228,37 @@ $$
  \end{align}
 $$ 
 
+Different from the B-theta formulation, when using PTDF, the changes in this case come from the fact that injections were reassigned and the topology of the network was modified.
 
+$$
+ PTDF =     \begin{bmatrix}
+               0&-0.615&-0.23&-0.103&-0.13&-0.221&-0.212&-0.185&-0.158\\
+               0&-0.23&-0.461&-0.206&-0.261&-0.442&-0.424&-0.37&-0.315\\
+               0&0.385&-0.23&-0.103&-0.13&-0.221&-0.212&-0.185&-0.158\\
+               0&0.127&0.255&-0.255&-0.145&0.218&0.182&0.073&-0.036\\
+               0&0.009&0.018&-0.018&-0.082&-0.627&-0.273&-0.209&-0.145\\
+               0&0.018&0.036&-0.036&-0.164&-0.255&-0.545&-0.418&-0.291\\
+               0&-0.027&-0.055&0.055&-0.755&-0.118&-0.182&-0.373&-0.564\\
+               0&-0.027&-0.055&0.055&0.245&-0.118&-0.182&-0.373&-0.564\\
+               0&0.009&0.018&-0.018&-0.082&0.373&-0.273&-0.209&-0.145\\
+               0&0.027&0.055&-0.055&-0.245&0.118&0.182&-0.627&-0.436\\
+               0&0.027&0.055&-0.055&-0.245&0.118&0.182&0.373&-0.436\\
+               0&-0.155&-0.309&-0.691&-0.609&-0.336&-0.364&-0.445&-0.527\\
+           \end{bmatrix}
+$$
+
+With this new PTDF, we have the following constraints for the possibly binding branches.
+
+$$
+ \begin{align}
+  {-}10 \leq -0.23 \cdot (p_3 + s_3 - 1)  -0.461 \cdot (s_4 - 1 ) -0.206 \cdot (0.5 \cdot p_1 + 0.5 \cdot p_4 + s_5 - 3) -0.442 \cdot p_5 -0.424 \cdot (s_9 - 1) -0.37 \cdot (s_{10} - 1) -0.315 \cdot (0.5 \cdot p_4 + s_{11} - 3) \leq 10 & \qquad \text{(l = 4)}\\
+  {-}10 \leq - p_5 \leq 10 & \qquad \text{(l = 13)}\\
+  {-}10 \leq -0.009 \cdot p_1  +  0.009 \cdot (p_3 + s_3 - 1) +  0.018 \cdot (s_4 - 1 )  -0.018 \cdot (0.5 \cdot p_1 + 0.5 \cdot p_4 + s_5 - 3) + 0.373 \cdot p_5 -0.273 \cdot (s_9 - 1) -0.209 \cdot (s_{10} - 1) -0.145 \cdot (0.5 \cdot p_4 + s_{11} - 3) \leq 10 & \qquad \text{(l = 14)}\\
+  {-}10 \leq -0.027 \cdot p_1 +  0.027 \cdot (p_3 + s_3 - 1) +  0.055 \cdot (s_4 - 1 ) -0.055 \cdot (0.5 \cdot p_1 + 0.5 \cdot p_4 + s_5 - 1) + 0.118 \cdot p_5 + 0.182 \cdot (s_9 - 1) + 0.373 \cdot (s_{10} - 1) -0.436 \cdot (0.5 \cdot p_4 + s_{11} - 3) \leq 10 & \qquad \text{(l = 16)}\\
+ \end{align}
+$$ 
+
+Note that, apart from the deletion of the slack variables associated with node 6 and the rounding we applied here, the expression are exactly the same as those for the original network. Naturally, this is not unexpected since what we did was a exact reformulation of the model.
 
 # Ward Reduction in Unit-Commitment Problems
 
