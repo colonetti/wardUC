@@ -38,7 +38,7 @@ $$
            \end{bmatrix}
 $$
 
-The above steps are taken in https://github.com/colonetti/ward_UC_pscc2024/blob/e71b4caff9d4ca70743ca9296af9262a6ec3dfd7/pre_processing/build_ptdf.py#L148.
+The above steps are taken in https://github.com/colonetti/wardUCPSCC2024/blob/7fccda443ffaaeef2cd6d0bfcae8b41ce32d4656/pre_processing/build_ptdf.py#L148
 
 Now, assume that the individual loads are 1 p.u., then adding up to a total system load of 11 p.u..
 Moreover, assume that only 4 of all 18 branches can possibly reach their limits under any feasible operation of this system for this load profile --- these are the branches 4, 13, 14 and 16, represented in red in the image.
