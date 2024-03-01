@@ -92,7 +92,7 @@ And the global power balance for the system.
 
 $$
  \begin{align}
-  p_1 + p_2 + p_3 + p_4 + p_5 + s_2 + s_3 + s_4 + s_5 + s_6 + s_9 + s_{10} + s_{11} + s_{12} + s_{13} + s_{14} == 11\\
+  p_1 + p_2 + p_3 + p_4 + p_5 + s_2 + s_3 + s_4 + s_5 + s_6 + s_9 + s_{10} + s_{11} + s_{12} + s_{13} + s_{14} = 11\\
  \end{align}
 $$ 
 
@@ -142,7 +142,7 @@ Naturally, the slack variables associated with the deleted nodes 8 and 14 also n
 
 $$
  \begin{align}
-  p_1 + p_2 + p_3 + p_4 + p_5 + s_2 + s_3 + s_4 + s_5 + s_6 + s_9 + s_{10} + s_{11} + s_{12} + s_{13} == 11\\
+  p_1 + p_2 + p_3 + p_4 + p_5 + s_2 + s_3 + s_4 + s_5 + s_6 + s_9 + s_{10} + s_{11} + s_{12} + s_{13} = 11\\
  \end{align}
 $$ 
 
@@ -191,29 +191,42 @@ Now nodes 1 and 6 are removed. Different from the previous nodes, they are not c
 Moreover, after removing them, new connections will be created.
 
 <img src="https://drive.google.com/uc?id=1xj7OeO--F4eKBktQBJHkzb7onh7IoK1x"
-     alt="system after removing node 12"
+     alt="system after removing nodes 1 and 6"
      style="width: 50%" />
 
-After removing the end-of-line nodes 8, 14, 13 and 12, the system`s PTDFs for the remaining monitored branches 4, 14 and 16 have not changed w.r.t. the remaining nodes. As seen below
+The main factor driving how the injections previously connected to nodes 1 and 6 will be reassigned to their respective neighbouring nodes is the reactance of the branches.
+For this toy system, all branches have a reactance of 0.1 p.u.. As nodes 1 and 6 were connected through two branches, their injections are simply divided 50-50 between their respective neighbouring nodes.
+You can see a generalization of this step in https://github.com/colonetti/wardUCPSCC2024/blob/ffaf630e421258e4ee527b9137f9fdd88ab484b7/pre_processing/reduce_network.py#L8
+
+Thus, after removing nodes 1 and 6, nodes 5 and 11 now receive each 50% fo the generation from generator G4 and the loads connected to them increase by 0.5 p.u.. Similarly, nodes 2 and 5 now receive 50% from 
+the output of generator G1 but there is no increase in their loads because there was no load connected to node 1.
+
+Lastly, although branches 1, 2, 10 and 11 were removed, branches 19 and 20 were added. These new branches account for the connectivity between nodes 1 and 5, and 5 and 11, respectively.
+Because none of the branches removed was possibly binding, neither branch 19 nor 20 can possibly be binding. Thus, their limits are also -inf and +inf. However, the reactance of the new branches need to be 
+carefully computed. As for the reassignment of injections, their reactances depend on the reactance of the deleted branches.
+For the reactances of 0.1 p.u. of the deleted branches, the new branches have a reactance of 0.2 p.u.. But nodes 2 and 5 already have a branch connecting them. Naturally, we can combine the two parallel branches
+into a single one. This results in a new branch, branch 20, whose reactance is 0.06667 p.u.. 
+
+What are the impacts of removing nodes 1 and 6 on the B-theta formulation? Firstly, we need to modify the power balances of nodes 2, 5 and 11, as follows.
 
 $$
- PTDF =     \begin{bmatrix}
-              0.615&0&0.052&0.103&0.23&0.203&0.112&0.121&0.148&0.176\\
-              0.385&0&-0.052&-0.103&-0.23&-0.203&-0.112&-0.121&-0.148&-0.176\\
-              -0.052&0&-0.615&-0.23&-0.103&-0.13&-0.221&-0.212&-0.185&-0.158\\
-              -0.103&0&-0.23&-0.461&-0.206&-0.261&-0.442&-0.424&-0.37&-0.315\\
-              -0.23&0&-0.103&-0.206&-0.461&-0.406&-0.224&-0.242&-0.297&-0.352\\
-              -0.052&0&0.385&-0.23&-0.103&-0.13&-0.221&-0.212&-0.185&-0.158\\
-              -0.127&0&0.127&0.255&-0.255&-0.145&0.218&0.182&0.073&-0.036\\
-              -0.009&0&0.009&0.018&-0.018&-0.082&-0.627&-0.273&-0.209&-0.145\\
-              -0.018&0&0.018&0.036&-0.036&-0.164&-0.255&-0.545&-0.418&-0.291\\
-              0.027&0&-0.027&-0.055&0.055&-0.755&-0.118&-0.182&-0.373&-0.564\\
-              0.027&0&-0.027&-0.055&0.055&0.245&-0.118&-0.182&-0.373&-0.564\\
-              -0.009&0&0.009&0.018&-0.018&-0.082&0.373&-0.273&-0.209&-0.145\\
-              -0.027&0&0.027&0.055&-0.055&-0.245&0.118&0.182&-0.627&-0.436\\
-              -0.027&0&0.027&0.055&-0.055&-0.245&0.118&0.182&0.373&-0.436\\
-           \end{bmatrix}
+ \begin{align}
+  0.5 \cdot p_1 + p_2 - f_{3} - f_{4} - f_{19} + s_{2} = 1 & \qquad \text{(b = 2)}\\
+  0.5 \cdot p_1 + 0.5 \cdot p_4 + f_{7} + f_{19} - f_{20} + s_{5} = 1 + 2 & \qquad \text{(b = 5)}\\
+  0.5 \cdot p_4 + f_{16} + f_{20} + s_{11} = 1  + 2& \qquad \text{(b = 11)}\\
+ \end{align}
+$$ 
+
+Next, in addition to removing the constraints and variables associated with the deleted branches, we add variables and constraints for the new branches:
+
 $$
+ \begin{align}
+   f_{19} - 15 \cdot \left( \theta_{2} - \theta_{5} \right)= 0 & \qquad (l = 19)\\
+   f_{20} - 5 \cdot \left( \theta_{5} - \theta_{11} \right)= 0 & \qquad (l = 20)\\
+   {-}inf \leq f_{l} \leq inf                                                         & \qquad \forall l \in \\{19, 20\\}\\
+ \end{align}
+$$ 
+
 
 
 # Ward Reduction in Unit-Commitment Problems
