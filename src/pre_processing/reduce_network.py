@@ -498,13 +498,13 @@ def reduce_network(params, thermals, network):
                                                                                 flush=True)
 
 
-def del_end_of_line_buses_and_reassign_injection(network, thermals, candidate_buses):
+def del_end_of_line_buses_and_reassign_injection(network, thermals, buses_to_be_rm):
     """
         End-of-line buses are those connected to a single power line.
         Delete these buses and move their power injections to the neighbouring bus
     """
 
-    for bus in candidate_buses:
+    for bus in buses_to_be_rm:
 
         # The elements connected to the bus to be deleted must be
         # relocated to a new bus
@@ -572,9 +572,9 @@ def _remove_end_of_line_buses_with_injections(params, thermals, network):
                             {g: thermals.BUS_COEFF[g][bus]
                             for g in network.SEC_CONSTRS[t][constr_id]['participants']['thermals']}
 
-    def _get_candidate_buses(params, network, thermals):
+    def _get_buses_to_be_rm(params, network, thermals):
         """
-        get a set of buses that can be deleted
+        get a list of the buses to be removed
         """
 
         # get the subset of buses connected to the system through a single line
@@ -587,13 +587,12 @@ def _remove_end_of_line_buses_with_injections(params, thermals, network):
         max_load = {bus: np.max(network.NET_LOAD[b, :]) for b, bus in enumerate(network.BUS_ID)
                                                                     if bus in single_line_buses}
 
-        # Remember that net loads (power withdraws) are positive in network.NET_LOAD,
-        # while net generation in NET_LOAD is negative.
+        # Remember that net loads are positive in network.NET_LOAD if they are power withdraws,
+        # while NET_LOAD is negative if the net result is a power injection (generation).
 
         max_gen_of_bus = {bus: 0 for bus in network.BUS_ID}
 
-        #### Set of candidate buses to be deleted
-        candidate_buses = []
+        buses_to_be_rm = []     # buses to be deleted
 
         threshold_line_limit = (99999.00/params.POWER_BASE)
 
@@ -620,7 +619,7 @@ def _remove_end_of_line_buses_with_injections(params, thermals, network):
                     # either the load has limitless capacity or its possible most
                     # negative power injection (largest possible load) and most positive
                     # power injection (largest possible generation) are both within its capacity
-                    candidate_buses.append(bus)
+                    buses_to_be_rm.append(bus)
                 else:
                     if (abs(max_load[bus]) >
                         min(np.min(network.LINE_FLOW_UB[l]), -1*np.max(network.LINE_FLOW_LB[l]))
@@ -629,22 +628,21 @@ def _remove_end_of_line_buses_with_injections(params, thermals, network):
 
                         _add_artificial_sec_constr(params, network, bus, l)
 
-                        candidate_buses.append(bus)
+                        buses_to_be_rm.append(bus)
 
-        return candidate_buses
+        return buses_to_be_rm
 
-    candidate_buses = _get_candidate_buses(params, network, thermals)
+    buses_to_be_rm = _get_buses_to_be_rm(params, network, thermals)
 
-    while len(candidate_buses) > 0:
-        #### Delete end-of-line buses
+    while len(buses_to_be_rm) > 0:
 
-        del_end_of_line_buses_and_reassign_injection(network, thermals, candidate_buses)
+        del_end_of_line_buses_and_reassign_injection(network, thermals, buses_to_be_rm)
 
         update_load_and_network(network, thermals,
-                                [network.BUS_ID.index(bus) for bus in candidate_buses],
-                                candidate_buses)
+                                [network.BUS_ID.index(bus) for bus in buses_to_be_rm],
+                                buses_to_be_rm)
 
-        candidate_buses = _get_candidate_buses(params, network, thermals)
+        buses_to_be_rm = _get_buses_to_be_rm(params, network, thermals)
 
 
 def _remove_mid_bus_with_inj(params, network, thermals,
@@ -654,50 +652,41 @@ def _remove_mid_bus_with_inj(params, network, thermals,
         remove a mid-point bus `bus` that has injections connected to it
     """
 
-    # by definition, the bus with the smallest ID will be the 'from bus' for the new line
-    # and, the bus with the largest ID is the bus where the power injections will be reassigned
-    # to and will be the 'to bus' for the new line
-
     if len(network.LINES_FROM_BUS[bus]) == 1 and len(network.LINES_TO_BUS[bus]) == 1:
-        # the bus that is connected to the bus being deleted by
-        # a line that 'comes out' of bus 'bus'
-        bus_connected_line_from = [bus2 for l in network.LINES_FROM_BUS[bus]
-                                    for bus2 in network.LINE_F_T[l] if bus2 != bus][0]
+        # get the bus connected to the bus being deleted by the branch that 'comes out' of bus 'bus'
+        bus_from = [bus2 for l in network.LINES_FROM_BUS[bus]
+                    for bus2 in network.LINE_F_T[l] if bus2 != bus][0]
 
-        # the bus that is connected to the bus being deleted by
-        # a line that 'goes to' bus 'bus'
-        bus_connected_line_to = [bus2 for l in network.LINES_TO_BUS[bus]
-                                    for bus2 in network.LINE_F_T[l] if bus2 != bus][0]
+        # get the bus connected to the bus being deleted by the branch that 'goes to' bus 'bus'
+        bus_to = [bus2 for l in network.LINES_TO_BUS[bus]
+                  for bus2 in network.LINE_F_T[l] if bus2 != bus][0]
     else:
         if len(network.LINES_FROM_BUS[bus]) == 2:
-            bus_connected_line_from = [bus2
-                                    for bus2 in network.LINE_F_T[network.LINES_FROM_BUS[bus][0]]
-                                        if bus2 != bus][0]
-            bus_connected_line_to = [bus2
-                                    for bus2 in network.LINE_F_T[network.LINES_FROM_BUS[bus][1]]
-                                        if bus2 != bus][0]
+            bus_from = [bus2 for bus2 in network.LINE_F_T[network.LINES_FROM_BUS[bus][0]]
+                        if bus2 != bus][0]
+            bus_to = [bus2 for bus2 in network.LINE_F_T[network.LINES_FROM_BUS[bus][1]]
+                      if bus2 != bus][0]
         elif len(network.LINES_TO_BUS[bus]) == 2:
-            bus_connected_line_from = [bus2
-                                    for bus2 in network.LINE_F_T[network.LINES_TO_BUS[bus][0]]
-                                        if bus2 != bus][0]
-            bus_connected_line_to = [bus2
-                                    for bus2 in network.LINE_F_T[network.LINES_TO_BUS[bus][1]]
-                                        if bus2 != bus][0]
+            bus_from = [bus2 for bus2 in network.LINE_F_T[network.LINES_TO_BUS[bus][0]]
+                        if bus2 != bus][0]
+            bus_to = [bus2 for bus2 in network.LINE_F_T[network.LINES_TO_BUS[bus][1]]
+                      if bus2 != bus][0]
         else:
-            # then one of the lines have been deleted here. this bus can be deleted using
+            # then one of the branches has been deleted. this bus can be deleted using
             # remove_end_of_line_buses_with_injections
             return
 
-    if bus_connected_line_from < bus_connected_line_to:
-        # in this case, the new line will 'come out' of bus bus_connected_line_from and will
-        # go to bus bus_connected_line_to. Also, the injections previously in the bus being
-        # deleted will be reassigned to bus bus_connected_line_to
+    # by definition, the bus with the smallest ID will be the 'from bus' for the new branch
+    # and, the bus with the largest ID is the bus where the power injections will be reassigned
+    # to and will be the 'to bus' for the new branch
 
-        # moreover, the new line will assume the line ID line_1. thus, line_1 must be the
-        # line 'coming out' of the bus with the smallest ID
-        buses_of_new_connection = [bus_connected_line_from, bus_connected_line_to]
-    else:
-        buses_of_new_connection = [bus_connected_line_to, bus_connected_line_from]
+    # in case bus_from < bus_to, the new line will 'come out' of bus bus_from and will
+    # go to bus bus_to. Also, the injections previously in the bus being
+    # deleted will be reassigned to bus bus_to
+
+    # moreover, the new line will assume the line ID line_1. thus, line_1 must be the
+    # line 'coming out' of the bus with the smallest ID
+    buses_of_new_connection = [bus_from, bus_to] if bus_from < bus_to else [bus_to, bus_from]
 
     assert buses_of_new_connection[0] != buses_of_new_connection[1]
 

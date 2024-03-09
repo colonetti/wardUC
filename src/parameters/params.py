@@ -215,14 +215,14 @@ class Params:
         #: provided, then an output directory EXP_NAME will be created, defaults to "exp1".
         self.EXP_NAME: str = 'exp_1'
 
-        #: Number of periods in the scheduling horizon, defaults to 36.
-        self.T: int = 36
+        #: Number of periods in the scheduling horizon, defaults to 1.
+        self.T: int = 1
 
         self.TIME_LIMIT: Real = 3600.0  #: Time limit in seconds, defaults to 3600.0.
         self.CASE: str = '1'            #: ID of the case under study, defaults to "1".
 
-        #: Name of the power system under study, defaults to "ieee118".
-        self.PS: str = 'ieee118'
+        #: Name of the power system under study, defaults to "14nodes".
+        self.PS: str = '14nodes'
 
         #: dir where the input files are located, defaults to ''.
         #: If not given, the input directory is assumed to be in the parent directory
@@ -248,8 +248,8 @@ class Params:
         #: Unitary cost for load curtailment and generation surplus, defaults to 1e8.
         self.DEFICIT_COST: Real = 1e8
 
-        #: Flag to indicate whether the transmission system should be reduced, defaults to False.
-        self.REDUCE_SYSTEM: bool = False
+        #: Flag to indicate whether the transmission system should be reduced, defaults to True.
+        self.REDUCE_SYSTEM: bool = True
 
         self.POWER_BASE: Real = 100.0  #: Power base in MVA, defaults to 100.
 
