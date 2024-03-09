@@ -217,7 +217,7 @@ $$
 
 $$
  \begin{align}
-   f_{19} - 5 \cdot \left( \theta_{9} - \theta_{11} \right)= 0 & \qquad }\\
+   f_{19} - 5 \cdot \left( \theta_{9} - \theta_{11} \right)= 0 & \qquad\\
    {-}9.5 \leq f_{19} \leq 10.5                                 & \qquad \\
  \end{align}
 $$ 
