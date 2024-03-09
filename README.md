@@ -159,7 +159,7 @@ $$
  \end{align}
 $$ 
 
-Naturally, the slack variables associated with the deleted nodes 8 and 14 also need to be removed from the global balance equation.
+Naturally, the slack variable associated with the deleted node 14 also needs to be removed from the global balance equation.
 
 $$
  \begin{align}
@@ -167,9 +167,38 @@ $$
  \end{align}
 $$ 
 
+This same procedure is then applied to node 13 and then to node 12, which results in the reduced network shown below.
+
 <img src="https://drive.google.com/uc?id=1LdnHoQOPfKnn8tkLRzie0cRDdf0eTFjW"
      alt="original system"
      style="width: 50%" />
+
+After these steps, the loads originally located at 14, 13 and 12 are placed at node 6, whose power balance equation becomes
+
+$$
+ \begin{align}
+  p_4 + f_{10} - f_{11} - f_{12} + s_{6} = 4. & \qquad \\
+ \end{align}
+$$ 
+
+For the PTDF formulation, the reduced network now has the following constraints.
+
+$$
+ \begin{align}
+  {-}10 \leq -0.103 \cdot p_1 -0.23 \cdot (p_3 + s_3 - 1)  -0.461 \cdot (s_4 - 1 ) -0.206 \cdot (s_5 - 1) -0.261 \cdot (p_4 + s_6 - 4) -0.442 \cdot p_5 -0.424 \cdot (s_9 - 1) -0.37 \cdot (s_{10} - 1) -0.315 \cdot (s_{11} - 1) \leq 10 & \qquad \text{(l = 4)}\\
+    {-}10 \leq - p_5 \leq 10 & \qquad \text{(l = 13)}\\
+    {-}10 \leq -0.009 \cdot p_1  +  0.009 \cdot (p_3 + s_3 - 1) +  0.018 \cdot (s_4 - 1 )  -0.018 \cdot (s_5 - 1) -0.082 \cdot (p_4 + s_6 - 4) + 0.373 \cdot p_5 -0.273 \cdot (s_9 - 1) -0.209 \cdot (s_{10} - 1) -0.145 \cdot (s_{11} - 1)   \leq 10 & \qquad \text{(l = 14)}\\
+    {-}10 \leq -0.027 \cdot p_1 +  0.027 \cdot (p_3 + s_3 - 1) +  0.055 \cdot (s_4 - 1 ) -0.055 \cdot (s_5 - 1) -0.245 \cdot (p_4 + s_6 - 4) + 0.118 \cdot p_5 + 0.182 \cdot (s_9 - 1) + 0.373 \cdot (s_{10} - 1) -0.436 \cdot (s_{11} - 1) \leq 10 & \qquad \text{(l = 16)}\\
+ \end{align}
+$$ 
+
+and
+
+$$
+ \begin{align}
+  p_1 + p_2 + p_3 + p_4 + p_5 + s_2 + s_3 + s_4 + s_5 + s_6 + s_9 + s_{10} + s_{11} = 11.\\
+ \end{align}
+$$ 
 
 ### Removal of node 10
 
