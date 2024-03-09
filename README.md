@@ -6,7 +6,7 @@
 Consider the following 14-node system.
 
 <img src="https://drive.google.com/uc?id=1xeFtii1CcXhDphXqDH5UOAmYSSBtGnJD"
-     alt="original system"
+     alt="original network"
      style="width: 50%" />
 
 The system has 18 branches, 5 generators (represented in green), and 11 nodes with load (represented by the red arrows). 
@@ -110,7 +110,7 @@ Below we show the step-by-step transformation that these formulations undergo as
 For this system, our algorithm firstly removes node 8. This node is connected to the rest of the system through a single, and it is one branch that is possibly binding. Furthermore, generator G5 is connected to node 8. Hence, after removing this, we need to ensure that the limits of the branch removed with it, branch 13, is still enforced in the reduced network, and we need to properly reassign the generation of G5.
 
 <img src="https://drive.google.com/uc?id=1LcOv0M03y0jnhgyNAC1PI652LDjj9nh9"
-     alt="original system"
+     alt="network after removing node 8"
      style="width: 50%" />
 
 In the B-theta formulation, in addition to removing the constraints associated with node 8 and branch 13, the power balance constraint of node 7 now becomes
@@ -137,7 +137,7 @@ For this particular node deletion, nothing changes for the PTDF formulation.
 The next step is to remove node 14. This is a load node also connected to the rest of the network through a single branch. Different from node 8, however, the branch connecting node 14 is not possibly binding. Thus, all we need to do is carefully reassign the load then connected to node 14. Because it was connected by a single branch, all injections of node 14 are then reassigned to the node that it was connected to: node 13. Thus, node 13 now receives an additional 1 p.u. load.
 
 <img src="https://drive.google.com/uc?id=1Lcy_0DmHGwouK4NUKiUBlCb3PQNwrA0B"
-     alt="original system"
+     alt="network after removing node 14"
      style="width: 50%" />
 
 For the B-theta formulation, removing node 14, in addition to removing the variables and constraints associated with it and with the branch deleted, boils down to modifying the power balance constraint of node 13 as follows.
@@ -170,7 +170,7 @@ $$
 This same procedure is then applied to node 13 and then to node 12, which results in the reduced network shown below.
 
 <img src="https://drive.google.com/uc?id=1LdnHoQOPfKnn8tkLRzie0cRDdf0eTFjW"
-     alt="original system"
+     alt="network after removing nodes 14, 13 and 12"
      style="width: 50%" />
 
 After these steps, the loads originally located at 14, 13 and 12 are placed at node 6, whose power balance equation becomes
@@ -202,27 +202,133 @@ $$
 
 ### Removal of node 10
 
+The next node removed is node 10. Different from the previous nodes deleted, node 10 is connected to two branches and one of them is possibly them. Removing node 10 then divides its injection between the nodes it was connected to (11 and 9), and creates a new branch between these nodes (branch 19). The amount of injection of node 10 that goes to 9 and the amount that goes to 11, as well as the reactance and limits of the new branch, depend on the reactances of the branches then connecting node 10. The new branch's limits, in fact, are also dependent on the injection of node 10.
+
 <img src="https://drive.google.com/uc?id=1LRvhjhHniwASSGwo-DSSqEHEpwnCCT50"
-     alt="original system"
+     alt="network after removing node 10"
      style="width: 50%" />
+
+$$
+ \begin{align}
+  f_{9} f_{14} - f_{15} + s_{9} = 1.5 & \qquad \text{(b = 9)}\\
+  f_{11} + f_{16} + s_{11} = 1.5 & \qquad \text{(b = 11)}\\
+ \end{align}
+$$ 
+
+$$
+ \begin{align}
+   f_{19} - 5 \cdot \left( \theta_{9} - \theta_{11} \right)= 0 & \qquad }\\
+   {-}9.5 \leq f_{19} \leq 10.5                                 & \qquad \\
+ \end{align}
+$$ 
+
+$$
+ \begin{align}
+  {-}10 \leq -0.103 \cdot p_1 -0.23 \cdot (p_3 + s_3 - 1)  -0.461 \cdot (s_4 - 1 ) -0.206 \cdot (s_5 - 1) -0.261 \cdot (p_4 + s_6 - 4) -0.442 \cdot p_5 -0.424 \cdot (s_9 - 1.5) -0.315 \cdot (s_{11} - 1.5) \leq 10 & \qquad \text{(l = 4)}\\
+    {-}10 \leq - p_5 \leq 10 & \qquad \text{(l = 13)}\\
+    {-}10 \leq -0.009 \cdot p_1  +  0.009 \cdot (p_3 + s_3 - 1) +  0.018 \cdot (s_4 - 1 )  -0.018 \cdot (s_5 - 1) -0.082 \cdot (p_4 + s_6 - 4) + 0.373 \cdot p_5 -0.273 \cdot (s_9 - 1.5) -0.145 \cdot (s_{11} - 1.5)   \leq 10 & \qquad \text{(l = 14)}\\
+    {-}9.5 \leq -0.027 \cdot p_1  + 0.027 \cdot (p_3 + s_3 - 1) + 0.055 \cdot (s_4 - 1 ) -0.055 \cdot (s_5 - 1) -0.245 \cdot (p_4 + s_6 - 4) + 0.118 \cdot p_5 + 0.182  \cdot (s_9 - 1.5) -0.436 \cdot (s_{11} - 1.5) \leq 10.5 & \qquad \text{(l = 16)}\\
+ \end{align}
+$$ 
+
+and
+
+$$
+ \begin{align}
+  p_1 + p_2 + p_3 + p_4 + p_5 + s_2 + s_3 + s_4 + s_5 + s_6 + s_9 + s_{11} = 11\\
+ \end{align}
+$$ 
      
 ### Removal of node 11
 
+By following the same procedure applied to node 10, we can safely remove node 11 and reduce the network to the one shown below.
+
 <img src="https://drive.google.com/uc?id=1LfU_K9SoSVe3UqISsYKq3W7YMgP8pQvl"
-     alt="original system"
+     alt="network after removing node 11"
      style="width: 50%" />
 
 ### Removal of node 1
+
+Then, we further reduce the network by deleting node 1. This node is connected to two branches but it has one generator connected to it. Naturally, the generation from G1 is then split between nodes 2 and 5, according to the reactances of the branches between deleted.
 
 <img src="https://drive.google.com/uc?id=1LXdOFH8ZGXO8rjS_NYYVwKcSUC4f7vrm"
      alt="original system"
      style="width: 50%" />
 
+Note that the only thing that changes is that the generator now simultaneously injects power into two nodes. However, its total power injection is still the same: the injection has only been fractioned among more nodes. Furthermore, from the point-of-view of the generator, its model remains unchanged.
+
+$$
+ \begin{align}
+  0.5 \cdot p_1 + p_2 - f_3 - f_4 - f_{21} + s_{2} = 1 & \qquad \text{(b = 2)}\\
+  0.5 \cdot p_1 + f_7 + f_{21} - f_{10} + s_{5} = 1 & \qquad \text{(b = 5)}\\
+ \end{align}
+$$ 
+
+$$
+ \begin{align}
+   f_{21} - 15 \cdot \left( \theta_{2} - \theta_{5} \right)= 0 & \qquad }\\
+   {-}inf \leq f_{21} \leq inf                                 & \qquad \\
+ \end{align}
+$$ 
+
+$$
+ \begin{align}
+  {-}10 \leq -0.23 \cdot (p_3 + s_3 - 1)  -0.461 \cdot (s_4 - 1 ) -0.206 \cdot (0.5 \cdot p_1 + s_5 - 1) -0.261 \cdot (p_4 + s_6 - 4) -0.442 \cdot p_5 -0.424 \cdot (s_9 - 1.5) -0.315 \cdot (s_{11} - 1.5) \leq 10 & \qquad \text{(l = 4)}\\
+    {-}10 \leq - p_5 \leq 10 & \qquad \text{(l = 13)}\\
+    {-}10 \leq  0.009 \cdot (p_3 + s_3 - 1) +  0.018 \cdot (s_4 - 1 )  -0.018 \cdot (0.5 \cdot p_1 + s_5 - 1) -0.082 \cdot (p_4 + s_6 - 4) + 0.373 \cdot p_5 -0.273 \cdot (s_9 - 1.5) -0.145 \cdot (s_{11} - 1.5)   \leq 10 & \qquad \text{(l = 14)}\\
+    {-}9.5 \leq 0.027 \cdot (p_3 + s_3 - 1) + 0.055 \cdot (s_4 - 1 ) -0.055 \cdot (0.5 \cdot p_1 + s_5 - 1) -0.245 \cdot (p_4 + s_6 - 4) + 0.118 \cdot p_5 + 0.182  \cdot (s_9 - 1.5) -0.436 \cdot (s_{11} - 1.5) \leq 10.5 & \qquad \text{(l = 16)}\\
+ \end{align}
+$$ 
+
+and
+
+$$
+ \begin{align}
+  p_1 + p_2 + p_3 + p_4 + p_5 + s_2 + s_3 + s_4 + s_5 + s_6 + s_9 + s_{11} = 11\\
+ \end{align}
+$$ 
+
 ### Removal of node 3
+
+The same steps applied to node 1 are replicated to node 3, with the exception that the new branch between nodes 2 and 4 is parallel to a existing branch, which happens to be possibly binding.
 
 <img src="https://drive.google.com/uc?id=1LPazOYuVSXWQ9pRd4m2bqPIZwhLNCe5C"
      alt="original system"
      style="width: 50%" />
+
+In this scenario, the limits of the new branch 22 are defined by the maximum angular difference that could be applied to branch 4. The result is a lower bound of -15 p.u. and an upper bound of 15 p.u..
+
+$$
+ \begin{align}
+  0.5 \cdot p_1 + p_2 + 0.5 \cdot p_3 - f_{21} - f_{22} + s_{2} = 1.5 & \qquad \text{(b = 2)}\\
+  0.5 \cdot p_1 + 0.5 \cdot p_3 + f_{22} - f_{7} - f_8 - f_9 + s_{4} = 1.5 & \qquad \text{(b = 4)}\\
+ \end{align}
+$$ 
+
+$$
+ \begin{align}
+   f_{22} - 15 \cdot \left( \theta_{2} - \theta_{4} \right)= 0 & \qquad }\\
+   {-}15 \leq f_{22} \leq 15                                 & \qquad \\
+ \end{align}
+$$ 
+
+$$
+ \begin{align}
+  {-}10 \leq -0.23 \cdot (p_3 + s_3 - 1)  -0.461 \cdot (s_4 - 1 ) -0.206 \cdot (0.5 \cdot p_1 + s_5 - 1) -0.261 \cdot (p_4 + s_6 - 4) -0.442 \cdot p_5 -0.424 \cdot (s_9 - 1.5) -0.315 \cdot (s_{11} - 1.5) \leq 10 & \qquad \text{(l = 4)}\\
+    {-}10 \leq - p_5 \leq 10 & \qquad \text{(l = 13)}\\
+    {-}10 \leq  0.018 \cdot (0.5 \cdot p_3 + s_4 - 1 )  -0.018 \cdot (0.5 \cdot p_1 + s_5 - 1) -0.082 \cdot (p_4 + s_6 - 4) + 0.373 \cdot p_5 -0.273 \cdot (s_9 - 1.5) -0.145 \cdot (s_{11} - 1.5)   \leq 10 & \qquad \text{(l = 14)}\\
+    {-}9.5 \leq 0.055 \cdot (0.5 \cdot p_3 + s_4 - 1 ) -0.055 \cdot (0.5 \cdot p_1 + s_5 - 1) -0.245 \cdot (p_4 + s_6 - 4) + 0.118 \cdot p_5 + 0.182  \cdot (s_9 - 1.5) -0.436 \cdot (s_{11} - 1.5) \leq 10.5 & \qquad \text{(l = 16)}\\
+ \end{align}
+$$ 
+
+and
+
+$$
+ \begin{align}
+  p_1 + p_2 + p_3 + p_4 + p_5 + s_2 + s_3 + s_4 + s_5 + s_6 + s_9 + s_{11} = 11\\
+ \end{align}
+$$ 
+
 
 ### Removal of node 5
 
