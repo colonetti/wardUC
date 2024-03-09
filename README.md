@@ -13,6 +13,13 @@ The system has 18 branches, 5 generators (represented in green), and 11 nodes wi
 Assume for simplicity that all branches have reactances of 0.1 p.u.. Moreover, throughout this example, node 2 is used as the reference node for the voltage angles.
 The first order of businness is to compute the Power Transfer Distribution Factors (PTDF) matrix for this system.
 
+Now, assume that the individual loads are 1 p.u., then adding up to a total system load of 11 p.u..
+Moreover, assume that only 4 of all 18 branches can possibly reach their limits under any feasible operation of this system for this load profile --- these are the branches 4, 13, 14 and 16, represented in red in the image.
+For the possibly binding branches, assume lower and upper limits for the flows of 10 p.u.. For all other branches, the limits -inf and +inf.
+
+We intend to show some of the most important features of our algorithm with this example. Hence, in this example, we follow the same steps taken in the algorithm.
+If you wish, you can follow the same steps by debugging our code with your favorite IDE.
+
 For this system, the PTDF matrix (rounded) is
 
 $$
@@ -39,12 +46,28 @@ $$
 $$
 
 The above steps are taken in https://github.com/colonetti/wardUCPSCC2024/blob/7fccda443ffaaeef2cd6d0bfcae8b41ce32d4656/pre_processing/build_ptdf.py#L148
+You can also see the computation for this particular example in [LINK_TO_THE_CODE_EX.PY]
 
-Now, assume that the individual loads are 1 p.u., then adding up to a total system load of 11 p.u..
-Moreover, assume that only 4 of all 18 branches can possibly reach their limits under any feasible operation of this system for this load profile --- these are the branches 4, 13, 14 and 16, represented in red in the image.
-For the possibly binding branches, assume lower and upper limits for the flows of 10 p.u.. For all other branches, the limits -inf and +inf.
+With the PTDF, we can add the flow constraints for the branches whose limits might be reached in the UC, as we explain in the paper. For this example, there are 4 possibly binding branches, 4, 13, 14 and 16. Their flows, as described by the PTDF, are force to be within their respective limits by the constraints below.
 
-For this example, the power flow equations under the B-theta formulation are the following.
+$$
+ \begin{align}
+  {-}10 \leq -0.103 \cdot p_1 -0.23 \cdot (p_3 + s_3 - 1)  -0.461 \cdot (s_4 - 1 ) -0.206 \cdot (s_5 - 1) -0.261 \cdot (p_4 + s_6 - 1) -0.442 \cdot p_5 -0.424 \cdot (s_9 - 1) -0.37 \cdot (s_{10} - 1) -0.315 \cdot (s_{11} - 1) -0.261 \cdot (s_{12} - 1) -0.261 \cdot (s_{13} - 1) -0.261 \cdot (s_{14} - 1) \leq 10 & \qquad \text{(l = 4)}\\
+    {-}10 \leq - p_5 \leq 10 & \qquad \text{(l = 13)}\\
+    {-}10 \leq -0.009 \cdot p_1  +  0.009 \cdot (p_3 + s_3 - 1) +  0.018 \cdot (s_4 - 1 )  -0.018 \cdot (s_5 - 1) -0.082 \cdot (p_4 + s_6 - 1) + 0.373 \cdot p_5 -0.273 \cdot (s_9 - 1) -0.209 \cdot (s_{10} - 1) -0.145 \cdot (s_{11} - 1) -0.082 \cdot (s_{12} - 1) -0.082 \cdot (s_{13} - 1) -0.082 \cdot (s_{14} - 1) \leq 10 & \qquad \text{(l = 14)}\\
+    {-}10 \leq -0.027 \cdot p_1 +  0.027 \cdot (p_3 + s_3 - 1) +  0.055 \cdot (s_4 - 1 ) -0.055 \cdot (s_5 - 1) -0.245 \cdot (p_4 + s_6 - 1) + 0.118 \cdot p_5 + 0.182 \cdot (s_9 - 1) + 0.373 \cdot (s_{10} - 1) -0.436 \cdot (s_{11} - 1) -0.245 \cdot (s_{12} - 1) -0.245 \cdot (s_{13} - 1) -0.245 \cdot (s_{14} - 1) \leq 10 & \qquad \text{(l = 16)}\\
+ \end{align}
+$$ 
+
+In addition to the flow constraints, we need to make sure that the total generation equals total load for the system.
+
+$$
+ \begin{align}
+  p_1 + p_2 + p_3 + p_4 + p_5 + s_2 + s_3 + s_4 + s_5 + s_6 + s_9 + s_{10} + s_{11} + s_{12} + s_{13} + s_{14} = 11\\
+ \end{align}
+$$ 
+
+On the other hand, for the B-theta formulation, we explictly enforce the power balance for each node.
 
 $$
  \begin{align}
@@ -77,29 +100,56 @@ $$
  \end{align}
 $$ 
 
-On the other hand, for the PTDF formulation, we first have the flow expressions and limits of the possibly binding branches, as below.
-
-$$
- \begin{align}
-  {-}10 \leq -0.103 \cdot p_1 -0.23 \cdot (p_3 + s_3 - 1)  -0.461 \cdot (s_4 - 1 ) -0.206 \cdot (s_5 - 1) -0.261 \cdot (p_4 + s_6 - 1) -0.442 \cdot p_5 -0.424 \cdot (s_9 - 1) -0.37 \cdot (s_{10} - 1) -0.315 \cdot (s_{11} - 1) -0.261 \cdot (s_{12} - 1) -0.261 \cdot (s_{13} - 1) -0.261 \cdot (s_{14} - 1) \leq 10 & \qquad \text{(l = 4)}\\
-    {-}10 \leq - p_5 \leq 10 & \qquad \text{(l = 13)}\\
-    {-}10 \leq -0.009 \cdot p_1  +  0.009 \cdot (p_3 + s_3 - 1) +  0.018 \cdot (s_4 - 1 )  -0.018 \cdot (s_5 - 1) -0.082 \cdot (p_4 + s_6 - 1) + 0.373 \cdot p_5 -0.273 \cdot (s_9 - 1) -0.209 \cdot (s_{10} - 1) -0.145 \cdot (s_{11} - 1) -0.082 \cdot (s_{12} - 1) -0.082 \cdot (s_{13} - 1) -0.082 \cdot (s_{14} - 1) \leq 10 & \qquad \text{(l = 14)}\\
-    {-}10 \leq -0.027 \cdot p_1 +  0.027 \cdot (p_3 + s_3 - 1) +  0.055 \cdot (s_4 - 1 ) -0.055 \cdot (s_5 - 1) -0.245 \cdot (p_4 + s_6 - 1) + 0.118 \cdot p_5 + 0.182 \cdot (s_9 - 1) + 0.373 \cdot (s_{10} - 1) -0.436 \cdot (s_{11} - 1) -0.245 \cdot (s_{12} - 1) -0.245 \cdot (s_{13} - 1) -0.245 \cdot (s_{14} - 1) \leq 10 & \qquad \text{(l = 16)}\\
- \end{align}
-$$ 
-
-And the global power balance for the system.
-
-$$
- \begin{align}
-  p_1 + p_2 + p_3 + p_4 + p_5 + s_2 + s_3 + s_4 + s_5 + s_6 + s_9 + s_{10} + s_{11} + s_{12} + s_{13} + s_{14} = 11\\
- \end{align}
-$$ 
-
 The above formulations are used when the network is not reduced. That is, for the full network, or original system.
 As the network is reduced, nodes, branches and slack variables are eliminated from the model. Thus reflecting in changes both in the B-theta and the PTDF formulations
 
 Below we show the step-by-step transformation that these formulations undergo as the network is reduced.
+
+### Removal of node 8
+
+<img src="https://drive.google.com/uc?id=1LcOv0M03y0jnhgyNAC1PI652LDjj9nh9"
+     alt="original system"
+     style="width: 50%" />
+     
+### Removal of nodes 14, 13 and 12
+
+<img src="https://drive.google.com/uc?id=1Lcy_0DmHGwouK4NUKiUBlCb3PQNwrA0B"
+     alt="original system"
+     style="width: 50%" />
+
+<img src="https://drive.google.com/uc?id=1LdnHoQOPfKnn8tkLRzie0cRDdf0eTFjW"
+     alt="original system"
+     style="width: 50%" />
+
+### Removal of node 10
+
+<img src="https://drive.google.com/uc?id=1LRvhjhHniwASSGwo-DSSqEHEpwnCCT50"
+     alt="original system"
+     style="width: 50%" />
+     
+### Removal of node 11
+
+<img src="https://drive.google.com/uc?id=1LfU_K9SoSVe3UqISsYKq3W7YMgP8pQvl"
+     alt="original system"
+     style="width: 50%" />
+
+### Removal of node 1
+
+<img src="https://drive.google.com/uc?id=1LXdOFH8ZGXO8rjS_NYYVwKcSUC4f7vrm"
+     alt="original system"
+     style="width: 50%" />
+
+### Removal of node 3
+
+<img src="https://drive.google.com/uc?id=1LPazOYuVSXWQ9pRd4m2bqPIZwhLNCe5C"
+     alt="original system"
+     style="width: 50%" />
+
+### Removal of node 5
+
+<img src="https://drive.google.com/uc?id=1LTk_OrofAhIQXy5yuQuJulZViqpcZw5q"
+     alt="original system"
+     style="width: 50%" />
 
 ### First iteration
 
