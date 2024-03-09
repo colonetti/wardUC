@@ -1,42 +1,10 @@
 # Under construction
 
+We intend to show some of the most important features of our algorithm with this example. Hence, in this example, we follow the same steps taken in the algorithm.
+If you wish, you can follow the same steps by debugging our code with your favorite IDE.
 
-$$ 
- A = \begin{bmatrix}
-          1 & -1 & 0  & 0  &  0 &  0 &  0 &  0 &  0 &  0 &  0 &  0 &  0 & 0\\ 
-          1 & 0  &  0 &  0 & -1 &  0 &  0 &  0 &  0 &  0 &  0 &  0 &  0 & 0\\ 
-          0 & 1  & -1 &  0 &  0 &  0 &  0 &  0 &  0 &  0 &  0 &  0 &  0 & 0\\  
-          0 & 1  &  0 & -1 &  0 &  0 &  0 &  0 &  0 &  0 &  0 &  0 &  0 & 0\\ 
-          0 & 1  &  0 &  0 & -1 &  0 &  0 &  0 &  0 &  0 &  0 &  0 &  0 & 0\\ 
-          0 & 0  &  1 & -1 &  0 &  0 &  0 &  0 &  0 &  0 &  0 &  0 &  0 & 0\\ 
-          0 & 0  &  0 &  1 & -1 &  0 &  0 &  0 &  0 &  0 &  0 &  0 &  0 & 0\\ 
-          0 & 0  &  0 &  1 &  0 &  0 & -1 &  0 &  0 &  0 &  0 &  0 &  0 & 0\\ 
-          0 & 0  &  0 &  1 &  0 &  0 &  0 &  0 & -1 &  0 &  0 &  0 &  0 & 0\\ 
-          0 & 0  &  0 &  0 &  1 & -1 &  0 &  0 &  0 &  0 &  0 &  0 &  0 & 0\\
-          0 & 0  &  0 &  0 &  0 &  1 &  0 &  0 &  0 &  0 & -1 &  0 &  0 & 0\\ 
-          0 & 0  &  0 &  0 &  0 &  1 &  0 &  0 &  0 &  0 &  0 & -1 &  0 & 0\\ 
-          0 & 0  &  0 &  0 &  0 &  0 &  1 & -1 &  0 &  0 &  0 &  0 &  0 & 0\\ 
-          0 & 0  &  0 &  0 &  0 &  0 &  1 &  0 & -1 &  0 &  0 &  0 &  0 & 0\\ 
-          0 & 0  &  0 &  0 &  0 &  0 &  0 &  0 &  1 & -1 &  0 &  0 &  0 & 0\\ 
-          0 & 0  &  0 &  0 &  0 &  0 &  0 &  0 &  0 &  1 & -1 &  0 &  0 & 0\\
-          0 & 0  &  0 &  0 &  0 &  0 &  0 &  0 &  0 &  0 &  0 &  1 & -1 & 0\\ 
-          0 & 0  &  0 &  0 &  0 &  0 &  0 &  0 &  0 &  0 &  0 &  0 &  1 &-1\\ 
-     \end{bmatrix} 
-$$
-
-$$ 
- Y = diag(\begin{bmatrix}
-          10 & 10 & 10 & 10 & 10 & 10 & 10 & 10 & 10 & 10 & 10 & 10 & 10 & 10 & 10 & 10 & 10 & 10 \\
-         \end{bmatrix}) 
-$$
-
-$$
- B = A ^ \top \cdot (Y \cdot A)
-$$
-
-$$
- PTDF = (Y \cdot A) \cdot \hat{B} 
-$$
+The first thing we want to show is how the network model looks like when no reduction is used. 
+Thus, we have the complete power transfer distribution factors (PTDF) matrix below. 
 
 $$
  PTDF =     \begin{bmatrix}
@@ -61,13 +29,29 @@ $$
            \end{bmatrix}
 $$
 
-The above steps are taken in https://github.com/colonetti/ward_UC_pscc2024/blob/e71b4caff9d4ca70743ca9296af9262a6ec3dfd7/pre_processing/build_ptdf.py#L148.
+In our code, this matrix is computed in https://github.com/colonetti/ward_UC_pscc2024/blob/e71b4caff9d4ca70743ca9296af9262a6ec3dfd7/pre_processing/build_ptdf.py#L148.
+You can also see the computation for this particular example in [LINK_TO_THE_CODE_EX.PY]
+
+With the PTDF, we can add the flow constraints for the branches whose limits might be reached in the UC, as we explain in the paper. For this example, there are 4 possibly binding branches, 4, 13, 14 and 16. Their flows, as described by the PTDF, are force to be within their respective limits by the constraints below.
 
 $$
  \begin{align}
-  \sum_{g \in \mathcal{G}\_{b}}p_{g} - \sum_{l \in \mathcal{L}^{-}}f_{l} + \sum_{l \in \mathcal{L}^{+}}f_{l} + s_{b} = \mathrm{\mathbf{D}}_{b} & \qquad \forall b \in \mathcal {B}\\
+  {-}10 \leq -0.103 \cdot p_1 -0.23 \cdot (p_3 + s_3 - 1)  -0.461 \cdot (s_4 - 1 ) -0.206 \cdot (s_5 - 1) -0.261 \cdot (p_4 + s_6 - 1) -0.442 \cdot p_5 -0.424 \cdot (s_9 - 1) -0.37 \cdot (s_{10} - 1) -0.315 \cdot (s_{11} - 1) -0.261 \cdot (s_{12} - 1) -0.261 \cdot (s_{13} - 1) -0.261 \cdot (s_{14} - 1) \leq 10 & \qquad \text{(l = 4)}\\
+    {-}10 \leq - p_5 \leq 10 & \qquad \text{(l = 13)}\\
+    {-}10 \leq -0.009 \cdot p_1  +  0.009 \cdot (p_3 + s_3 - 1) +  0.018 \cdot (s_4 - 1 )  -0.018 \cdot (s_5 - 1) -0.082 \cdot (p_4 + s_6 - 1) + 0.373 \cdot p_5 -0.273 \cdot (s_9 - 1) -0.209 \cdot (s_{10} - 1) -0.145 \cdot (s_{11} - 1) -0.082 \cdot (s_{12} - 1) -0.082 \cdot (s_{13} - 1) -0.082 \cdot (s_{14} - 1) \leq 10 & \qquad \text{(l = 14)}\\
+    {-}10 \leq -0.027 \cdot p_1 +  0.027 \cdot (p_3 + s_3 - 1) +  0.055 \cdot (s_4 - 1 ) -0.055 \cdot (s_5 - 1) -0.245 \cdot (p_4 + s_6 - 1) + 0.118 \cdot p_5 + 0.182 \cdot (s_9 - 1) + 0.373 \cdot (s_{10} - 1) -0.436 \cdot (s_{11} - 1) -0.245 \cdot (s_{12} - 1) -0.245 \cdot (s_{13} - 1) -0.245 \cdot (s_{14} - 1) \leq 10 & \qquad \text{(l = 16)}\\
  \end{align}
 $$ 
+
+In addition to the flow constraints, we need to make sure that the total generation equals total load for the system.
+
+$$
+ \begin{align}
+  p_1 + p_2 + p_3 + p_4 + p_5 + s_2 + s_3 + s_4 + s_5 + s_6 + s_9 + s_10 + s_11 + s_12 + s_13 + s_14 = 11\\
+ \end{align}
+$$ 
+
+On the other hand, for the B-theta formulation, we explictly enforce the power balance for each node.
 
 $$
  \begin{align}
@@ -88,14 +72,7 @@ $$
  \end{align}
 $$ 
 
-$$
- \begin{align}
-  {-}10 \leq -0.103 \cdot p_1 -0.23 \cdot (p_3 + s_3 - 1)  -0.461 \cdot (s_4 - 1 ) -0.206 \cdot (s_5 - 1) -0.261 \cdot (p_4 + s_6 - 1) -0.442 \cdot p_5 -0.424 \cdot (s_9 - 1) -0.37 \cdot (s_{10} - 1) -0.315 \cdot (s_{11} - 1) -0.261 \cdot (s_{12} - 1) -0.261 \cdot (s_{13} - 1) -0.261 \cdot (s_{14} - 1) \leq 10 & \qquad \text{(l = 4)}\\
-    {-}10 \leq - p_5 \leq 10 & \qquad \text{(l = 13)}\\
-    {-}10 \leq -0.009 \cdot p_1  +  0.009 \cdot (p_3 + s_3 - 1) +  0.018 \cdot (s_4 - 1 )  -0.018 \cdot (s_5 - 1) -0.082 \cdot (p_4 + s_6 - 1) + 0.373 \cdot p_5 -0.273 \cdot (s_9 - 1) -0.209 \cdot (s_{10} - 1) -0.145 \cdot (s_{11} - 1) -0.082 \cdot (s_{12} - 1) -0.082 \cdot (s_{13} - 1) -0.082 \cdot (s_{14} - 1) \leq 10 & \qquad \text{(l = 14)}\\
-    {-}10 \leq -0.027 \cdot p_1 +  0.027 \cdot (p_3 + s_3 - 1) +  0.055 \cdot (s_4 - 1 ) -0.055 \cdot (s_5 - 1) -0.245 \cdot (p_4 + s_6 - 1) + 0.118 \cdot p_5 + 0.182 \cdot (s_9 - 1) + 0.373 \cdot (s_{10} - 1) -0.436 \cdot (s_{11} - 1) -0.245 \cdot (s_{12} - 1) -0.245 \cdot (s_{13} - 1) -0.245 \cdot (s_{14} - 1) \leq 10 & \qquad \text{(l = 16)}\\
- \end{align}
-$$ 
+And we need to gurantee that the flows are within their limits.
 
 $$
  \begin{align}
@@ -104,6 +81,21 @@ $$
    {-}inf \leq f_{l} \leq inf                                                         & \qquad \forall l \in \mathcal {L} \setminus \\{4, 13, 14\\}\\
  \end{align}
 $$ 
+
+
+### Removal of node 8
+
+### Removal of nodes 14, 13 and 12
+
+### Removal of node 10
+
+### Removal of node 11
+
+### Removal of node 1
+
+### Removal of node 3
+
+### Removal of node 5
 
 After the first iteration:
 $$\mathcal{B} = \mathcal{B} \setminus \\{8, 14\\}$$
