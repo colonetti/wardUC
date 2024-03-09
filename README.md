@@ -277,10 +277,10 @@ $$
 
 $$
  \begin{align}
-  {-}10 \leq -0.23 \cdot (p_3 + s_3 - 1)  -0.461 \cdot (s_4 - 1 ) -0.206 \cdot (0.5 \cdot p_1 + s_5 - 1) -0.261 \cdot (p_4 + s_6 - 4) -0.442 \cdot p_5 -0.424 \cdot (s_9 - 1.5) -0.315 \cdot (s_{11} - 1.5) \leq 10 & \qquad \text{(l = 4)}\\
+  {-}10 \leq -0.23 \cdot (p_3 + s_3 - 1)  -0.461 \cdot (s_4 - 1 ) -0.206 \cdot (0.5 \cdot p_1 + s_5 - 1) -0.261 \cdot (p_4 + s_6 - 5) -0.442 \cdot p_5 -0.424 \cdot (s_9 - 2) \leq 10 & \qquad \text{(l = 4)}\\
     {-}10 \leq - p_5 \leq 10 & \qquad \text{(l = 13)}\\
-    {-}10 \leq  0.009 \cdot (p_3 + s_3 - 1) +  0.018 \cdot (s_4 - 1 )  -0.018 \cdot (0.5 \cdot p_1 + s_5 - 1) -0.082 \cdot (p_4 + s_6 - 4) + 0.373 \cdot p_5 -0.273 \cdot (s_9 - 1.5) -0.145 \cdot (s_{11} - 1.5)   \leq 10 & \qquad \text{(l = 14)}\\
-    {-}9.5 \leq 0.027 \cdot (p_3 + s_3 - 1) + 0.055 \cdot (s_4 - 1 ) -0.055 \cdot (0.5 \cdot p_1 + s_5 - 1) -0.245 \cdot (p_4 + s_6 - 4) + 0.118 \cdot p_5 + 0.182  \cdot (s_9 - 1.5) -0.436 \cdot (s_{11} - 1.5) \leq 10.5 & \qquad \text{(l = 20)}\\
+    {-}10 \leq  0.009 \cdot (p_3 + s_3 - 1) +  0.018 \cdot (s_4 - 1 )  -0.018 \cdot (0.5 \cdot p_1 + s_5 - 1) -0.082 \cdot (p_4 + s_6 - 5) + 0.373 \cdot p_5 -0.273 \cdot (s_9 - 2) \leq 10 & \qquad \text{(l = 14)}\\
+    {-}9.5 \leq 0.027 \cdot (p_3 + s_3 - 1) + 0.055 \cdot (s_4 - 1 ) -0.055 \cdot (0.5 \cdot p_1 + s_5 - 1) -0.245 \cdot (p_4 + s_6 - 5) + 0.118 \cdot p_5 + 0.182  \cdot (s_9 - 2)  \leq 10.5 & \qquad \text{(l = 20)}\\
  \end{align}
 $$ 
 
@@ -288,7 +288,7 @@ and
 
 $$
  \begin{align}
-  p_1 + p_2 + p_3 + p_4 + p_5 + s_2 + s_3 + s_4 + s_5 + s_6 + s_9 + s_{11} = 11\\
+  p_1 + p_2 + p_3 + p_4 + p_5 + s_2 + s_3 + s_4 + s_5 + s_6 + s_9 = 11\\
  \end{align}
 $$ 
 
@@ -317,30 +317,57 @@ $$
 $$ 
 
 PTDF:
-
+ 
 $$
  \begin{align}
     {-}10 \leq - p_5 \leq 10 & \qquad \text{(l = 13)}\\
-    {-}10 \leq  0.018 \cdot (0.5 \cdot p_3 + s_4 - 1 )  -0.018 \cdot (0.5 \cdot p_1 + s_5 - 1.5) -0.082 \cdot (p_4 + s_6 - 4) + 0.373 \cdot p_5 -0.273 \cdot (s_9 - 1.5) -0.145 \cdot (s_{11} - 1.5)   \leq 10 & \qquad \text{(l = 14)}\\
-    {-}9.5 \leq 0.055 \cdot (0.5 \cdot p_3 + s_4 - 1 ) -0.055 \cdot (0.5 \cdot p_1 + s_5 - 1.5) -0.245 \cdot (p_4 + s_6 - 4) + 0.118 \cdot p_5 + 0.182  \cdot (s_9 - 1.5) -0.436 \cdot (s_{11} - 1.5) \leq 10.5 & \qquad \text{(l = 20)}\\
-    {-}15 \leq -0.685 \cdot (0.5 \cdot p_1 + 0.5 \cdot p_3 + s_{4} - 1.5)  -0.315 \cdot (0.5 \cdot p_1 + s_5 - 1.5) -0.416 \cdot (p_4 + s_6 - 4) -0.652 \cdot p_5 -0.618 \cdot (s_9 - 1.5) \leq 15 & \qquad \text{(l = 22)}\\
+    {-}10 \leq  0.018 \cdot (0.5 \cdot p_3 +s_4 -1.5) - 0.018 \cdot (0.5 \cdot p_1 +s_5-1) - 0.082 \cdot ( p_4+s_6-5) + 0.373 \cdot p_5 - 0.273 \cdot (s_9 -2) \leq 10 & \qquad \text{(l = 14)}\\
+    {-}9.5 \leq -0.055 \cdot (0.5 \cdot p_3+s_4-1.5) + 0.055 \cdot (0.5 \cdot p_1 +s_5-1) + 0.245 \cdot (p_4+s_6-5) -0.118 \cdot p_5 -0.182 \cdot (s_9-2) \leq 10.5 & \qquad \text{(l = 20)}\\
+  {-}15 \leq -0.691 \cdot (0.5 \cdot p_3+s_4-1.5) -0.309 \cdot (0.5 \cdot p_1 +s_5-1) -0.391 \cdot (p_4+s_6-5) -0.664 \cdot p_5 -0.636 \cdot (s_9-2) \leq 15 & \qquad \text{(l = 22)}\\
  \end{align}
 $$ 
-
 and
 
 $$
  \begin{align}
-  p_1 + p_2 + p_3 + p_4 + p_5 + s_2 + s_4 + s_5 + s_6 + s_9 + s_{11} = 11\\
+  p_1 + p_2 + p_3 + p_4 + p_5 + s_2 + s_4 + s_5 + s_6 + s_9 = 11\\
  \end{align}
 $$ 
-
 
 ### Removal of node 5
 
 <img src="https://drive.google.com/uc?id=1LTk_OrofAhIQXy5yuQuJulZViqpcZw5q"
      alt="original system"
      style="width: 50%" />
+
+$$
+ \begin{align}
+  0.72 \cdot p_1 + p_2 + 0.5 \cdot p_3 + f_{1} - f_{3} - f_{4} - f_{5} + s_{2} = 1.93 & \qquad \text{(b = 2)}\\
+  0.14 \cdot p_1  + 0.5 \cdot p_3 + f_{4} + f_{6} - f_{7} - f_{8} - f_{9} + s_{4} = 1.79 & \qquad \text{(b = 4)}\\
+  0.14 \cdot p_1 + p_4 + f_{10} - f_{11} - f_{12} + s_{6} = 5.28 & \qquad \text{(b = 6)}\\
+  p_5 + f_{8} - f_{13} - f_{14} = 0 & \qquad \text{(b = 7)}\\
+  f_{9} f_{14} - f_{15} + s_{9} = 2 & \qquad \text{(b = 9)}\\
+ \end{align}
+$$ 
+
+$$
+ \begin{align}
+   f_{8} - 0.001 \cdot \left( \theta_{4} - \theta_{7} \right)= 0 & \qquad \\
+   f_{9} - 0.001 \cdot \left( \theta_{4} - \theta_{9} \right)= 0 & \qquad \\
+   f_{14} - 0.001 \cdot \left( \theta_{7} - \theta_{9} \right)= 0 & \qquad \\
+   f_{20} - 0.0003 \cdot \left( \theta_{6} - \theta_{9} \right)= 0 & \qquad \\
+   f_{23} - 0.0019 \cdot \left( \theta_{2} - \theta_{4} \right)= 0 & \qquad \\
+   f_{24} - 0.0004 \cdot \left( \theta_{2 - \theta_{6} \right)= 0 & \qquad \\
+   f_{25} - 0.0003 \cdot \left( \theta_{4} - \theta_{6} \right)= 0 & \qquad \\
+   {-}inf \leq f_{8} \leq inf                                        & \qquad \\
+   {-}inf \leq f_{9} \leq inf                                        & \qquad \\
+   {-}10 \leq f_{14} \leq 10                                        & \qquad \\
+   {-}10 \leq f_{20} \leq 10                                        & \qquad \\
+   {-}19.286 \leq f_{23} \leq 19.286                             & \qquad \\
+   {-}inf \leq f_{24} \leq inf                                        & \qquad \\
+   {-}inf \leq f_{25} \leq inf                                        & \qquad \\
+ \end{align}
+$$ 
 
 ### First iteration
 
