@@ -107,15 +107,65 @@ Below we show the step-by-step transformation that these formulations undergo as
 
 ### Removal of node 8
 
+For this system, our algorithm firstly removes node 8. This node is connected to the rest of the system through a single, and it is one branch that is possibly binding. Furthermore, generator G5 is connected to node 8. Hence, after removing this, we need to ensure that the limits of the branch removed with it, branch 13, is still enforced in the reduced network, and we need to properly reassign the generation of G5.
+
 <img src="https://drive.google.com/uc?id=1LcOv0M03y0jnhgyNAC1PI652LDjj9nh9"
      alt="original system"
      style="width: 50%" />
+
+In the B-theta formulation, in addition to removing the constraints associated with node 8 and branch 13, the power balance constraint of node 7 now becomes
+
+$$
+ \begin{align}
+  p_{5} + f_{8} - f_{14} = 0 & \\
+ \end{align}
+$$ 
+
+In our strategy, because the limits of branch 13 are possibly binding but it has been removed, its limits are now enforced on the injections connected to the node being deleted.
+For branch 13, this simply means enforcing its limits on the generation of G5.
+
+$$
+ \begin{align}
+  p_{5} \leq 10 & \\
+ \end{align}
+$$ 
+
+For this particular node deletion, nothing changes for the PTDF formulation.
      
 ### Removal of nodes 14, 13 and 12
+
+The next step is to remove node 14. This is a load node also connected to the rest of the network through a single branch. Different from node 8, however, the branch connecting node 14 is not possibly binding. Thus, all we need to do is carefully reassign the load then connected to node 14. Because it was connected by a single branch, all injections of node 14 are then reassigned to the node that it was connected to: node 13. Thus, node 13 now receives an additional 1 p.u. load.
 
 <img src="https://drive.google.com/uc?id=1Lcy_0DmHGwouK4NUKiUBlCb3PQNwrA0B"
      alt="original system"
      style="width: 50%" />
+
+For the B-theta formulation, removing node 14, in addition to removing the variables and constraints associated with it and with the branch deleted, boils down to modifying the power balance constraint of node 13 as follows.
+
+$$
+ \begin{align}
+  f_{17} + s_{13} = 2 & \\
+ \end{align}
+$$ 
+
+For the PTDF formulation, in addition to relocating the load, we need to remember to remove the slack variables previously associated with node 14 from the flow expressions, as follows.
+
+$$
+ \begin{align}
+  {-}10 \leq -0.103 \cdot p_1 -0.23 \cdot (p_3 + s_3 - 1)  -0.461 \cdot (s_4 - 1 ) -0.206 \cdot (s_5 - 1) -0.261 \cdot (p_4 + s_6 - 1) -0.442 \cdot p_5 -0.424 \cdot (s_9 - 1) -0.37 \cdot (s_{10} - 1) -0.315 \cdot (s_{11} - 1) -0.261 \cdot (s_{12} - 1) -0.261 \cdot (s_{13} - 2) \leq 10 & \qquad \text{(l = 4)}\\
+    {-}10 \leq - p_5 \leq 10 & \qquad \text{(l = 13)}\\
+    {-}10 \leq -0.009 \cdot p_1  +  0.009 \cdot (p_3 + s_3 - 1) +  0.018 \cdot (s_4 - 1 )  -0.018 \cdot (s_5 - 1) -0.082 \cdot (p_4 + s_6 - 1) + 0.373 \cdot p_5 -0.273 \cdot (s_9 - 1) -0.209 \cdot (s_{10} - 1) -0.145 \cdot (s_{11} - 1) -0.082 \cdot (s_{12} - 1) -0.082 \cdot (s_{13} - 2)  \leq 10 & \qquad \text{(l = 14)}\\
+    {-}10 \leq -0.027 \cdot p_1 +  0.027 \cdot (p_3 + s_3 - 1) +  0.055 \cdot (s_4 - 1 ) -0.055 \cdot (s_5 - 1) -0.245 \cdot (p_4 + s_6 - 1) + 0.118 \cdot p_5 + 0.182 \cdot (s_9 - 1) + 0.373 \cdot (s_{10} - 1) -0.436 \cdot (s_{11} - 1) -0.245 \cdot (s_{12} - 1) -0.245 \cdot (s_{13} - 2)  \leq 10 & \qquad \text{(l = 16)}\\
+ \end{align}
+$$ 
+
+Naturally, the slack variables associated with the deleted nodes 8 and 14 also need to be removed from the global balance equation.
+
+$$
+ \begin{align}
+  p_1 + p_2 + p_3 + p_4 + p_5 + s_2 + s_3 + s_4 + s_5 + s_6 + s_9 + s_{10} + s_{11} + s_{12} + s_{13} = 11\\
+ \end{align}
+$$ 
 
 <img src="https://drive.google.com/uc?id=1LdnHoQOPfKnn8tkLRzie0cRDdf0eTFjW"
      alt="original system"
@@ -160,42 +210,6 @@ The load previously allocated to node 14 goes to node 13, and the generator then
      alt="system after removing nodes 8 and 14"
      style="width: 50%" />
 
-In the B-theta formulation, in addition to removing the constraints associated with nodes 8 and 14 and branches 13 and 18, the power balance constraints of nodes 7 and 14 now become
-
-$$
- \begin{align}
-  p_{5} + f_{8} - f_{14} = 0 & \\
-  f_{17} + s_{13} = 1 + 1 & \\
- \end{align}
-$$ 
-
-In our strategy, because the limits of branch 13 are possibly binding but it has been removed, its limits are now enforced on the injections connected to the node being deleted.
-For branch 13, this simply means enforcing its limits on the generation of G5.
-
-$$
- \begin{align}
-  p_{5} \leq 10 & \\
- \end{align}
-$$ 
-
-For the PTDF formulation, the changes in the flow expressions are due to the deletion of the slack variables, as seen below.
-
-$$
- \begin{align}
-  {-}10 \leq -0.103 \cdot p_1 -0.23 \cdot (p_3 + s_3 - 1)  -0.461 \cdot (s_4 - 1 ) -0.206 \cdot (s_5 - 1) -0.261 \cdot (p_4 + s_6 - 1) -0.442 \cdot p_5 -0.424 \cdot (s_9 - 1) -0.37 \cdot (s_{10} - 1) -0.315 \cdot (s_{11} - 1) -0.261 \cdot (s_{12} - 1) -0.261 \cdot (s_{13} - 2) \leq 10 & \qquad \text{(l = 4)}\\
-    {-}10 \leq - p_5 \leq 10 & \qquad \text{(l = 13)}\\
-    {-}10 \leq -0.009 \cdot p_1  +  0.009 \cdot (p_3 + s_3 - 1) +  0.018 \cdot (s_4 - 1 )  -0.018 \cdot (s_5 - 1) -0.082 \cdot (p_4 + s_6 - 1) + 0.373 \cdot p_5 -0.273 \cdot (s_9 - 1) -0.209 \cdot (s_{10} - 1) -0.145 \cdot (s_{11} - 1) -0.082 \cdot (s_{12} - 1) -0.082 \cdot (s_{13} - 2)  \leq 10 & \qquad \text{(l = 14)}\\
-    {-}10 \leq -0.027 \cdot p_1 +  0.027 \cdot (p_3 + s_3 - 1) +  0.055 \cdot (s_4 - 1 ) -0.055 \cdot (s_5 - 1) -0.245 \cdot (p_4 + s_6 - 1) + 0.118 \cdot p_5 + 0.182 \cdot (s_9 - 1) + 0.373 \cdot (s_{10} - 1) -0.436 \cdot (s_{11} - 1) -0.245 \cdot (s_{12} - 1) -0.245 \cdot (s_{13} - 2)  \leq 10 & \qquad \text{(l = 16)}\\
- \end{align}
-$$ 
-
-Naturally, the slack variables associated with the deleted nodes 8 and 14 also need to be removed from the global balance equation.
-
-$$
- \begin{align}
-  p_1 + p_2 + p_3 + p_4 + p_5 + s_2 + s_3 + s_4 + s_5 + s_6 + s_9 + s_{10} + s_{11} + s_{12} + s_{13} = 11\\
- \end{align}
-$$ 
 
 ### Second iteration
 
