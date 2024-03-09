@@ -33,6 +33,7 @@ In our code, this matrix is computed in https://github.com/colonetti/ward_UC_psc
 You can also see the computation for this particular example in [LINK_TO_THE_CODE_EX.PY]
 
 With the PTDF, we can add the flow constraints for the branches whose limits might be reached in the UC, as we explain in the paper. For this example, there are 4 possibly binding branches, 4, 13, 14 and 16. Their flows, as described by the PTDF, are force to be within their respective limits by the constraints below.
+
 $$
  \begin{align}
   {-}10 \leq -0.103 \cdot p_1 -0.23 \cdot (p_3 + s_3 - 1)  -0.461 \cdot (s_4 - 1 ) -0.206 \cdot (s_5 - 1) -0.261 \cdot (p_4 + s_6 - 1) -0.442 \cdot p_5 -0.424 \cdot (s_9 - 1) -0.37 \cdot (s_{10} - 1) -0.315 \cdot (s_{11} - 1) -0.261 \cdot (s_{12} - 1) -0.261 \cdot (s_{13} - 1) -0.261 \cdot (s_{14} - 1) \leq 10 & \qquad \text{(l = 4)}\\
