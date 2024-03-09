@@ -904,17 +904,14 @@ def _remove_mid_point_buses_with_injs(params, thermals, network):
 
     def _get_cand_buses(network, buses_cannot_be_del):
         """get mid-point buses with injections that can be deleted"""
-        candidate_buses = []
 
         # the bus must be connected to two lines
         # exactly one of the lines connected to the bus can be binding
         # if a bus is removed, none of its immediate neighbouring buses can be removed
-        candidate_buses = [bus for bus in set(network.BUS_ID) - buses_cannot_be_del
+        return [bus for bus in set(network.BUS_ID) - buses_cannot_be_del
                            if len(network.LINES_FROM_BUS[bus] + network.LINES_TO_BUS[bus]) == 2
                            and (len([l for l in network.LINES_FROM_BUS[bus] +
                                      network.LINES_TO_BUS[bus] if network.ACTIVE_BOUNDS[l]]) == 1)]
-
-        return candidate_buses
 
     MAX_IT = 10
 
