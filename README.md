@@ -208,6 +208,8 @@ The next node removed is node 10. Different from the previous nodes deleted, nod
      alt="network after removing node 10"
      style="width: 50%" />
 
+B-theta:
+
 $$
  \begin{align}
   f_{9} f_{14} - f_{15} + s_{9} = 1.5 & \qquad \text{(b = 9)}\\
@@ -222,12 +224,14 @@ $$
  \end{align}
 $$ 
 
+PTDF:
+
 $$
  \begin{align}
   {-}10 \leq -0.103 \cdot p_1 -0.23 \cdot (p_3 + s_3 - 1)  -0.461 \cdot (s_4 - 1 ) -0.206 \cdot (s_5 - 1) -0.261 \cdot (p_4 + s_6 - 4) -0.442 \cdot p_5 -0.424 \cdot (s_9 - 1.5) -0.315 \cdot (s_{11} - 1.5) \leq 10 & \qquad \text{(l = 4)}\\
     {-}10 \leq - p_5 \leq 10 & \qquad \text{(l = 13)}\\
     {-}10 \leq -0.009 \cdot p_1  +  0.009 \cdot (p_3 + s_3 - 1) +  0.018 \cdot (s_4 - 1 )  -0.018 \cdot (s_5 - 1) -0.082 \cdot (p_4 + s_6 - 4) + 0.373 \cdot p_5 -0.273 \cdot (s_9 - 1.5) -0.145 \cdot (s_{11} - 1.5)   \leq 10 & \qquad \text{(l = 14)}\\
-    {-}9.5 \leq -0.027 \cdot p_1  + 0.027 \cdot (p_3 + s_3 - 1) + 0.055 \cdot (s_4 - 1 ) -0.055 \cdot (s_5 - 1) -0.245 \cdot (p_4 + s_6 - 4) + 0.118 \cdot p_5 + 0.182  \cdot (s_9 - 1.5) -0.436 \cdot (s_{11} - 1.5) \leq 10.5 & \qquad \text{(l = 16)}\\
+    {-}9.5 \leq -0.027 \cdot p_1  + 0.027 \cdot (p_3 + s_3 - 1) + 0.055 \cdot (s_4 - 1 ) -0.055 \cdot (s_5 - 1) -0.245 \cdot (p_4 + s_6 - 4) + 0.118 \cdot p_5 + 0.182  \cdot (s_9 - 1.5) -0.436 \cdot (s_{11} - 1.5) \leq 10.5 & \qquad \text{(l = 19)}\\
  \end{align}
 $$ 
 
@@ -266,7 +270,7 @@ $$
 
 $$
  \begin{align}
-   f_{21} - 15 \cdot \left( \theta_{2} - \theta_{5} \right)= 0 & \qquad }\\
+   f_{21} - 15 \cdot \left( \theta_{2} - \theta_{5} \right)= 0 & \qquad \\
    {-}inf \leq f_{21} \leq inf                                 & \qquad \\
  \end{align}
 $$ 
@@ -276,7 +280,7 @@ $$
   {-}10 \leq -0.23 \cdot (p_3 + s_3 - 1)  -0.461 \cdot (s_4 - 1 ) -0.206 \cdot (0.5 \cdot p_1 + s_5 - 1) -0.261 \cdot (p_4 + s_6 - 4) -0.442 \cdot p_5 -0.424 \cdot (s_9 - 1.5) -0.315 \cdot (s_{11} - 1.5) \leq 10 & \qquad \text{(l = 4)}\\
     {-}10 \leq - p_5 \leq 10 & \qquad \text{(l = 13)}\\
     {-}10 \leq  0.009 \cdot (p_3 + s_3 - 1) +  0.018 \cdot (s_4 - 1 )  -0.018 \cdot (0.5 \cdot p_1 + s_5 - 1) -0.082 \cdot (p_4 + s_6 - 4) + 0.373 \cdot p_5 -0.273 \cdot (s_9 - 1.5) -0.145 \cdot (s_{11} - 1.5)   \leq 10 & \qquad \text{(l = 14)}\\
-    {-}9.5 \leq 0.027 \cdot (p_3 + s_3 - 1) + 0.055 \cdot (s_4 - 1 ) -0.055 \cdot (0.5 \cdot p_1 + s_5 - 1) -0.245 \cdot (p_4 + s_6 - 4) + 0.118 \cdot p_5 + 0.182  \cdot (s_9 - 1.5) -0.436 \cdot (s_{11} - 1.5) \leq 10.5 & \qquad \text{(l = 16)}\\
+    {-}9.5 \leq 0.027 \cdot (p_3 + s_3 - 1) + 0.055 \cdot (s_4 - 1 ) -0.055 \cdot (0.5 \cdot p_1 + s_5 - 1) -0.245 \cdot (p_4 + s_6 - 4) + 0.118 \cdot p_5 + 0.182  \cdot (s_9 - 1.5) -0.436 \cdot (s_{11} - 1.5) \leq 10.5 & \qquad \text{(l = 20)}\\
  \end{align}
 $$ 
 
@@ -307,17 +311,19 @@ $$
 
 $$
  \begin{align}
-   f_{22} - 15 \cdot \left( \theta_{2} - \theta_{4} \right)= 0 & \qquad }\\
+   f_{22} - 15 \cdot \left( \theta_{2} - \theta_{4} \right)= 0 & \qquad\\
    {-}15 \leq f_{22} \leq 15                                 & \qquad \\
  \end{align}
 $$ 
 
+PTDF:
+
 $$
  \begin{align}
-  {-}10 \leq -0.23 \cdot (p_3 + s_3 - 1)  -0.461 \cdot (s_4 - 1 ) -0.206 \cdot (0.5 \cdot p_1 + s_5 - 1) -0.261 \cdot (p_4 + s_6 - 4) -0.442 \cdot p_5 -0.424 \cdot (s_9 - 1.5) -0.315 \cdot (s_{11} - 1.5) \leq 10 & \qquad \text{(l = 4)}\\
     {-}10 \leq - p_5 \leq 10 & \qquad \text{(l = 13)}\\
-    {-}10 \leq  0.018 \cdot (0.5 \cdot p_3 + s_4 - 1 )  -0.018 \cdot (0.5 \cdot p_1 + s_5 - 1) -0.082 \cdot (p_4 + s_6 - 4) + 0.373 \cdot p_5 -0.273 \cdot (s_9 - 1.5) -0.145 \cdot (s_{11} - 1.5)   \leq 10 & \qquad \text{(l = 14)}\\
-    {-}9.5 \leq 0.055 \cdot (0.5 \cdot p_3 + s_4 - 1 ) -0.055 \cdot (0.5 \cdot p_1 + s_5 - 1) -0.245 \cdot (p_4 + s_6 - 4) + 0.118 \cdot p_5 + 0.182  \cdot (s_9 - 1.5) -0.436 \cdot (s_{11} - 1.5) \leq 10.5 & \qquad \text{(l = 16)}\\
+    {-}10 \leq  0.018 \cdot (0.5 \cdot p_3 + s_4 - 1 )  -0.018 \cdot (0.5 \cdot p_1 + s_5 - 1.5) -0.082 \cdot (p_4 + s_6 - 4) + 0.373 \cdot p_5 -0.273 \cdot (s_9 - 1.5) -0.145 \cdot (s_{11} - 1.5)   \leq 10 & \qquad \text{(l = 14)}\\
+    {-}9.5 \leq 0.055 \cdot (0.5 \cdot p_3 + s_4 - 1 ) -0.055 \cdot (0.5 \cdot p_1 + s_5 - 1.5) -0.245 \cdot (p_4 + s_6 - 4) + 0.118 \cdot p_5 + 0.182  \cdot (s_9 - 1.5) -0.436 \cdot (s_{11} - 1.5) \leq 10.5 & \qquad \text{(l = 20)}\\
+    {-}15 \leq -0.685 \cdot (0.5 \cdot p_1 + 0.5 \cdot p_3 + s_{4} - 1.5)  -0.315 \cdot (0.5 \cdot p_1 + s_5 - 1.5) -0.416 \cdot (p_4 + s_6 - 4) -0.652 \cdot p_5 -0.618 \cdot (s_9 - 1.5) \leq 15 & \qquad \text{(l = 22)}\\
  \end{align}
 $$ 
 
@@ -325,7 +331,7 @@ and
 
 $$
  \begin{align}
-  p_1 + p_2 + p_3 + p_4 + p_5 + s_2 + s_3 + s_4 + s_5 + s_6 + s_9 + s_{11} = 11\\
+  p_1 + p_2 + p_3 + p_4 + p_5 + s_2 + s_4 + s_5 + s_6 + s_9 + s_{11} = 11\\
  \end{align}
 $$ 
 
