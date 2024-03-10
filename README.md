@@ -326,6 +326,7 @@ $$
   {-}15 \leq -0.691 \cdot (0.5 \cdot p_3+s_4-1.5) -0.309 \cdot (0.5 \cdot p_1 +s_5-1) -0.391 \cdot (p_4+s_6-5) -0.664 \cdot p_5 -0.636 \cdot (s_9-2) \leq 15 & \qquad \text{(l = 22)}\\
  \end{align}
 $$ 
+
 and
 
 $$
@@ -368,139 +369,6 @@ $$
    {-}inf \leq f_{25} \leq inf                                        & \qquad \\
  \end{align}
 $$ 
-
-### First iteration
-
-At the first iteration, nodes 8 and 14 are removed and their respective injections are reassigned.
-The load previously allocated to node 14 goes to node 13, and the generator then connected to node 8 is now placed at node 7.
-
-<img src="https://drive.google.com/uc?id=1xhHf9JmMk1Fjzs-Ar2V0nPQ_Psa8oapB"
-     alt="system after removing nodes 8 and 14"
-     style="width: 50%" />
-
-
-### Second iteration
-
-Now node 13 is removed and the load connected to it is transfered to node 12.
-
-<img src="https://drive.google.com/uc?id=1xiSH66igfQHCcyNyEzn6_MeAqEqGYKHN"
-     alt="system after removing node 13"
-     style="width: 50%" />
-     
-The implications of removing node 13 to the formulation are similar to what happened in the previous iteration.
-
-### Third iteration
-
-The next step is to remove node 12.
-
-<img src="https://drive.google.com/uc?id=1xiyhlPZYVeFgEhG5Za-HZXoDiN3Ei0Pm"
-     alt="system after removing node 12"
-     style="width: 50%" />
-
-After removing the end-of-line nodes 8, 14, 13 and 12, the system`s PTDFs for the remaining monitored branches 4, 14 and 16 have not changed w.r.t. the remaining nodes. As seen below
-
-$$
- PTDF =     \begin{bmatrix}
-              0.615&0&0.052&0.103&0.23&0.203&0.112&0.121&0.148&0.176& (l = 1)\\
-              0.385&0&-0.052&-0.103&-0.23&-0.203&-0.112&-0.121&-0.148&-0.176& (l = 2)\\
-              -0.052&0&-0.615&-0.23&-0.103&-0.13&-0.221&-0.212&-0.185&-0.158& (l = 3)\\
-              -0.103&0&-0.23&-0.461&-0.206&-0.261&-0.442&-0.424&-0.37&-0.315& (l = 4)\\
-              -0.23&0&-0.103&-0.206&-0.461&-0.406&-0.224&-0.242&-0.297&-0.352& (l = 5)\\
-              -0.052&0&0.385&-0.23&-0.103&-0.13&-0.221&-0.212&-0.185&-0.158& (l = 6)\\
-              -0.127&0&0.127&0.255&-0.255&-0.145&0.218&0.182&0.073&-0.036& (l = 7)\\
-              -0.009&0&0.009&0.018&-0.018&-0.082&-0.627&-0.273&-0.209&-0.145& (l = 8)\\
-              -0.018&0&0.018&0.036&-0.036&-0.164&-0.255&-0.545&-0.418&-0.291& (l = 9)\\
-              0.027&0&-0.027&-0.055&0.055&-0.755&-0.118&-0.182&-0.373&-0.564& (l = 10)\\
-              0.027&0&-0.027&-0.055&0.055&0.245&-0.118&-0.182&-0.373&-0.564& (l = 11)\\
-              -0.009&0&0.009&0.018&-0.018&-0.082&0.373&-0.273&-0.209&-0.145& (l = 14)\\
-              -0.027&0&0.027&0.055&-0.055&-0.245&0.118&0.182&-0.627&-0.436& (l = 15)\\
-              -0.027&0&0.027&0.055&-0.055&-0.245&0.118&0.182&0.373&-0.436& (l = 16)\\
-           \end{bmatrix}
-$$
-
-### Fourth iteration
-
-Now nodes 1, 3 and 6 are removed. Different from the previous nodes, they are not connected to a single branch. Thus, the reassignment of their injections is not as straightforward.
-Moreover, after removing them, new connections will be created.
-
-<img src="https://drive.google.com/uc?id=1xk-njjVJx0yhjpim0q93uHyBFVwQ59P1"
-     alt="system after removing nodes 1, 3 and 6"
-     style="width: 50%" />
-
-The main factor driving how the injections previously connected to nodes 1, 3 and 6 will be reassigned to their respective neighbouring nodes is the reactance of the branches.
-For this toy system, all branches have a reactance of 0.1 p.u.. As nodes being deleted were each connected through two branches, their injections are simply divided 50-50 between their respective neighbouring nodes.
-You can see a generalization of this step in https://github.com/colonetti/wardUCPSCC2024/blob/ffaf630e421258e4ee527b9137f9fdd88ab484b7/pre_processing/reduce_network.py#L8
-
-Thus, after removing nodes 6, nodes 5 and 11 now receive each 50% fo the generation from generator G4 and the loads connected to them increase by 0.5 p.u.. Similarly, nodes 2 and 5 now receive 50% from 
-the output of generator G1 but there is no increase in their loads because there was no load connected to node 1. Finally, the generation from G3 and the load connected at node 3 are equally divided between nodes 2 and 4.
-
-Lastly, although branches 1, 2, 3, 6, 10 and 11 were removed, branches 19, 20 and 21 were added. These new branches account for the connectivity between nodes 2 and 4, 1 and 5, and 5 and 11, respectively.
-Because only branch 4 was possibly binding, only the new branch 19 can possibly be binding. Regardless of the branch limits, the reactance of the new branches need to be 
-carefully computed. As for the reassignment of injections, the reactances also depend on the reactance of the deleted branches.
-For the reactances of 0.1 p.u. of the deleted branches, the new branches have a reactance of 0.2 p.u.. But nodes 2 and 5 and 2 and 4 already have a branch connecting them. Naturally, we can combine the two parallel branches
-into a single one. This results in two new branches, branches 19 and 20, whose reactances are 0.06667 p.u.. However, after combining the two branches between nodes 2 and 4 (which results in the new branch 19), how can we account for the limits on the previous branch 4? To that end, we simply take the maximum angular difference between nodes 2 and 4 and compute the limits for the new branch.
-
-What are the impacts of removing nodes 1 and 6 on the B-theta formulation? Firstly, we need to modify the power balances of nodes 2, 4, 5 and 11, as follows.
-
-$$
- \begin{align}
-  0.5 \cdot p_1 + p_2 + 0.5 \cdot p_3 - f_{19} - f_{20} + s_{2} = 1.5 & \qquad \text{(b = 2)}\\
-  0.5 \cdot p_1 + p_2 + 0.5 \cdot p_3 + f_{19} - f_{7} - f_{8} - f_{9} + s_{4} = 1.5 & \qquad \text{(b = 4)}\\
-  0.5 \cdot p_1 + 0.5 \cdot p_4 + f_{7} + f_{20} - f_{21} + s_{5} = 3 & \qquad \text{(b = 5)}\\
-  0.5 \cdot p_4 + f_{16} + f_{21} + s_{11} = 3 & \qquad \text{(b = 11)}\\
- \end{align}
-$$ 
-
-Next, in addition to removing the constraints and variables associated with the deleted branches, we add variables and constraints for the new branches:
-
-$$
- \begin{align}
-   f_{19} - 15 \cdot \left( \theta_{2} - \theta_{4} \right)= 0 & \qquad (l = 19)\\
-   f_{20} - 15 \cdot \left( \theta_{2} - \theta_{5} \right)= 0 & \qquad (l = 20)\\
-   f_{21} - 5 \cdot \left( \theta_{5} - \theta_{11} \right)= 0 & \qquad (l = 21)\\
-   {-}inf \leq f_{l} \leq inf                                                         & \qquad \forall l \in \\{20, 21\\}\\
-   {-}15 \leq f_{19} \leq 15                                                         & (l = 19)\\
- \end{align}
-$$ 
-
-Different from the B-theta formulation, when using PTDF, the changes in this case come from the fact that injections were reassigned and the topology of the network was modified.
-
-$$
- PTDF =     \begin{bmatrix}
-               0&0.255&-0.255&0.218&0.182&0.073&-0.036& (l = 7)\\
-               0&0.018&-0.018&-0.627&-0.273&-0.209&-0.145& (l = 8)\\
-               0&0.036&-0.036&-0.255&-0.545&-0.418&-0.291& (l = 9)\\
-               0&0.018&-0.018&0.373&-0.273&-0.209&-0.145& (l = 14)\\
-               0&0.055&-0.055&0.118&0.182&-0.627&-0.436& (l = 15)\\
-               0&0.055&-0.055&0.118&0.182&0.373&-0.436& (l = 16)\\
-               0&-0.691&-0.309&-0.664&-0.636&-0.555&-0.473& (l = 19)\\
-               0&-0.309&-0.691&-0.336&-0.364&-0.445&-0.527& (l = 20)\\
-               0&-0.055&0.055&-0.118&-0.182&-0.373&-0.564& (l = 21)\\
-           \end{bmatrix}
-$$
-
-With this new PTDF, we have the following constraints for the possibly binding branches.
-
-$$
- \begin{align}
-  {-}10 \leq - p_5 \leq 10 & \qquad \text{(l = 13)}\\
-  {-}10 \leq 0.018 \cdot (0.5 \cdot p_3 + s_4 - 1.5) -0.018 \cdot (0.5 \cdot p_1 + 0.5 \cdot p_4 + s_5 - 3) + 0.373 \cdot p_5 -0.273 \cdot (s_9 - 1)  -0.209 \cdot (s_{10} - 1)   -0.145 \cdot (0.5 \cdot p_4 + s_{11} - 3) \leq 10 & \qquad \text{(l = 14)}\\
-  {-}10 \leq 0.055 \cdot (0.5 \cdot p_3 + s_4 - 1.5) -0.055 \cdot (0.5 \cdot p_1 + 0.5 \cdot p_4 + s_5 - 3) + 0.118 \cdot p_5 + 0.182 \cdot (s_9 - 1) + 0.373 \cdot (s_{10} - 1) -0.436 \cdot (0.5 \cdot p_4 + s_{11} - 3) \leq 10 & \qquad \text{(l = 16)}\\
-  {-}15 \leq -0.691 \cdot (0.5 \cdot p_3 + s_4 - 1.5) -0.309 \cdot (0.5 \cdot p_1 + 0.5 \cdot p_4 + s_5 - 3) -0.664 \cdot p_5 -0.636 \cdot (s_9 - 1) -0.555 \cdot (s_{10} - 1) -0.473 \cdot (0.5 \cdot p_4 + s_{11} - 3) \leq 15 & \qquad \text{(l = 19)}\\
- \end{align}
-$$ 
-
-Note that, apart from the deletion of the slack variables associated with node 6 and the rounding we applied here, the expression are exactly the same as those for the original network. Naturally, this is not unexpected since what we did was a exact reformulation of the model.
-
-### Fifth iteration
-
-The next node to be removed is node 10.
-
-<img src="https://drive.google.com/uc?id=1xkOXUOm49qWvnGeb7_jf1ayEyrFiLLaH"
-     alt="system after removing node 10"
-     style="width: 50%" />
-
-Different from the other nodes removed, node 10 is connected to two lines and one of them is possibly binding. Although the procedures to compute the reassignments of the injection and the reactance of the new branch are the same as previously introduced, we also need that the new branch reflects the limits previously enforced on branch 16.
 
 # Ward Reduction in Unit-Commitment Problems
 
