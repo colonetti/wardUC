@@ -1,0 +1,17 @@
+<BEGIN>;
+<Hydro plants>;
+ID;Name;Minimum reservoir volume (hm3);Maximum reservoir volume (hm3);Name of downriver reservoir;Water travelling time (h);Run-of-river plant? TRUE or FALSE;Minimum forebay level (m);Maximum forebay level (m);Maximum spillage (m3/s);Basin;Influence of spillage on the HPF? Yes or No;Maximum spillage - HPF;Downriver plant of bypass discharge;Maximum bypass discharge (m3/s);Water travel time in the bypass process (h);Downriver reservoir of pump units;Upriver reservoir of pump units;Water travel time in pumping (h);Comments
+</Hydro plants>;
+<Thermal plants>;
+ID;Name;Minimum power output (MW);Maximum power output (MW);Unitary linear cost ($/MW);Ramp-up limit (MW/h);Ramp-down limit (MW/h);Minimum up-time (h);Minimum down-time (h);Bus id;Constant cost ($);Start-up cost ($);Shut-down cost ($);Reserve eligibility;Comments
+1;g1;0;100;1.0;1000;1000;1;1;1;0;0.0;0;None;
+2;g2;0;100;1.0;1000;1000;1;1;2;0;0.0;0;None;
+3;g3;0;100;1.0;1000;1000;1;1;3;0;0.0;0;None;
+4;g4;0;100;1.0;1000;1000;1;1;6;0;0.0;0;None;
+5;g5;0;100;1.0;1000;1000;1;1;8;0;0.0;0;None;
+</Thermal plants>
+<Deficit cost>
+Deficit cost  in ($/(MWh/h))
+7500.0
+</Deficit cost>
+</END>

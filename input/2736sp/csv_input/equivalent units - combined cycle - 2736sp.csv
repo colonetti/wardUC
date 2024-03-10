@@ -1,0 +1,5 @@
+<BEGIN>;;;;;;;;;;;;;;;;;;;
+<Equivalent units>;;;;;;;;;;;;;;;;;;;
+Plant's ID;Plant's Name;Unit's ID;Minimum power output (MW);Maximum power output (MW);Ramp-up limit (MW/h);Ramp-down limit (MW/h);Minimum up-time (h);Minimum down-time (h);Transition ramp (MW/h);Bus;Standard linear generation cost ($/MWh);Constant cost ($);Start-up cost ($);Shut-down cost ($);Minimum reactive generation (MVAr);Maximum reactive generation (MVAr);Maximum apparent power (MVA);Comments;Real units part of equivalent unit (units are separated by semicolons)
+</Equivalent units>;;;;;;;;;;;;;;;;;;;
+</END>;;;;;;;;;;;;;;;;;;;

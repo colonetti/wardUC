@@ -1,0 +1,6 @@
+ID;Name;Period;Start-up decision;Shut-down decision;Dispatch phase;Generation in dispacth (MW);Total generation (MW);Reserve (MW);Minimum generation (MW);Maximum generation (MW);Ramp down limit (MW/1.0 h);Ramp up limit (MW/1.0 h);
+1;g1;0;0.0;0.0;1.0;100.0;100.0;0.0;0.0;100.0;1000.0;1000.0;
+2;g2;0;0.0;0.0;1.0;100.0;100.0;0.0;0.0;100.0;1000.0;1000.0;
+3;g3;0;0.0;0.0;1.0;100.0;100.0;0.0;0.0;100.0;1000.0;1000.0;
+4;g4;0;0.0;0.0;1.0;100.0;100.0;0.0;0.0;100.0;1000.0;1000.0;
+5;g5;0;0.0;0.0;1.0;100.0;100.0;0.0;0.0;100.0;1000.0;1000.0;

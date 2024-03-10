@@ -1,2 +1,0 @@
-first_subh_flags=False False False False True False False False
-n_subhs_of_each_proc=2 4 6 12 2 4 6 12
