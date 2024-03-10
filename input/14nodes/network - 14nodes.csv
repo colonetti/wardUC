@@ -18,24 +18,24 @@ ID;Name;Reference bus;Base voltage (kV);Area;Subsystem market - Name;Subsystem m
 </Buses>
 <AC Transmission lines>
 From (ID);From (Name);To (ID);To (Name);Line rating (MW);Reactance (p.u.) - 100-MVA base
-1;Bus1;2;Bus2;99999.0;10.0;
-1;Bus1;5;Bus5;99999.0;10.0;
-2;Bus2;3;Bus3;99999.0;10.0;
-2;Bus2;4;Bus4;1000.0;10.0;
-2;Bus2;5;Bus5;99999.0;10.0;
-3;Bus3;4;Bus4;99999.0;10.0;
-4;Bus4;5;Bus5;99999.0;10.0;
-4;Bus4;7;Bus7;99999.0;10.0;
-4;Bus4;9;Bus9;99999.0;10.0;
-5;Bus5;6;Bus6;99999.0;10.0;
-6;Bus6;11;Bus11;99999.0;10.0;
-6;Bus6;12;Bus12;99999.0;10.0;
-7;Bus7;8;Bus8;1000.0;10.0;
-7;Bus7;9;Bus9;1000.0;10.0;
-9;Bus9;10;Bus10;99999.0;10.0;
-10;Bus10;11;Bus11;1000.0;10.0;
-12;Bus12;13;Bus13;99999.0;10.0;
-13;Bus13;14;Bus14;99999.0;10.0;
+1;Bus1;2;Bus2;99999.0;0.1;
+1;Bus1;5;Bus5;99999.0;0.1;
+2;Bus2;3;Bus3;99999.0;0.1;
+2;Bus2;4;Bus4;1000.0;0.1;
+2;Bus2;5;Bus5;99999.0;0.1;
+3;Bus3;4;Bus4;99999.0;0.1;
+4;Bus4;5;Bus5;99999.0;0.1;
+4;Bus4;7;Bus7;99999.0;0.1;
+4;Bus4;9;Bus9;99999.0;0.1;
+5;Bus5;6;Bus6;99999.0;0.1;
+6;Bus6;11;Bus11;99999.0;0.1;
+6;Bus6;12;Bus12;99999.0;0.1;
+7;Bus7;8;Bus8;1000.0;0.1;
+7;Bus7;9;Bus9;1000.0;0.1;
+9;Bus9;10;Bus10;99999.0;0.1;
+10;Bus10;11;Bus11;1000.0;0.1;
+12;Bus12;13;Bus13;99999.0;0.1;
+13;Bus13;14;Bus14;99999.0;0.1;
 </AC Transmission lines>
 </END>
 <DC Links>
