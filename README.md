@@ -425,25 +425,27 @@ $$
      alt="original system"
      style="width: 50%" />
 
+B-theta:
+
 $$
  \begin{align}
   0.72 \cdot p_1 + p_2 + 0.5 \cdot p_3 + f_{1} - f_{3} - f_{4} - f_{5} + s_{2} = 1.93 & \qquad \text{(b = 2)}\\
   0.14 \cdot p_1  + 0.5 \cdot p_3 + f_{4} + f_{6} - f_{7} - f_{8} - f_{9} + s_{4} = 1.79 & \qquad \text{(b = 4)}\\
   0.14 \cdot p_1 + p_4 + f_{10} - f_{11} - f_{12} + s_{6} = 5.28 & \qquad \text{(b = 6)}\\
   p_5 + f_{8} - f_{13} - f_{14} = 0 & \qquad \text{(b = 7)}\\
-  f_{9} f_{14} - f_{15} + s_{9} = 2 & \qquad \text{(b = 9)}\\
+  f_{9} + f_{14} - f_{15} + s_{9} = 2 & \qquad \text{(b = 9)}\\
  \end{align}
 $$ 
 
 $$
  \begin{align}
-   f_{8} - 0.001 \cdot \left( \theta_{4} - \theta_{7} \right)= 0 & \qquad \\
-   f_{9} - 0.001 \cdot \left( \theta_{4} - \theta_{9} \right)= 0 & \qquad \\
-   f_{14} - 0.001 \cdot \left( \theta_{7} - \theta_{9} \right)= 0 & \qquad \\
-   f_{20} - 0.0003 \cdot \left( \theta_{6} - \theta_{9} \right)= 0 & \qquad \\
-   f_{23} - 0.0019 \cdot \left( \theta_{2} - \theta_{4} \right)= 0 & \qquad \\
-   f_{24} - 0.0004 \cdot \left( \theta_{2 - \theta_{6} \right)= 0 & \qquad \\
-   f_{25} - 0.0003 \cdot \left( \theta_{4} - \theta_{6} \right)= 0 & \qquad \\
+   f_{8} - 10 \cdot \left( \theta_{4} - \theta_{7} \right)= 0 & \qquad \\
+   f_{9} - 10 \cdot \left( \theta_{4} - \theta_{9} \right)= 0 & \qquad \\
+   f_{14} - 10 \cdot \left( \theta_{7} - \theta_{9} \right)= 0 & \qquad \\
+   f_{20} - 3.333 \cdot \left( \theta_{6} - \theta_{9} \right)= 0 & \qquad \\
+   f_{23} - 19.286 \cdot \left( \theta_{2} - \theta_{4} \right)= 0 & \qquad \\
+   f_{24} - 4.286 \cdot \left( \theta_{2 - \theta_{6} \right)= 0 & \qquad \\
+   f_{25} - 2.857 \cdot \left( \theta_{4} - \theta_{6} \right)= 0 & \qquad \\
    {-}inf \leq f_{8} \leq inf                                        & \qquad \\
    {-}inf \leq f_{9} \leq inf                                        & \qquad \\
    {-}10 \leq f_{14} \leq 10                                        & \qquad \\
@@ -452,4 +454,23 @@ $$
    {-}inf \leq f_{24} \leq inf                                        & \qquad \\
    {-}inf \leq f_{25} \leq inf                                        & \qquad \\
  \end{align}
+$$
+
+PTDF:
+
+$$
+ \begin{align}
+    {-}10 \leq - p_5 \leq 10 & \qquad \text{(l = 13)}\\
+    {-}10 \leq  0.018 \cdot (0.14 \cdot p_1  + 0.5 \cdot p_3 + s_{4} - 1.79) - 0.082 \cdot (0.14 \cdot p_1 + p_4 + s_{6} - 5.28) + 0.373 \cdot p_5 - 0.273 \cdot (s_{9} - 2) \leq 10 & \qquad \text{(l = 14)}\\
+    {-}9.5 \leq  -0.055 \cdot (0.14 \cdot p_1  + 0.5 \cdot p_3 + s_{4} - 1.79) + 0.245 \cdot (0.14 \cdot p_1 + p_4 + s_{6} - 5.28) - 0.118 \cdot p_5 - 0.182 \cdot (s_{9} - 2) \leq 10.5 & \qquad \text{(l = 20)}\\
+  {-}19.286 \leq  -0.888 \cdot (0.14 \cdot p_1  + 0.5 \cdot p_3 + s_{4} - 1.79) - 0.503 \cdot (0.14 \cdot p_1 + p_4 + s_{6} - 5.28) -0.853 \cdot p_5 - 0.818 \cdot (s_{9} - 2) \leq 19.286 & \qquad \text{(l = 23)}\\
+ \end{align}
 $$ 
+
+$$
+ \begin{align}
+  p_1 + p_2 + p_3 + p_4 + p_5 + s_2 + s_4 + s_6 + s_9 = 11\\
+ \end{align}
+$$ 
+
+ 
