@@ -128,7 +128,6 @@ $$
 $$
 
 The above steps are taken in https://github.com/colonetti/wardUCPSCC2024/blob/7fccda443ffaaeef2cd6d0bfcae8b41ce32d4656/pre_processing/build_ptdf.py#L148
-You can also see the computation for this particular example in [LINK_TO_THE_CODE_EX.PY]
 
 With the PTDF, we can add the flow constraints for the branches whose limits might be reached in the UC, as we explain in the paper. For this example, there are 4 possibly binding branches, 4, 13, 14 and 16. Their flows, as described by the PTDF, are force to be within their respective limits by the constraints below.
 
