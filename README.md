@@ -64,7 +64,7 @@ mpiexec -np 1 python "main.py" %1 [--EXP_NAME=exp_1] [--T=36] [--CASE=1] [--PS=i
 The complete package dependency is described in 'requirements.txt'. We summarize the roles of the main packages below.
 
 -   [gurobipy](https://www.gurobi.com/) for solving the optimization models
--   [numpy](http://www.numpy.org/) and [scipy](http://scipy.org/) matrix computations
+-   [numpy](http://www.numpy.org/) for matrix computations
 -   [networkx](https://networkx.github.io/) for network computations
 -   [mpi4py](https://mpi4py.readthedocs.io/en/stable/) for parallel computing
 
