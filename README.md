@@ -81,9 +81,9 @@ TODO
 TODO
 
 
-## 14-node system example
+# 14-node system example
 
-# Original network
+## Original network
 
 Consider the following 14-node system.
 
@@ -185,7 +185,7 @@ $$
 The above formulations are used when the network is not reduced. That is, for the full network, or original system.
 As the network is reduced, nodes, branches and slack variables are eliminated from the model. Thus reflecting in changes both in the B-theta and the PTDF formulations
 
-# Reduced network
+## Reduced network
 
 Below we show the step-by-step transformation that these formulations undergo as the network is reduced.
 
