@@ -96,56 +96,6 @@ def read(args):
                            'initial states of thermal units - ' + params.PS +
                            ' - case ' + str(params.CASE) + '.csv', params, thermals)
 
-
-
-
-
-
-    # import numpy as np
-
-    # total_original_load, total_removed_load = np.sum(network.NET_LOAD), 0
-
-    # gen_buses = network.get_gen_buses(thermals)
-    # load_buses = network.get_load_buses()
-
-    # for bus in [bus for bus in load_buses - gen_buses if
-    #                                             max(network.NET_LOAD[network.BUS_HEADER[bus]]) > 0]:
-    #     transm_cap = sum(max(max(network.LINE_FLOW_UB[l]), -min(network.LINE_FLOW_LB[l]))
-    #                                                         for l in network.LINES_FROM_BUS[bus]) +\
-    #                     sum(max(max(network.LINE_FLOW_UB[l]), -min(network.LINE_FLOW_LB[l]))
-    #                                                          for l in network.LINES_TO_BUS[bus])
-    #     for t in [t for t in range(params.T) if (network.NET_LOAD[network.BUS_HEADER[bus]][t] > 0)
-    #                         and (transm_cap < abs(network.NET_LOAD[network.BUS_HEADER[bus]][t]))]:
-    #         reduction = (network.NET_LOAD[network.BUS_HEADER[bus]][t] - transm_cap)
-    #         network.NET_LOAD[network.BUS_HEADER[bus]][t] -= reduction
-    #         data["Buses"][str(bus)]["Load (MW)"][t] -= params.POWER_BASE * reduction
-    #         total_removed_load += reduction
-
-    # print(f'\n\nThe total reduction in load is {(total_removed_load*params.POWER_BASE)/2:.4f} MWh '+
-    #         f'({100*(total_removed_load/total_original_load):.4f}% of the total original load)',
-    #         flush = True)
-
-    # for g in data["Generators"].keys():
-    #     data["Generators"][g]["Bus"] = "b" + data["Generators"][g]["Bus"]
-    # data["Buses"] = {"b" + str(b): {"Load (MW)": data["Buses"][b]["Load (MW)"]} for b in data["Buses"].keys()}
-    # for l in data["Transmission lines"].keys():
-    #     data["Transmission lines"][l]["Source bus"] = "b" + data["Transmission lines"][l]["Source bus"]
-    #     data["Transmission lines"][l]["Target bus"] = "b" + data["Transmission lines"][l]["Target bus"]
-
-    # data["Transmission lines"] = {"l" + k: v for k,v in data["Transmission lines"].items()}
-
-    # data["Parameters"]["Version"] = "0.3"
-
-
-    # import json
-    # with open(params.IN_DIR + params.PS + '_modified.json', 'w', encoding='utf-8') as f:
-    #     json.dump(data, f, ensure_ascii=False, indent=4)
-
-    # return
-    # fdasf = fdsafdsafdsafdsa
-
-
-
     if params.REDUCE_SYSTEM and (params.NETWORK_MODEL in (NetworkModel.B_THETA,
                                                           NetworkModel.FLUXES, NetworkModel.PTDF)):
 
