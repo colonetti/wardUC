@@ -439,13 +439,13 @@ $$
 
 $$
  \begin{align}
-   f_{8} - 10 \cdot \left( \theta_{4} - \theta_{7} \right)= 0 & \qquad \\
-   f_{9} - 10 \cdot \left( \theta_{4} - \theta_{9} \right)= 0 & \qquad \\
-   f_{14} - 10 \cdot \left( \theta_{7} - \theta_{9} \right)= 0 & \qquad \\
-   f_{20} - 3.333 \cdot \left( \theta_{6} - \theta_{9} \right)= 0 & \qquad \\
-   f_{23} - 19.286 \cdot \left( \theta_{2} - \theta_{4} \right)= 0 & \qquad \\
-   f_{24} - 4.286 \cdot \left( \theta_{2 - \theta_{6} \right)= 0 & \qquad \\
-   f_{25} - 2.857 \cdot \left( \theta_{4} - \theta_{6} \right)= 0 & \qquad \\
+   f_{8} - 10 \cdot ( \theta_{4} - \theta_{7} )= 0 & \qquad \\
+   f_{9} - 10 \cdot ( \theta_{4} - \theta_{9} )= 0 & \qquad \\
+   f_{14} - 10 \cdot ( \theta_{7} - \theta_{9} )= 0 & \qquad \\
+   f_{20} - 3.333 \cdot ( \theta_{6} - \theta_{9} )= 0 & \qquad \\
+   f_{23} - 19.286 \cdot ( \theta_{2} - \theta_{4} )= 0 & \qquad \\
+   f_{24} - 4.286 \cdot ( \theta_2 - \theta_{6} )= 0 & \qquad \\
+   f_{25} - 2.857 \cdot ( \theta_{4} - \theta_{6})= 0 & \qquad \\
    {-}inf \leq f_{8} \leq inf                                        & \qquad \\
    {-}inf \leq f_{9} \leq inf                                        & \qquad \\
    {-}10 \leq f_{14} \leq 10                                        & \qquad \\
