@@ -462,7 +462,7 @@ $$
  \begin{align}
     {-}10 \leq - p_5 \leq 10 & \qquad \text{(l = 13)}\\
     {-}10 \leq  0.018 \cdot (0.14 \cdot p_1  + 0.5 \cdot p_3 + s_{4} - 1.79) - 0.082 \cdot (0.14 \cdot p_1 + p_4 + s_{6} - 5.28) + 0.373 \cdot p_5 - 0.273 \cdot (s_{9} - 2) \leq 10 & \qquad \text{(l = 14)}\\
-    {-}9.5 \leq  -0.055 \cdot (0.14 \cdot p_1  + 0.5 \cdot p_3 + s_{4} - 1.79) + 0.245 \cdot (0.14 \cdot p_1 + p_4 + s_{6} - 5.28) - 0.118 \cdot p_5 - 0.182 \cdot (s_{9} - 2) \leq 10.5 & \qquad \text{(l = 20)}\\
+    {-}10 \leq  -0.055 \cdot (0.14 \cdot p_1  + 0.5 \cdot p_3 + s_{4} - 1.79) + 0.245 \cdot (0.14 \cdot p_1 + p_4 + s_{6} - 5.28) - 0.118 \cdot p_5 - 0.182 \cdot (s_{9} - 2) \leq 10 & \qquad \text{(l = 20)}\\
   {-}19.286 \leq  -0.888 \cdot (0.14 \cdot p_1  + 0.5 \cdot p_3 + s_{4} - 1.79) - 0.503 \cdot (0.14 \cdot p_1 + p_4 + s_{6} - 5.28) -0.853 \cdot p_5 - 0.818 \cdot (s_{9} - 2) \leq 19.286 & \qquad \text{(l = 23)}\\
  \end{align}
 $$ 
