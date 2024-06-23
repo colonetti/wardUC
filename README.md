@@ -1,8 +1,5 @@
 # Ward Reduction in Unit-Commitment Problems
 
-This is a implementation of the ideas presented in the paper "Ward Reduction in Unit-Commitment Problems",
-conditionally accepted for publication in XXIII Power Systems Computation Conference, PSCC 2024.
-
 In this work, we analyse how we can use the famous Ward reduction to reduce the computational burden of
 unit-commitment models. The UC model we currently study has two main components:
 -    Typical model for thermal generating units: linear generation costs, generation limits, ramps, and minimum up and down times.
@@ -127,7 +124,7 @@ $$
            \end{bmatrix}
 $$
 
-The above steps are taken in https://github.com/colonetti/wardUCPSCC2024/blob/7fccda443ffaaeef2cd6d0bfcae8b41ce32d4656/pre_processing/build_ptdf.py#L148
+The above steps are taken in https://github.com/colonetti/wardUC/blob/7fccda443ffaaeef2cd6d0bfcae8b41ce32d4656/pre_processing/build_ptdf.py#L148
 
 With the PTDF, we can add the flow constraints for the branches whose limits might be reached in the UC, as we explain in the paper. For this example, there are 4 possibly binding branches, 4, 13, 14 and 16. Their flows, as described by the PTDF, are force to be within their respective limits by the constraints below.
 
