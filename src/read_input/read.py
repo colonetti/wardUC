@@ -97,18 +97,22 @@ def read(args):
                            ' - case ' + str(params.CASE) + '.csv', params, thermals)
 
     if params.REDUCE_SYSTEM and (params.NETWORK_MODEL in (NetworkModel.B_THETA,
-                                                          NetworkModel.FLUXES, NetworkModel.PTDF)):
+                                                          NetworkModel.FLUXES,
+                                                          NetworkModel.PTDF)):
 
-        original_thermals, original_network = deepcopy(thermals), deepcopy(network)
+        original_thermals = deepcopy(thermals)
+        original_network = deepcopy(network)
 
         build_ptdf(original_network)
 
         reduce_network(params, thermals, network)
 
-        assert len(network.LINE_F_T.keys()) > 0, ("After reducing the network, there are no " +
-                                                  "transmission lines left in the system. " +
-                                                  "Either use the single bus model " +
-                                                  "or disable network reduction")
+        if len(network.LINE_F_T.keys()) == 0:
+            raise ValueError("After reducing the network, there are no " +
+                             "transmission lines left in the system. " +
+                             "Either use the single bus model " +
+                             "or disable network reduction"
+            )
 
         build_ptdf(network)
 
@@ -116,10 +120,12 @@ def read(args):
 
         reduce_network(params, thermals, network)
 
-        assert len(network.LINE_F_T.keys()) > 0, ("After reducing the network, there are no " +
-                                                  "transmission lines left in the system. " +
-                                                  "Either use the single bus model " +
-                                                  "or disable network reduction")
+        if len(network.LINE_F_T.keys()) == 0:
+            raise ValueError("After reducing the network, there are no " +
+                             "transmission lines left in the system. " +
+                             "Either use the single bus model " +
+                             "or disable network reduction"
+            )
 
         build_ptdf(network)
         redundant_line_bounds(params, thermals, network,
@@ -128,10 +134,12 @@ def read(args):
 
         reduce_network(params, thermals, network)
 
-        assert len(network.LINE_F_T.keys()) > 0, ("After reducing the network, there are no " +
-                                                  "transmission lines left in the system. " +
-                                                  "Either use the single bus model " +
-                                                  "or disable network reduction")
+        if len(network.LINE_F_T.keys()) == 0:
+            raise ValueError("After reducing the network, there are no " +
+                             "transmission lines left in the system. " +
+                             "Either use the single bus model " +
+                             "or disable network reduction"
+            )
 
     if params.NETWORK_MODEL not in (NetworkModel.SINGLE_BUS, NetworkModel.FLUXES):
         build_ptdf(network)

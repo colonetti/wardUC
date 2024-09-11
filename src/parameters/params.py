@@ -51,10 +51,11 @@ def _check_choices(params: "Params"):
     Checks whether the parameters chosen in params are valid
     """
 
-    assert os.path.isdir(params.IN_DIR), ('no directory for power system ' +
-                                          params.PS + ' has been found in the input directory ' +
-                                          params.IN_DIR.replace(params.PS + "/", "")
-                                          )
+    if not os.path.isdir(params.IN_DIR):
+        raise FileNotFoundError('no directory for power system ' + params.PS +
+                                ' has been found in the input directory ' +
+                                params.IN_DIR.replace(params.PS + "/", "")
+    )
 
     for attr in ['DISCRETIZATION', 'MILP_GAP',
                  'DEFICIT_COST', 'SCAL_OBJ_F', 'TIME_LIMIT', 'POWER_BASE']:
@@ -172,7 +173,12 @@ def _set_params_from_file(params, file_name):
                     old_value = dict(getattr(params, row[0].strip()).items())
                     keys = list(old_value.keys())
                     if isinstance(getattr(params, row[0].strip())[keys[0]], bool):
-                        assert row[1].strip() in ('True', 'False', '1', '0')
+                        if not row[1].strip() in ('True', 'False', '1', '0'):
+                            s = (f"Error reading file {file_name}." +
+                                f"Accepted values for {row[0].strip()} are " +
+                                f"{('True', 'False', '1', '0')}"
+                            )
+                            raise ValueError(s)
                         new_value = row[1].strip() in ('True', '1')
                     else:
                         new_value = type(getattr(params, row[0].strip())[keys[0]])(row[1].strip())

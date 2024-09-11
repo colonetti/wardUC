@@ -33,7 +33,8 @@ def build_ptdf(network:Network):
 
     time_0 = time()
 
-    assert len(set(network.LINE_F_T.values())) == len(network.LINE_ID), 'there are parallel lines'
+    if len(set(network.LINE_F_T.values())) != len(network.LINE_ID):
+        raise ValueError('there are parallel lines')
 
     network.PTDF = np.zeros((len(network.LINE_ID), len(network.BUS_ID)), dtype='d')
 

@@ -17,8 +17,10 @@ def read_reserves(filename, params, network, thermals) -> None:
         if row[0] not in network.RESERVES.keys():
             network.RESERVES[row[0]] = {t: 0 for t in range(params.T)}
 
-        assert int(row[1]) in network.RESERVES[row[0]].keys(), \
-            f"I dont recognize period {row[1]} in the reserve file {filename}"
+        if int(row[1]) not in network.RESERVES[row[0]]:
+            raise ValueError(f"I dont recognize period {row[1]} in " +
+                             f"the reserve file {filename}"
+            )
         network.RESERVES[row[0]][int(row[1])] = float(row[2]) / params.POWER_BASE
 
         row = next(reader)  # next reserve

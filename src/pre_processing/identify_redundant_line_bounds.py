@@ -19,10 +19,12 @@ def remove_redundant_flow_limits_without_opt(params, thermals, network):
 
     new_unreachable_bounds = 0
 
-    assert network.PTDF.shape == (len(network.LINE_ID), len(network.BUS_ID)),\
-            ("The shape of the numpy array network.PTDF must be " +
-            f"({len(network.LINE_ID)}, {len(network.BUS_ID)}): the number of rows is the number "+
+    if network.PTDF.shape != (len(network.LINE_ID), len(network.BUS_ID)):
+        s = ("The shape of the numpy array network.PTDF must be " +
+            f"({len(network.LINE_ID)}, {len(network.BUS_ID)}): " +
+            "the number of rows is the number "+
                 "and the number of columns equals the number of buses")
+        raise ValueError(s)
 
     line_sensitivities_arr = network.PTDF[:]
     line_sensitivities_arr[np.where(abs(network.PTDF) < params.PTDF_COEFF_TOL)] = 0

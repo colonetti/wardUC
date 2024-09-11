@@ -53,12 +53,14 @@ def _remove_many_connect_buses(params, network, thermals, bus_to_del:int):
         _reassign_injections(thermals, network, bus_to_del, bus, B_ext_impact[b_idx][0])
 
     for connec in new_connections:
-        existing_paral_line = None  #in case there is already a line between buses_of_new_connection
+        # in case there is already a line between buses_of_new_connection
+        existing_paral_line = None
 
         # check if there is already a line between buses in buses_of_new_connection
         lines_btw_buses = [l for l in network.LINE_ID if network.LINE_F_T[l] == connec]
         if len(lines_btw_buses) > 0:
-            assert len(lines_btw_buses) == 1
+            if len(lines_btw_buses) != 1:
+                raise ValueError("More than one line between buses")
             existing_paral_line = lines_btw_buses[0]
 
         if existing_paral_line is None:
@@ -688,10 +690,9 @@ def _remove_mid_bus_with_inj(params, network, thermals,
     # line 'coming out' of the bus with the smallest ID
     buses_of_new_connection = [bus_from, bus_to] if bus_from < bus_to else [bus_to, bus_from]
 
-    assert buses_of_new_connection[0] != buses_of_new_connection[1]
-
     if len(set(buses_of_new_connection)) == 1:
-        raise ValueError("buses_of_new_connection should contain two buses")
+        raise ValueError("Invalid endpoint buses. Both endpoints are the same:"
+                         + f" {buses_of_new_connection}")
 
     existing_paral_line = None # in case there is already a line between buses_of_new_connection
 
@@ -700,7 +701,8 @@ def _remove_mid_bus_with_inj(params, network, thermals,
                 if network.LINE_F_T[l] == (buses_of_new_connection[0], buses_of_new_connection[1])
                 or network.LINE_F_T[l] == (buses_of_new_connection[1], buses_of_new_connection[0])]
     if len(lines_btw_buses) > 0:
-        assert len(lines_btw_buses) == 1
+        if len(lines_btw_buses) > 1:
+            raise ValueError("More than one line between buses")
         existing_paral_line = lines_btw_buses[0]
 
     line_1 = [l for l in network.LINES_FROM_BUS[bus] + network.LINES_TO_BUS[bus]

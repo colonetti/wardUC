@@ -101,7 +101,8 @@ def convert_from_csv_to_json(params,
 
     while row[0].strip() != '</END>':
         g = "g" + row[header["Plant's ID"]].strip()
-        assert g in data["Generators"].keys(), ("Thermal generating unit " + str(g) +
+        if g not in data["Generators"]:
+            raise ValueError("Thermal generating unit " + str(g) +
                                                 " is not in the system ")
         hours = int(row[header["Hours in initial state"]].strip())
         state_0 = int(row[header["Initial state (0/1)"]].strip())
@@ -203,8 +204,12 @@ def convert_from_csv_to_json(params,
     for bus in [bus for bus in row[:] if bus != '']:
         header_gross_load.append(bus.strip())
 
-    assert len(data["Buses"].keys()) == len(header_gross_load), "The number of buses in the load"+\
-                                " file is different form the number of buses in the system"
+    if len(data["Buses"]) != len(header_gross_load):
+        raise ValueError("The number of buses in the load file is different " +
+                        "from the number of buses in the system. The number " +
+                        f"of buses in the system is {len(header_gross_load)}, "
+                        + f"and the number in the file is {len(data["Buses"])}"
+        )
 
     for t in range(data["Parameters"]["Time horizon (h)"]):
         row = next(reader)
@@ -436,7 +441,10 @@ def convert_from_json_to_csv(
         f.write("0;")
         f.write(str(gen["Startup costs ($)"][0]) + ";")
         f.write("0;")
-        assert len(gen["Reserve eligibility"]) <= 1
+        if len(gen["Reserve eligibility"]) > 1:
+            raise ValueError(f"Generator {g} participates in more than one " +
+                             "reserve area. The maximum is 1."
+            )
         if len(gen["Reserve eligibility"]) == 1:
             f.write(gen["Reserve eligibility"][0] + ";")
         else:
@@ -554,13 +562,24 @@ def convert_from_json_to_csv(
 
     if 'Reserves' in data.keys():
         f = open(out_dir + '/case ' + case_name + '/'+
-                "reserves - " + system_name + " - case " + case_name + ".csv",
-                                                                    'w', encoding = 'ISO-8859-1')
+                 "reserves - " + system_name + " - case " + case_name + ".csv",
+                 'w', encoding = 'ISO-8859-1')
         f.write('<BEGIN>\n')
         f.write('Reserve ID;Hour;Reservse (MW)\n')
         for reserve in data['Reserves'].keys():
-            assert data['Reserves'][reserve]['Type'] == 'Spinning'
-            assert len(data['Reserves']['r1']['Amount (MW)']) == data["Parameters"]["Time horizon (h)"]
+            if data['Reserves'][reserve]['Type'] != 'Spinning':
+                raise ValueError("Only spinning reserve is allowed, not " +
+                                 f"{data['Reserves'][reserve]['Type']}")
+            if (len(data['Reserves']['r1']['Amount (MW)']) !=
+                data["Parameters"]["Time horizon (h)"]):
+                raise ValueError("The reserve levels informed do not match " +
+                                 "the planning horizon. While the planning " +
+                                 "horizon contains " +
+                                 f"{data["Parameters"]["Time horizon (h)"]} " +
+                                 "hours, " +
+                                 f"{len(data['Reserves']['r1']['Amount (MW)'])}"
+                                 + " entries of reserve were informed."
+                )
             for t, r in enumerate(data['Reserves']['r1']['Amount (MW)']):
                 f.write(reserve + ";" + str(t) + ";" + str(r) + "\n")
         f.write("</END>")
