@@ -3,7 +3,7 @@ import argparse
 from numbers import Real
 from csv import reader
 
-from parameters.params import _str2bool, _str2real, _str2enum
+from src.params import _str2bool, _str2real, _str2enum
 from constants import (NetworkModel, NetworkSlacks)
 
 def _treat_args(W_RANK:int, W_SIZE:int) -> dict:

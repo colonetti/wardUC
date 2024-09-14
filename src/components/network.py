@@ -4,7 +4,7 @@ from math import pi
 import numpy as np
 import networkx as nx
 
-from parameters.params import Params
+from src.params import Params
 from components.thermal import Thermals
 
 def _get_isolated_subsystems(network:"Network") -> dict:

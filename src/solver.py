@@ -5,7 +5,7 @@ import gurobipy as grbpy
 from constants import Model, Var
 from model.add_all_components import add_all_comp
 
-from parameters.params import Params
+from src.params import Params
 from components.thermal import Thermals
 from components.network import Network
 

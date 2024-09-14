@@ -10,7 +10,7 @@ from model.add_thermal import add_thermal_bin, add_thermal_cont
 from model.add_global_constrs import add_global_constrs
 
 
-from parameters.params import Params
+from src.params import Params
 from components.thermal import Thermals
 from components.network import Network
 

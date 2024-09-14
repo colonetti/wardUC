@@ -3,7 +3,7 @@ mpi4py.rc.thread_level = 'single'
 from mpi4py import MPI
 
 from read_input.read import read
-from solver.main_solver import run_solver
+from src.solver import run_solver
 from write import write_solution, check_flows_full_network
 from constants import NetworkModel
 

@@ -2,7 +2,7 @@
 from timeit import default_timer as dt
 import numpy as np
 
-from parameters.params import Params
+from src.params import Params
 from components.thermal import Thermals
 from components.network import Network, _get_isolated_subsystems
 

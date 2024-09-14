@@ -2,7 +2,7 @@
 
 from numbers import Real
 
-from parameters.params import Params
+from src.params import Params
 
 
 class Thermals:

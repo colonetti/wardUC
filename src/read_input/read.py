@@ -2,7 +2,7 @@
 import os
 from copy import deepcopy
 
-from parameters.params import Params
+from src.params import Params
 from constants import NetworkModel
 from read_input.read_csv import (
                                     read_generators,

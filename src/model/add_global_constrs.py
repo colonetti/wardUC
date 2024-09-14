@@ -3,7 +3,7 @@
 from typing import Union
 from numbers import Real
 
-from parameters.params import Params
+from src.params import Params
 from components.thermal import Thermals
 from components.network import Network
 
