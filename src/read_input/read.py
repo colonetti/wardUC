@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
-from copy import deepcopy
 
 from params import Params
-from constants import NetworkModel
 from read_input.read_csv import (
                                 read_generators,
                                 read_network, gross_load_and_renewable_gen,
@@ -16,22 +14,7 @@ from read_input.convert_json import (convert_from_json_to_csv,
 )
 from components.thermal import Thermals
 from components.network import Network
-from pre_processing.build_ptdf import build_ptdf
-from pre_processing.reduce_network import reduce_network
-from pre_processing.identify_redundant_line_bounds import (
-                                    remove_redundant_flow_limits_without_opt,
-                                    redundant_line_bounds
-)
 
-def _check_number_of_buses(network: Network):
-    """Check whether there are buses left in the network"""
-
-    if len(network.LINE_F_T) == 0:
-        raise ValueError("After reducing the network, there are no " +
-                            "transmission lines left in the system. " +
-                            "Either use the single bus model " +
-                            "or disable network reduction"
-        )
 
 def read(args):
     """Read csv files with system's data and operating conditions"""
@@ -135,45 +118,4 @@ def read(args):
                            params, thermals
     )
 
-    if params.REDUCE_SYSTEM and (params.NETWORK_MODEL in (NetworkModel.B_THETA,
-                                                          NetworkModel.FLUXES,
-                                                          NetworkModel.PTDF)):
-
-        original_thermals = deepcopy(thermals)
-        original_network = deepcopy(network)
-
-        build_ptdf(original_network)
-
-        reduce_network(params, thermals, network)
-
-        _check_number_of_buses(network)
-
-        build_ptdf(network)
-
-        remove_redundant_flow_limits_without_opt(params, thermals, network)
-
-        reduce_network(params, thermals, network)
-
-        _check_number_of_buses(network)
-
-        build_ptdf(network)
-        redundant_line_bounds(params, thermals, network,
-                              time_limit=360,
-                              run_single_period_models=False)
-
-        reduce_network(params, thermals, network)
-
-        _check_number_of_buses(network)
-
-    if params.NETWORK_MODEL not in (NetworkModel.SINGLE_BUS,
-                                    NetworkModel.FLUXES):
-        build_ptdf(network)
-
-    if not (params.REDUCE_SYSTEM and
-                (params.NETWORK_MODEL in (NetworkModel.B_THETA,
-                                          NetworkModel.FLUXES,
-                                          NetworkModel.PTDF))
-    ):
-        original_thermals, original_network = thermals, network
-
-    return params, thermals, network, original_thermals, original_network
+    return params, thermals, network

@@ -2,11 +2,14 @@
 from timeit import default_timer as dt
 import gurobipy as grbpy
 
-from model.add_all_components import add_all_comp
-
 from params import Params
 from components.thermal import Thermals
 from components.network import Network
+
+from constants import NetworkModel
+from model.add_network import add_network
+from model.add_thermal import add_thermal_bin, add_thermal_cont
+from model.add_global_constrs import add_global_constrs
 
 def run_solver(params: Params, thermals: Thermals, network: Network):
     """
@@ -53,22 +56,53 @@ def run_solver(params: Params, thermals: Thermals, network: Network):
     m = grbpy.Model(name=f"unit_commitment_{params.PS}", env=env)
     m.setParam("LogToConsole", params.VERBOSE)
 
-    (st_up_tg, st_dw_tg, disp_stat_tg,
-            tg, t_g_disp,
-            s_reserve,
-            theta,
-            branch_flow,
-            s_load_curtailment,
-            s_gen_surplus,
-            s_renew_curtailment) = add_all_comp(params,
-                                                thermals,
-                                                network,
+    # Add the thermal binary variables and related constraints to model
+    st_up_tg, st_dw_tg, disp_stat_tg = add_thermal_bin(m,
+                                                       params, thermals,
+                                                       vtype="B"
+    )
+
+    # Add the continuous part of the thermal units to the optimization model
+    tg, t_g_disp = add_thermal_cont(m, params, thermals, network,
+                                    st_up_tg, st_dw_tg, disp_stat_tg
+    )
+
+    # Add reserve constraints, if there is any
+    s_reserve = add_global_constrs(m,
+                                   params, thermals, network,
+                                   disp_stat_tg,
+                                   t_g_disp
+    )
+
+    # Add the network model
+    if params.NETWORK_MODEL in (NetworkModel.B_THETA,
+                                NetworkModel.FLUXES,
+                                NetworkModel.PTDF
+    ):
+        (theta, branch_flow, s_load_curtailment,
+         s_gen_surplus, s_renew_curtailment) = add_network(
                                                 m,
-                                                vtype='B')
+                                                params, thermals, network,
+                                                tg,
+                                                flow_periods=
+                                                 list(range(params.T)),
+                                                single_bus_periods=[])
+    else:
+        # single-bus model
+        (theta, branch_flow, s_load_curtailment,
+         s_gen_surplus, s_renew_curtailment) = add_network(
+                                                m,
+                                                params, thermals, network,
+                                                tg,
+                                                flow_periods=[],
+                                                single_bus_periods=
+                                                 list(range(params.T)))
 
-    print(f'\n\n{dt() - ini:.2f} seconds to build the optimization model.\n\n', flush=True)
+    print(f'\n\n{dt() - ini:.2f} seconds to build the optimization model.\n\n',
+          flush=True)
 
-    m.setParam("Method", 2)                 # use the barrier method to solve the root relaxation
+    # use the barrier method to solve the root relaxation
+    m.setParam("Method", 2)
     m.setParam("Threads", params.THREADS)
     m.setParam("MIPGap", params.MILP_GAP)
     m.setParam("TimeLimit", params._LAST_TIME - dt())
@@ -80,4 +114,5 @@ def run_solver(params: Params, thermals: Thermals, network: Network):
             s_reserve,
             theta,
             branch_flow,
-            s_load_curtailment, s_gen_surplus, s_renew_curtailment)
+            s_load_curtailment, s_gen_surplus, s_renew_curtailment
+    )
