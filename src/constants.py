@@ -2,6 +2,8 @@ from enum import Enum
 
 from gurobipy import Model, quicksum, Var
 
+MAX_FLOW: float = 99999.00
+
 class NetworkModel(Enum):
     """Network model"""
 

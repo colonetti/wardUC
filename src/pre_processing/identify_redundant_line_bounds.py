@@ -1,3 +1,5 @@
+
+import os
 from sys import executable
 from time import time
 from mpi4py import MPI
@@ -124,20 +126,29 @@ def _get_back_flags(params, network, CHILD_COMM):
         get back from the spawn workers the flags indicating whether the line bounds can be binding
         and then update the flags
     """
-    aux_active_bounds = np.array([int(v) for v in network.ACTIVE_BOUNDS.values()], dtype='int')
-    CHILD_COMM.Reduce(None, [aux_active_bounds, MPI.INT], op = MPI.MIN, root = MPI.ROOT)
+    aux_active_bounds = np.array([int(v)
+                                  for v in network.ACTIVE_BOUNDS.values()],
+                                  dtype='int')
+    CHILD_COMM.Reduce(None, [aux_active_bounds, MPI.INT],
+                      op=MPI.MIN, root=MPI.ROOT)
 
-    aux_ubs = np.array([int(v) for v in network.ACTIVE_UB.values()], dtype='int')
-    CHILD_COMM.Reduce(None, [aux_ubs, MPI.INT], op = MPI.MIN, root = MPI.ROOT)
+    aux_ubs = np.array([int(v) for v in network.ACTIVE_UB.values()],
+                       dtype='int')
+    CHILD_COMM.Reduce(None, [aux_ubs, MPI.INT], op=MPI.MIN, root=MPI.ROOT)
 
-    aux_lbs = np.array([int(v) for v in network.ACTIVE_LB.values()], dtype='int')
-    CHILD_COMM.Reduce(None, [aux_lbs, MPI.INT], op = MPI.MIN, root = MPI.ROOT)
+    aux_lbs = np.array([int(v) for v in network.ACTIVE_LB.values()],
+                       dtype='int')
+    CHILD_COMM.Reduce(None, [aux_lbs, MPI.INT], op=MPI.MIN, root=MPI.ROOT)
 
-    aux_actibe_ubs_per_period = np.zeros((len(network.LINE_ID), params.T), dtype='int')
-    CHILD_COMM.Reduce(None, [aux_actibe_ubs_per_period, MPI.INT], op = MPI.MIN, root = MPI.ROOT)
+    aux_actibe_ubs_per_period = np.zeros((len(network.LINE_ID), params.T),
+                                         dtype='int')
+    CHILD_COMM.Reduce(None, [aux_actibe_ubs_per_period, MPI.INT],
+                      op=MPI.MIN, root=MPI.ROOT)
 
-    aux_actibe_lbs_per_period = np.zeros((len(network.LINE_ID), params.T), dtype='int')
-    CHILD_COMM.Reduce(None, [aux_actibe_lbs_per_period, MPI.INT], op = MPI.MIN, root = MPI.ROOT)
+    aux_actibe_lbs_per_period = np.zeros((len(network.LINE_ID), params.T),
+                                         dtype='int')
+    CHILD_COMM.Reduce(None, [aux_actibe_lbs_per_period, MPI.INT],
+                      op=MPI.MIN, root=MPI.ROOT)
 
     # convert the results back to bool. note that bool(1) = True, and bool(0) = False
     # similarly, int(True) = 1
@@ -169,8 +180,8 @@ def _get_back_flags(params, network, CHILD_COMM):
         i += 1
 
 def redundant_line_bounds(params, thermals, network,
-                                time_limit:float = 360,
-                                    run_single_period_models:bool = True):
+                          time_limit: float=360,
+                          run_single_period_models: bool=True):
     """
         Through a series of steps, try to identify line flow limits that can never be reached, and
         thus are redundant and can be removed from the model
@@ -181,15 +192,21 @@ def redundant_line_bounds(params, thermals, network,
     complete_list_jobs = _create_list_of_jobs(params, network)
 
     # initial number of redundant transmission line bounds
-    i_redund_b = len([l for l in network.LINE_ID if not(network.ACTIVE_BOUNDS[l])])
+    i_redund_b = len([l for l in network.LINE_ID
+                      if not network.ACTIVE_BOUNDS[l]])
 
     t_0 = time()
 
     if params.MAX_PROCESS_REDUCE_NETWORK > 1:
         # spawn at most params.MAX_PROCESS_REDUCE_NETWORK child processes
-        CHILD_COMM = MPI.COMM_SELF.Spawn(executable,
-                                            args = ["pre_processing/identify_redund_flows_DC.py"],
-                                                maxprocs = params.MAX_PROCESS_REDUCE_NETWORK)
+
+        parent_dir: str = os.path.abspath(
+                            os.path.join(__file__, "../..")).replace("\\", "/")
+        py_file = parent_dir + "/pre_processing/identify_redund_flows_DC.py"
+
+        CHILD_COMM = MPI.COMM_SELF.Spawn(executable, args=[py_file],
+                                         maxprocs=
+                                            params.MAX_PROCESS_REDUCE_NETWORK)
         # share with them the necessary info
         CHILD_COMM.bcast(params, root = MPI.ROOT)
         CHILD_COMM.bcast(network, root = MPI.ROOT)
@@ -205,14 +222,17 @@ def redundant_line_bounds(params, thermals, network,
 
     else:
         _remove_redundant_flow_limits_angles(params, network, thermals,
-                                                time_limit = time_limit,
-                                                list_of_jobs = complete_list_jobs,
-                                                print_to_console = True,
-                                                run_single_period_models = run_single_period_models)
+                                             time_limit=time_limit,
+                                             list_of_jobs=complete_list_jobs,
+                                             print_to_console=True,
+                                             run_single_period_models=
+                                              run_single_period_models)
 
     # final number of redundant transmission line bounds
-    f_redund_b = len([l for l in network.LINE_ID if not(network.ACTIVE_BOUNDS[l])])
+    f_redund_b = len([l for l in network.LINE_ID
+                      if not network.ACTIVE_BOUNDS[l]])
 
-    print(f"\n\nIt took {time() - t_0:,.4f} sec to execute identify_redund_flows_DC.py")
-    print(f"{f_redund_b-i_redund_b} more redundant line bounds have been identifed\n\n",
-          flush=True)
+    print("\n\n")
+    print(f"It took {time()-t_0:,.4f} sec to execute identify_redund_flows_DC")
+    print(f"{f_redund_b-i_redund_b} more redundant line bounds have" +
+          " been identifed\n\n", flush=True)

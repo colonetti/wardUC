@@ -2,12 +2,11 @@
 from timeit import default_timer as dt
 import numpy as np
 
-from src.params import Params
+from params import Params
 from components.thermal import Thermals
 from components.network import Network, _get_isolated_subsystems
 
 from constants import (NetworkModel, NetworkSlacks, Model, quicksum, Var)
-
 
 
 def PTDF_formulation(
@@ -32,10 +31,11 @@ def PTDF_formulation(
     exp = get_bus_injection_expr(thermals, network,
                                  t_g,
                                  branch_flow,
-                                 s_load_curtailment, s_gen_surplus, s_renew_curtailment,
+                                 s_load_curtailment,
+                                 s_gen_surplus, s_renew_curtailment,
                                  periods,
                                  include_flows=False
-                                 )
+    )
 
     # get a set of buses for which at least in one period there might be a power injection
     # these are the buses to which either a load or a generating unit is connected to at some
@@ -128,9 +128,7 @@ def single_bus(
         network: Network,
         thermals: Thermals,
         t_g: dict[tuple[int, int], Var],
-        subhorizon_periods: list[int],
-        overlapping_periods: list[int],
-        overlapping_costs
+        subhorizon_periods: list[int]
 ) -> "Expr":
     """Add single-bus power balances for the periods in `periods`.
 
@@ -147,10 +145,6 @@ def single_bus(
     :param subhorizon_periods: Periods for which the variables and constraints are to be added.
     :type subhorizon_periods: list[int]
 
-    :return overlapping_costs: The updated overlapping costs `overlapping_costs` with the slack
-        variables of the power balance, if slack variables are used. If slacks are not used, then
-        `overlapping_costs` is not changed.
-    :rtype overlapping_costs: "Expr"
     """
 
     disjoint_subsys = _get_isolated_subsystems(network)
@@ -160,59 +154,43 @@ def single_bus(
         for bus in sub_sys['nodes']:
             _map_bus_system[bus] = disj_subs
 
-    if params.NETWORK_SLACKS in (NetworkSlacks.BUS_SLACKS, NetworkSlacks.BUS_AND_LINE_SLACKS):
+    if params.NETWORK_SLACKS in (NetworkSlacks.BUS_SLACKS,
+                                 NetworkSlacks.BUS_AND_LINE_SLACKS):
         s_gen_single_bus = {(disj_subs, t): m.addVar(obj=params.DEFICIT_COST,
                                                       name=f'slack_gen_subsys_{disj_subs}_{t}')
                             for t in subhorizon_periods
-                            for disj_subs, sub_sys in disjoint_subsys.items()
-                            }
+                            for disj_subs, _ in disjoint_subsys.items()
+        }
         s_load_single_bus = {(disj_subs, t): m.addVar(obj=params.DEFICIT_COST,
                                                        name=f'slack_load_subsys_{disj_subs}_{t}')
                              for t in subhorizon_periods
-                             for disj_subs, sub_sys in disjoint_subsys.items()
-                             }
-        s_gen_single_bus.update({(disj_subs, t): m.addVar(
-                                                      name=f'slack_gen_subsys_{disj_subs}_{t}')
-                            for t in overlapping_periods
-                            for disj_subs, sub_sys in disjoint_subsys.items()
-                            })
-        s_load_single_bus.update({(disj_subs, t): m.addVar(
-                                                       name=f'slack_load_subsys_{disj_subs}_{t}')
-                             for t in overlapping_periods
-                             for disj_subs, sub_sys in disjoint_subsys.items()
-                             })
+                             for disj_subs, _ in disjoint_subsys.items()
+        }
+
     else:
-        s_gen_single_bus = {(disj_subs, t): 0 for t in subhorizon_periods + overlapping_periods
-                            for disj_subs, sub_sys in disjoint_subsys.items()
-                            }
-        s_load_single_bus = {(disj_subs, t): 0 for t in subhorizon_periods + overlapping_periods
-                             for disj_subs, sub_sys in disjoint_subsys.items()
-                             }
+        s_gen_single_bus = {(disj_subs, t): 0 for t in subhorizon_periods
+                            for disj_subs, _ in disjoint_subsys.items()
+        }
+        s_load_single_bus = {(disj_subs, t): 0 for t in subhorizon_periods
+                             for disj_subs, _ in disjoint_subsys.items()
+        }
 
     exps = get_bus_injection_expr(thermals, network,
                                   t_g,
-                                  {},
-                                  {}, {}, {},
-                                  subhorizon_periods + overlapping_periods,
-                                  include_flows=False)
-
-    for t in subhorizon_periods + overlapping_periods:
-        for disj_subs, sub_sys in disjoint_subsys.items():
-            m.addConstr(
-                quicksum(exps[bus, t] for bus in sub_sys['nodes'])
-                + s_gen_single_bus[disj_subs, t] - s_load_single_bus[disj_subs, t]
-                == 0,
-                name=f"single_bus_power_balance_{disj_subs}_{t}"
-            )
-
-    overlapping_costs += params.DEFICIT_COST * quicksum(
-                                                        s_gen_single_bus[disj_subs, t] +
-                                                        s_load_single_bus[disj_subs, t]
-                                                        for t in overlapping_periods
-                                                        for disj_subs in disjoint_subsys.keys()
+                                  {}, {}, {}, {},
+                                  subhorizon_periods,
+                                  include_flows=False
     )
 
-    return overlapping_costs
+    for t in subhorizon_periods:
+        for disj_subs, sub_sys in disjoint_subsys.items():
+            m.addConstr(
+                        quicksum(exps[bus, t] for bus in sub_sys['nodes']) +
+                        s_gen_single_bus[disj_subs, t] -
+                        s_load_single_bus[disj_subs, t]
+                        == 0,
+                        name=f"single_bus_power_balance_{disj_subs}_{t}"
+            )
 
 
 def get_bus_injection_expr(
@@ -263,12 +241,15 @@ def get_bus_injection_expr(
 
     thermals_per_bus = {bus: [] for bus in buses}
 
-    thermals_per_bus.update({bus: [g for g in thermals.ID if bus in thermals.BUS[g]]
-                             for bus in gen_buses})
+    thermals_per_bus.update({bus: [g for g in thermals.ID
+                                   if bus in thermals.BUS[g]]
+                                   for bus in gen_buses}
+    )
 
     (s_load, s_gen, s_ren) = ({(bus, t): 0 for bus in buses for t in periods},
-                                {(bus, t): 0 for bus in buses for t in periods},
-                                {(bus, t): 0 for bus in buses for t in periods})
+                              {(bus, t): 0 for bus in buses for t in periods},
+                              {(bus, t): 0 for bus in buses for t in periods}
+    )
 
     s_load.update(s_load_curtailment)
     s_gen.update(s_gen_surplus)
@@ -345,11 +326,14 @@ def B_theta_network_model(
         periods: list[int]
 ) -> dict[tuple[int, int], Var]:
     """B-theta formulation of the DC network model.
-    This function adds the bus-wise power balance constraints, voltage angle variables, and
-    the linear constraints that enforce the relation between flows and angles. Moreover,
-    if line slacks are enabled through either `NetworkSlack.LINE_SLACKS` or
-    `NetworkSlack.BUS_AND_LINE_SLACKS` then, instead of enforcing the branch_flow capacities through
-    the bounds of the branch_flow variables, these capacities are included as linear inequalities together
+    This function adds the bus-wise power balance constraints,
+    voltage angle variables, and
+    the linear constraints that enforce the relation between flows and angles.
+    Moreover, if line slacks are enabled through either
+    `NetworkSlack.LINE_SLACKS` or `NetworkSlack.BUS_AND_LINE_SLACKS` then,
+    instead of enforcing the branch_flow capacities through
+    the bounds of the branch_flow variables, these capacities are included
+    as linear inequalities together
     with heavily penalized slacks associated with these inequalities.
 
     :param m: Optimization model.
@@ -384,17 +368,17 @@ def B_theta_network_model(
                                  s_gen_surplus,
                                  s_renew_curtailment,
                                  periods,
-                                 include_flows=True)
+                                 include_flows=True
+    )
 
     for bus in network.BUS_ID:
         for t in periods:
             m.addConstr(exp[bus, t] == 0, name=f"bus_{bus}_{t}")
 
     theta = {
-        (bus, t):
-            m.addVar(lb=0, name=f'theta_{bus}_{t}')
-        for t in periods
-        for bus in network.BUS_ID
+            (bus, t): m.addVar(lb=0, name=f'theta_{bus}_{t}')
+            for t in periods
+            for bus in network.BUS_ID
     }
 
     # Set the voltage angle reference
@@ -408,33 +392,39 @@ def B_theta_network_model(
         if abs(ADMT) <= 1e-1:
             for t in periods:
                 m.addConstr(1e2 * branch_flow[network.LINE_F_T[l][0],
-                network.LINE_F_T[l][1], l, t]
+                            network.LINE_F_T[l][1], l, t]
                              == 1e2 * ADMT *
                              (theta[network.LINE_F_T[l][0], t] -
                               theta[network.LINE_F_T[l][1], t]),
                              name=f"ACflow_{network.LINE_F_T[l][0]}" +
-                                  f"_{network.LINE_F_T[l][1]}_{l}_{t}")
+                                  f"_{network.LINE_F_T[l][1]}_{l}_{t}"
+                )
         elif abs(ADMT) >= 1e3:
             for t in periods:
                 m.addConstr(1e-2 * branch_flow[network.LINE_F_T[l][0],
-                network.LINE_F_T[l][1], l, t]
-                             == 1e-2 * ADMT *
-                             (theta[network.LINE_F_T[l][0], t] -
-                              theta[network.LINE_F_T[l][1], t]),
-                             name=f"ACflow_{network.LINE_F_T[l][0]}" +
-                                  f"_{network.LINE_F_T[l][1]}_{l}_{t}")
+                            network.LINE_F_T[l][1], l, t]
+                                    == 1e-2 * ADMT *
+                                    (theta[network.LINE_F_T[l][0], t] -
+                                    theta[network.LINE_F_T[l][1], t]),
+                                    name=f"ACflow_{network.LINE_F_T[l][0]}" +
+                                        f"_{network.LINE_F_T[l][1]}_{l}_{t}"
+                )
         else:
             for t in periods:
                 m.addConstr(branch_flow[network.LINE_F_T[l][0],
-                network.LINE_F_T[l][1], l, t]
-                             == ADMT *
-                             (theta[network.LINE_F_T[l][0], t] -
-                              theta[network.LINE_F_T[l][1], t]),
-                             name=f"ACflow_{network.LINE_F_T[l][0]}" +
-                                  f"_{network.LINE_F_T[l][1]}_{l}_{t}")
+                            network.LINE_F_T[l][1], l, t]
+                                    == ADMT *
+                                    (theta[network.LINE_F_T[l][0], t] -
+                                    theta[network.LINE_F_T[l][1], t]),
+                                    name=f"ACflow_{network.LINE_F_T[l][0]}" +
+                                        f"_{network.LINE_F_T[l][1]}_{l}_{t}"
+                )
 
-    if params.NETWORK_SLACKS in (NetworkSlacks.LINE_SLACKS, NetworkSlacks.BUS_AND_LINE_SLACKS):
-        _line_capacities_with_slacks(m, network, s_line_violation, branch_flow, periods)
+    if params.NETWORK_SLACKS in (NetworkSlacks.LINE_SLACKS,
+                                 NetworkSlacks.BUS_AND_LINE_SLACKS
+    ):
+        _line_capacities_with_slacks(m, network, s_line_violation,
+                                     branch_flow, periods)
 
     return theta
 
@@ -451,13 +441,20 @@ def add_network(
     """
     Add variables and constrains associated with the network to model `m`.
     Which variables and constraints will be added depend on the model chosen in
-    `params.NetworkModel` and periods provided in either `flow_periods` or `single_bus_periods`.
-    Only one of these lists must be nonempty, and the periods it contains must be contiguous.
-    If the model chosen in `params.NetworkModel` is either `NetworkModel.B_THETA` or
-    `NetworkModel.FLUXES` and `flow_periods` is not empty, then transmission line flows' variables
-    will be added to `m`, along with bus-wise power balances, and, for `NetworkModel.B_THETA`,
-    line branch_flow expressions tying flows to voltage angles. On the other hand, if
-    `single_bus_periods` is not empty, then global power balance constraints will be added, but
+    `params.NetworkModel` and periods provided in either
+    `flow_periods` or `single_bus_periods`.
+    Only one of these lists must be nonempty, and the periods
+    it contains must be contiguous.
+    If the model chosen in `params.NetworkModel`
+    is either `NetworkModel.B_THETA` or
+    `NetworkModel.FLUXES` and `flow_periods` is not empty,
+    then transmission line flows' variables
+    will be added to `m`, along with bus-wise power balances, and,
+    for `NetworkModel.B_THETA`,
+    line branch_flow expressions tying flows to voltage angles.
+    On the other hand, if
+    `single_bus_periods` is not empty,
+    then global power balance constraints will be added, but
     no line branch_flow variables.
 
     :param m: Optimization model.
@@ -470,11 +467,12 @@ def add_network(
     :type network: Network
     :param t_g: Total thermal generation.
     :type t_g: dict[tuple[int, int], Var]
-    :param flow_periods: A contiguous list of periods for which line flows and associated
-        constraints will be added, as long as `params.NetworkModel` includes such representation.
+    :param flow_periods: A contiguous list of periods for which line flows
+        and associated constraints will be added,
+        as long as `params.NetworkModel` includes such representation.
     :type flow_periods: list[int]
-    :param single_bus_periods: For the contiguous periods in this list, global power balance
-        constraints for the system will be added.
+    :param single_bus_periods: For the contiguous periods in this list,
+        global power balance constraints for the system will be added.
     :type single_bus_periods: list[int]
 
     :return theta: Voltage angle.
@@ -495,7 +493,8 @@ def add_network(
 
     # Flows transmission lines
     if params.NETWORK_MODEL in (NetworkModel.B_THETA, NetworkModel.FLUXES):
-        if params.NETWORK_SLACKS in (NetworkSlacks.LINE_SLACKS, NetworkSlacks.BUS_AND_LINE_SLACKS):
+        if params.NETWORK_SLACKS in (NetworkSlacks.LINE_SLACKS,
+                                     NetworkSlacks.BUS_AND_LINE_SLACKS):
             branch_flow = {
                 (network.LINE_F_T[l][0], network.LINE_F_T[l][1], l, t):
                     m.addVar(
@@ -520,11 +519,13 @@ def add_network(
 
     if len(flow_periods) > 0:
 
-        if params.NETWORK_SLACKS in (NetworkSlacks.BUS_SLACKS, NetworkSlacks.BUS_AND_LINE_SLACKS):
+        if params.NETWORK_SLACKS in (NetworkSlacks.BUS_SLACKS,
+                                     NetworkSlacks.BUS_AND_LINE_SLACKS):
             renewable_gen_buses = list(network.get_renewable_gen_buses())
             renewable_gen_buses.sort()
             s_renew_curtailment.update(
-                {(bus, t): m.addVar(obj=params.DEFICIT_COST, name=f'slack_ren_curtail_{bus}_{t}')
+                {(bus, t): m.addVar(obj=params.DEFICIT_COST,
+                                    name=f'slack_ren_curtail_{bus}_{t}')
                  for t in flow_periods
                  for bus in renewable_gen_buses
                  }
@@ -533,22 +534,27 @@ def add_network(
             load_buses = list(network.get_load_buses())
             load_buses.sort()
             s_load_curtailment.update(
-                {(bus, t): m.addVar(obj=params.DEFICIT_COST, name=f'slack_load_curtail_{bus}_{t}')
+                {(bus, t): m.addVar(obj=params.DEFICIT_COST,
+                                    name=f'slack_load_curtail_{bus}_{t}')
                  for t in flow_periods
                  for bus in load_buses
                  }
             )
 
-            slack_gen_buses = list(network.get_gen_buses(thermals) - set(renewable_gen_buses))
+            slack_gen_buses = list(network.get_gen_buses(thermals) -
+                                   set(renewable_gen_buses)
+            )
             slack_gen_buses.sort()
             s_gen_surplus.update(
-                {(bus, t): m.addVar(obj=params.DEFICIT_COST, name=f'slack_gen_surplus_{bus}_{t}')
+                {(bus, t): m.addVar(obj=params.DEFICIT_COST,
+                                    name=f'slack_gen_surplus_{bus}_{t}')
                  for t in flow_periods
                  for bus in slack_gen_buses
                  }
             )
 
-        if params.NETWORK_SLACKS in (NetworkSlacks.LINE_SLACKS, NetworkSlacks.BUS_AND_LINE_SLACKS):
+        if params.NETWORK_SLACKS in (NetworkSlacks.LINE_SLACKS,
+                                     NetworkSlacks.BUS_AND_LINE_SLACKS):
             s_line_violation.update(
                 {
                     (network.LINE_F_T[l][0], network.LINE_F_T[l][1], l, t):
@@ -556,27 +562,29 @@ def add_network(
                                   name=f"slack_line_{network.LINE_F_T[l][0]}_" +
                                        f"{network.LINE_F_T[l][1]}_{l}_{t}"
                                   )
-                    for t in flow_periods
-                    for l in network.LINE_F_T
-                    if network.ACTIVE_UB_PER_PERIOD[l][t] or network.ACTIVE_LB_PER_PERIOD[l][t]
+                    for t in flow_periods for l in network.LINE_F_T
+                    if network.ACTIVE_UB_PER_PERIOD[l][t] or
+                     network.ACTIVE_LB_PER_PERIOD[l][t]
                 }
             )
         else:
             s_line_violation.update(
                 {
                     (network.LINE_F_T[l][0], network.LINE_F_T[l][1], l, t): 0
-                    for t in flow_periods
-                    for l in network.LINE_F_T
-                    if network.ACTIVE_UB_PER_PERIOD[l][t] or network.ACTIVE_LB_PER_PERIOD[l][t]
+                    for t in flow_periods for l in network.LINE_F_T
+                    if network.ACTIVE_UB_PER_PERIOD[l][t] or
+                     network.ACTIVE_LB_PER_PERIOD[l][t]
                 }
             )
         if params.NETWORK_MODEL == NetworkModel.PTDF:
             PTDF_formulation(m, params, thermals, network,
                              t_g,
-                             s_load_curtailment, s_gen_surplus, s_renew_curtailment,
+                             s_load_curtailment,
+                             s_gen_surplus, s_renew_curtailment,
                              s_line_violation,
                              branch_flow,
-                             flow_periods)
+                             flow_periods
+            )
 
         elif params.NETWORK_MODEL == NetworkModel.FLUXES:
             exp = get_bus_injection_expr(thermals, network,
@@ -586,7 +594,8 @@ def add_network(
                                          s_gen_surplus,
                                          s_renew_curtailment,
                                          flow_periods,
-                                         include_flows=True)
+                                         include_flows=True
+            )
 
             for bus in network.BUS_ID:
                 for t in flow_periods:
@@ -597,7 +606,8 @@ def add_network(
                 _line_capacities_with_slacks(m, network,
                                              s_line_violation,
                                              branch_flow,
-                                             flow_periods)
+                                             flow_periods
+                )
 
         elif params.NETWORK_MODEL == NetworkModel.B_THETA:
             theta = B_theta_network_model(m, params, thermals, network,

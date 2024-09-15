@@ -3,7 +3,7 @@
 from typing import Union
 from numbers import Real
 
-from src.params import Params
+from params import Params
 from components.thermal import Thermals
 from components.network import Network
 
@@ -39,11 +39,12 @@ def add_global_constrs(
     :rtype: dict[str, Var]
     """
 
-    overlapping_costs = 0
-
-    s_reserve = {(res, t): m.addVar(obj=params.DEFICIT_COST, name=f'slack_reserve_{res}_{t}')
+    s_reserve = {(res, t): m.addVar(obj=params.DEFICIT_COST,
+                                    name=f'slack_reserve_{res}_{t}')
                  for res in network.RESERVES.keys()
-                 for t in [t for t in range(params.T) if network.RESERVES[res][t] > 0]}
+                 for t in [t for t in range(params.T)
+                           if network.RESERVES[res][t] > 0]
+    }
 
     for res in network.RESERVES.keys():
         for t in [t for t in range(params.T) if network.RESERVES[res][t] > 0]:

@@ -4,10 +4,10 @@ from typing import Union
 from numbers import Real
 import math
 
-from src.params import Params
+from params import Params
 from components.thermal import Thermals
 from components.network import Network
-from constants import (Model, quicksum, Var)
+from constants import (Model, quicksum, Var, MAX_FLOW)
 
 
 def _add_sec_constraints_only_on_thermals(
@@ -29,8 +29,8 @@ def _add_sec_constraints_only_on_thermals(
     constrs_w_buses = set()
     for t in range(params.T):
         for key, constr in [(item[0], item[1]) for item in network.SEC_CONSTRS[t].items()
-                            if (item[1]['LB'] > -(99999.00 / params.POWER_BASE) or
-                                item[1]['UB'] < (99999.00 / params.POWER_BASE))]:
+                            if (item[1]['LB'] > -(MAX_FLOW / params.POWER_BASE) or
+                                item[1]['UB'] < (MAX_FLOW / params.POWER_BASE))]:
             constrs_w_buses.add((t, key))
 
     constrs_w_buses = list(constrs_w_buses)
@@ -62,7 +62,7 @@ def _add_sec_constraints_only_on_thermals(
         all_thermals = network.SEC_CONSTRS[t][constr_id]['participants']['thermals']
 
         if constr['LB'] != constr['UB']:
-            if constr['LB'] > -(99999.00 / params.POWER_BASE):
+            if constr['LB'] > -(MAX_FLOW / params.POWER_BASE):
                 g = all_thermals[0]
                 const = - network.SEC_CONSTRS[t][constr_id]['net load']
                 if len(all_thermals) == 1:
@@ -81,7 +81,7 @@ def _add_sec_constraints_only_on_thermals(
                     m.addConstr(power_injections[constr_id, t]
                                  + slacks['LB', constr['name'], t] >= constr['LB'],
                                  name=f"thermals_only_{constr['name']}_LB_{t}")
-            if constr['UB'] < (99999.00 / params.POWER_BASE):
+            if constr['UB'] < (MAX_FLOW / params.POWER_BASE):
                 g = all_thermals[0]
                 const = - network.SEC_CONSTRS[t][constr_id]['net load']
                 if len(all_thermals) == 1 and thermals.MAX_P[g] <= (constr['UB'] - const):

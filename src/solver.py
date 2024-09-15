@@ -2,10 +2,9 @@
 from timeit import default_timer as dt
 import gurobipy as grbpy
 
-from constants import Model, Var
 from model.add_all_components import add_all_comp
 
-from src.params import Params
+from params import Params
 from components.thermal import Thermals
 from components.network import Network
 
@@ -59,11 +58,13 @@ def run_solver(params: Params, thermals: Thermals, network: Network):
             s_reserve,
             theta,
             branch_flow,
-            s_load_curtailment, s_gen_surplus, s_renew_curtailment) = add_all_comp(params,
-                                                                                   thermals,
-                                                                                   network,
-                                                                                   m,
-                                                                                   vtype='B')
+            s_load_curtailment,
+            s_gen_surplus,
+            s_renew_curtailment) = add_all_comp(params,
+                                                thermals,
+                                                network,
+                                                m,
+                                                vtype='B')
 
     print(f'\n\n{dt() - ini:.2f} seconds to build the optimization model.\n\n', flush=True)
 

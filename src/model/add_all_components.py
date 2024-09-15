@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from src.params import Params
+from params import Params
 from components.thermal import Thermals
 from components.network import Network
 
-from constants import NetworkModel, Model, Var
+from constants import NetworkModel
 from model.add_network import add_network
 from model.add_thermal import add_thermal_bin, add_thermal_cont
 from model.add_global_constrs import add_global_constrs
@@ -14,9 +14,9 @@ def add_all_comp(
         params: Params,
         thermals: Thermals,
         network: Network,
-        m: Model,
+        m: "Model",
         vtype: str='B'
-        ) -> tuple[dict, dict, dict, dict, dict, dict, dict, dict, dict, dict, dict]:
+    ) -> tuple[dict, dict, dict, dict, dict, dict, dict, dict, dict, dict, dict]:
     """
     Add all components of the unit-commitment problem to the Gurobi optimization model.
 
@@ -60,11 +60,13 @@ def add_all_comp(
     st_up_tg, st_dw_tg, disp_stat_tg = add_thermal_bin(m,
                                                        params,
                                                        thermals,
-                                                       vtype=vtype)
+                                                       vtype=vtype
+    )
 
     # Add the continuous part of the thermal units to the optimization model
     tg, t_g_disp = add_thermal_cont(m, params, thermals, network,
-                                    st_up_tg, st_dw_tg, disp_stat_tg)
+                                    st_up_tg, st_dw_tg, disp_stat_tg
+    )
 
     # Add reserve constraints, if there is any
     s_reserve = add_global_constrs(m,
@@ -72,23 +74,31 @@ def add_all_comp(
                                    thermals,
                                    network,
                                    disp_stat_tg,
-                                   t_g_disp)
+                                   t_g_disp
+    )
 
     # Add the network model
-    if params.NETWORK_MODEL in (NetworkModel.B_THETA, NetworkModel.FLUXES, NetworkModel.PTDF):
-        (theta, branch_flow, s_load_curtailment, s_gen_surplus, s_renew_curtailment) = add_network(
-                                                        m,
-                                                        params, thermals, network,
-                                                        tg,
-                                                        flow_periods=list(range(params.T)),
-                                                        single_bus_periods=[])
+    if params.NETWORK_MODEL in (NetworkModel.B_THETA,
+                                NetworkModel.FLUXES,
+                                NetworkModel.PTDF
+    ):
+        (theta, branch_flow, s_load_curtailment,
+         s_gen_surplus, s_renew_curtailment) = add_network(
+                                                m,
+                                                params, thermals, network,
+                                                tg,
+                                                flow_periods=
+                                                 list(range(params.T)),
+                                                single_bus_periods=[])
     else:
-        (theta, branch_flow, s_load_curtailment, s_gen_surplus, s_renew_curtailment) = add_network(
-                                                        m,
-                                                        params, thermals, network,
-                                                        tg,
-                                                        flow_periods=[],
-                                                        single_bus_periods=list(range(params.T)))
+        (theta, branch_flow, s_load_curtailment,
+         s_gen_surplus, s_renew_curtailment) = add_network(
+                                                m,
+                                                params, thermals, network,
+                                                tg,
+                                                flow_periods=[],
+                                                single_bus_periods=
+                                                 list(range(params.T)))
 
     return (st_up_tg, st_dw_tg, disp_stat_tg,
             tg, t_g_disp,

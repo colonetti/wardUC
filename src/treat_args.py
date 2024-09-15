@@ -3,7 +3,7 @@ import argparse
 from numbers import Real
 from csv import reader
 
-from src.params import _str2bool, _str2real, _str2enum
+from params import _str2bool, _str2real, _str2enum
 from constants import (NetworkModel, NetworkSlacks)
 
 def _treat_args(W_RANK:int, W_SIZE:int) -> dict:
@@ -13,7 +13,8 @@ def _treat_args(W_RANK:int, W_SIZE:int) -> dict:
     if W_SIZE > 1:
         if W_RANK == 0:
             raise ValueError("Only one process must be launched. " +
-                                                            f"The number of processes is {W_SIZE}")
+                             f"The number of processes is {W_SIZE}"
+            )
         quit()
 
     class DummyParams:

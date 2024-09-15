@@ -6,23 +6,27 @@ from numbers import Real
 from csv import reader
 from timeit import default_timer as dt
 
-from constants import (NetworkModel, NetworkSlacks)
+from constants import NetworkModel, NetworkSlacks
 
 
 def _str2bool(v: Union[bool, str]):
-    """Converts usual string representations of the boolean values to either True or False"""
+    """Converts usual string representations of the boolean values to
+    either True or False
+    """
     if isinstance(v, bool):
         return v
     if v.lower() in ('yes', 'true', 't', 'y', '1'):
         return True
-    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+    if v.lower() in ('no', 'false', 'f', 'n', '0'):
         return False
-    else:
-        raise ValueError(f"Boolean value expected. Got {v} of type {type(v)}.")
+
+    raise ValueError(f"Boolean value expected. Got {v} of type {type(v)}.")
 
 
 def _str2real(v: str):
-    """Converts usual string representations of the boolean values to either True or False"""
+    """Converts usual string representations of the boolean values
+    to either True or False
+    """
 
     try:
         _v = int(v)
@@ -60,22 +64,23 @@ def _check_choices(params: "Params"):
     for attr in ['DISCRETIZATION', 'MILP_GAP',
                  'DEFICIT_COST', 'SCAL_OBJ_F', 'TIME_LIMIT', 'POWER_BASE']:
         value = getattr(params, attr)
-        if not (isinstance(value, Real)):
-            raise TypeError(f"{attr} must be a real number and not a {type(value)}")
+        if not isinstance(value, Real):
+            raise TypeError(f"{attr} must be a real number, not {type(value)}")
         if value < 0:
             raise ValueError(f"{attr} must be nonnegative")
 
         if attr == 'POWER_BASE' and value != 100:
             print('The power base chosen is different from 100 MVA (it is ' +
-                  str(value) + ' MVA). If this is correct, then proceed, otherwise ' +
-                  ' choose a different value for it.')
+                  str(value) + ' MVA). If this is correct, then proceed, ' +
+                  ' otherwise choose a different value for it.')
 
-    _enums_types = {"NETWORK_MODEL": NetworkModel, "NETWORK_SLACKS": NetworkSlacks}
+    _enums_types = {"NETWORK_MODEL": NetworkModel,
+                    "NETWORK_SLACKS": NetworkSlacks}
     for attr in ['NETWORK_MODEL', "NETWORK_SLACKS"]:
-        if not (isinstance(getattr(params, attr), _enums_types[attr])):
+        if not isinstance(getattr(params, attr), _enums_types[attr]):
             raise AttributeError(
                 f"Parameter {attr} must be a member of {_enums_types[attr]}." +
-                f" The choices for this parameter are " +
+                " The choices for this parameter are " +
                 f"{[_opt.name for _opt in _enums_types[attr]]}."
                 + f" The current value is {getattr(params, attr)} " +
                 f"({type(getattr(params, attr))})."
@@ -94,48 +99,61 @@ def _set_attr_from_console(parameter_class: "Params",
     for k, v in args.items():
         k = k.upper()
         if hasattr(parameter_class, k):
-            old_value = getattr(parameter_class, k)
-            if not (isinstance(old_value, _enums)):
-                if isinstance(old_value, list) and (not (isinstance(v, list)) or len(v) == 1):
+            old_v = getattr(parameter_class, k)
+            if not (isinstance(old_v, _enums)):
+                if (isinstance(old_v, list) and
+                    (not (isinstance(v, list)) or len(v) == 1)
+                ):
                     if not (isinstance(v, list)):
-                        v = _str2bool(v) if isinstance(old_value[0], bool) else v
+                        v = (_str2bool(v) if isinstance(old_v[0], bool)
+                                        else v
+                        )
                     else:
-                        v = _str2bool(v[0]) if isinstance(old_value[0], bool) else v[0]
-                    v = len(old_value) * [type(old_value[0])(v)]
+                        v = (_str2bool(v[0]) if isinstance(old_v[0], bool)
+                                            else v[0]
+                        )
+                    v = len(old_v) * [type(old_v[0])(v)]
                     setattr(parameter_class, k, v)
                     if W_RANK == 0:
-                        print(f"Attribute {k} changed from {old_value} to {v}", flush=True)
+                        print(f"Attribute {k} changed from {old_v} to {v}",
+                              flush=True)
 
-                elif isinstance(old_value, list) and isinstance(v, list):
+                elif isinstance(old_v, list) and isinstance(v, list):
                     v = [1] + ([_str2bool(_v) for _v in v]
-                               if isinstance(old_value[0], bool)
-                               else [type(old_value[0])(_v) for _v in v])
+                               if isinstance(old_v[0], bool)
+                               else [type(old_v[0])(_v) for _v in v])
                     v[W_RANK] = v[W_RANK]
                     setattr(parameter_class, k, v)
                     if W_RANK == 0:
-                        print(f"Attribute {k} changed from {old_value} to {v}", flush=True)
+                        print(f"Attribute {k} changed from {old_v} to {v}",
+                              flush=True)
 
-                elif not (isinstance(old_value, list)) and isinstance(v, list):
-                    v = [1] + v if isinstance(old_value, bool) else [1] + [_str2bool(_v) for _v in
-                                                                           v]
+                elif not (isinstance(old_v, list)) and isinstance(v, list):
+                    v = ([1] + v if isinstance(old_v, bool)
+                                 else [1] + [_str2bool(_v) for _v in v]
+                    )
                     setattr(parameter_class, k, v[W_RANK])
                     if W_RANK == 0:
-                        print(f"Attribute {k} changed from {old_value} to {v[W_RANK]}", flush=True)
+                        print(f"Attr {k} changed from {old_v} to {v[W_RANK]}",
+                              flush=True)
 
-                elif isinstance(old_value, bool):
+                elif isinstance(old_v, bool):
                     v = _str2bool(v)
                     setattr(parameter_class, k, v)
                     if W_RANK == 0:
-                        print(f"Attribute {k} changed from {old_value} to {v}", flush=True)
+                        print(f"Attribute {k} changed from {old_v} to {v}",
+                              flush=True)
 
                 else:
-                    v = type(old_value)(v)
+                    v = type(old_v)(v)
                     setattr(parameter_class, k, v)
                     if W_RANK == 0:
-                        print(f"Attribute {k} changed from {old_value} to {v}", flush=True)
+                        print(f"Attribute {k} changed from {old_v} to {v}",
+                              flush=True)
             else:
                 found = False
-                for (_en, _name) in [(_en, _opt.name) for _en in _enums for _opt in _en]:
+                for (_en, _name) in [(_en, _opt.name) for _en in _enums
+                                     for _opt in _en]:
                     if _name == v.upper():
                         setattr(parameter_class, k, getattr(_en, _name))
                         found = True
@@ -143,7 +161,7 @@ def _set_attr_from_console(parameter_class: "Params",
 
                 if W_RANK == 0:
                     if found:
-                        print(f"Attribute {k} changed from {old_value} to " +
+                        print(f"Attribute {k} changed from {old_v} to " +
                               f"{getattr(parameter_class, k)}", flush=True)
                     else:
                         raise AttributeError(f"Error setting attribute {k}")
@@ -156,22 +174,25 @@ def _set_params_from_file(params, file_name):
         overwrite the parameters according to them
     """
 
-    print(f"\n\nAttributes found in file {params.IN_DIR + params.CASE + '/params.txt'}" +
-          " will overwrite default values of parameters")
+    print("\n\n")
+    print(f"Attributes found in file {params.IN_DIR+params.CASE+'/params.txt'}"
+          + " will overwrite default values of parameters")
     with open(file_name, encoding="ISO-8859-1") as csv_file:
         csv_reader = reader(csv_file, delimiter='=')
-        for row in [r for r in csv_reader if len(r) > 0 and len(r[0]) > 0 and r[0][0] != "#"]:
+        for row in [r for r in csv_reader
+                    if len(r) > 0 and len(r[0]) > 0 and r[0][0] != "#"
+        ]:
             if hasattr(params, row[0].strip()):
                 if not (isinstance(getattr(params, row[0].strip()), dict)):
-                    old_value = getattr(params, row[0].strip())
+                    old_v = getattr(params, row[0].strip())
                     new_value = type(getattr(params, row[0].strip()))(row[1].strip())
                     setattr(params, row[0].strip(), new_value)
-                    print(f"Attribute {row[0].strip()} changed from {old_value} to {new_value}",
+                    print(f"Attribute {row[0].strip()} changed from {old_v} to {new_value}",
                           flush=True)
                 else:
                     # if it is a dict
-                    old_value = dict(getattr(params, row[0].strip()).items())
-                    keys = list(old_value.keys())
+                    old_v = dict(getattr(params, row[0].strip()).items())
+                    keys = list(old_v.keys())
                     if isinstance(getattr(params, row[0].strip())[keys[0]], bool):
                         if not row[1].strip() in ('True', 'False', '1', '0'):
                             s = (f"Error reading file {file_name}." +
@@ -185,29 +206,32 @@ def _set_params_from_file(params, file_name):
                     for k in keys:
                         getattr(params, row[0].strip())[k] = new_value
 
-                    print(f"Attribute {row[0].strip()} changed from {old_value} to {new_value}",
+                    print(f"Attribute {row[0].strip()} changed from {old_v} to {new_value}",
                           flush=True)
             else:
                 raise AttributeError(f"Params has no attribute {row[0]}.\n" +
-                                     "The .txt file used to overwrite attribute values must " +
-                                     "have no header, one pair attribute=value " +
+                                     "The .txt file used to overwrite " +
+                                     "attribute values must " +
+                                     "have no header, one pair " +
+                                     "attribute=value " +
                                      "should be given in each line\n" +
-                                     "Attributes and values are separated by = signs and " +
+                                     "Attributes and values are separated by "+
+                                     "= signs and " +
                                      "no special characters are allowed\n" +
                                      "Lines starting with # are ignored")
 
 
 class Params:
     """
-    The attributes of an instance of this class contain the values for the parameters of the
-    algorithm and the optimization model.
+    The attributes of an instance of this class contain the values for
+    the parameters of the algorithm and the optimization model.
 
-    :param args: Argument-value pairs for the solution process and the optimization
-                model.
+    :param args: Argument-value pairs for the solution process and the
+                  optimization model.
     :type args: dict or None
 
-    :return: an object of Params containing all choices for the optimization model and
-                algorithm that are shared across all processes.
+    :return: an object of Params containing all choices for the optimization
+              model and algorithm that are shared across all processes.
     :rtype: Params
     """
 
@@ -218,7 +242,8 @@ class Params:
 
         #: Name that uniquely identifies the current experiment.
         #: If an output directory, OUT_DIR, is not
-        #: provided, then an output directory EXP_NAME will be created, defaults to "exp1".
+        #: provided, then an output directory EXP_NAME will be created,
+        #: defaults to "exp1".
         self.EXP_NAME: str = 'exp_1'
 
         #: Number of periods in the scheduling horizon, defaults to 1.
@@ -290,11 +315,13 @@ class Params:
         if args is not None:
             _set_attr_from_console(self, W_RANK=0, args=args)
 
-        self.IN_DIR: str = (os.path.abspath(os.path.join(__file__, "../../..")).replace("\\", "/")
+        self.IN_DIR: str = (
+                            os.path.abspath(
+                            os.path.join(__file__, "../..")).replace("\\", "/")
                             + '/input/' + self.PS + '/'
                             if (self.IN_DIR is None or self.IN_DIR == '')
-                            else self.IN_DIR
-                            )
+                             else self.IN_DIR
+        )
 
         if not (os.path.isdir(self.IN_DIR + 'case ' + str(self.CASE) + '/')):
             os.makedirs(self.IN_DIR + 'case ' + str(self.CASE) + '/')
@@ -303,16 +330,20 @@ class Params:
             _set_params_from_file(self, self.IN_DIR + "/params.txt")
 
         if os.path.isfile(self.IN_DIR + "case " + self.CASE + "/params.txt"):
-            _set_params_from_file(self, self.IN_DIR + "case " + self.CASE + "/params.txt")
+            _set_params_from_file(self, self.IN_DIR + "case " +
+                                  self.CASE + "/params.txt"
+            )
 
         if self.OUT_DIR == '' or self.OUT_DIR is None:
             self.OUT_DIR = (
-                            os.path.abspath(os.path.join(__file__, "../../..")).replace("\\", "/")
+                            os.path.abspath(
+                                os.path.join(__file__, "../../..")
+                            ).replace("\\", "/")
                             + '/output/' + self.PS + '/case '
                             + self.CASE + '/' + self.EXP_NAME + '/'
             )
 
-        if not (os.path.isdir(self.OUT_DIR)):
+        if not os.path.isdir(self.OUT_DIR):
             os.makedirs(self.OUT_DIR)
 
         _check_choices(self)

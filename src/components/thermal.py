@@ -2,7 +2,7 @@
 
 from numbers import Real
 
-from src.params import Params
+from params import Params
 
 
 class Thermals:
@@ -104,21 +104,21 @@ class Thermals:
         self.GEN_COST[self.ID[-1]] = (params.DISCRETIZATION *
                                       params.POWER_BASE * float(row[header['genCost']]) *
                                       params.SCAL_OBJ_F
-                                      )
+        )
 
         self.RAMP_UP[self.ID[-1]] = (params.DISCRETIZATION *
                                      float(row[header['rampUp']]) / params.POWER_BASE
-                                     )
+        )
         self.RAMP_DOWN[self.ID[-1]] = (params.DISCRETIZATION *
                                        float(row[header['rampDown']]) / params.POWER_BASE
-                                       )
+        )
 
         self.MIN_UP[self.ID[-1]] = (0 if params.DISCRETIZATION * int(row[header['minUp']]) <= 1
                                     else int(row[header['minUp']])
-                                    )
+        )
         self.MIN_DOWN[self.ID[-1]] = (0 if params.DISCRETIZATION * int(row[header['minDown']]) <= 1
                                       else int(row[header['minDown']])
-                                      )
+        )
         self.BUS[self.ID[-1]] = [(int(row[header['bus']]))]
         self.BUS_COEFF[self.ID[-1]] = {(int(row[header['bus']])): 1.00}
 

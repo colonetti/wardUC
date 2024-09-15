@@ -6,7 +6,7 @@ import numpy as np
 
 from model.add_network import get_bus_injection_expr
 
-from constants import NetworkModel, NetworkSlacks, Model
+from constants import NetworkModel, NetworkSlacks
 
 def check_flows_full_network(params,
                              thermals,
@@ -422,4 +422,3 @@ def write_branch_flows(params,
         print("The list of bounds for the lines above have been violated")
     else:
         print("\n\nNo branch limits were violated\n\n")
-

@@ -4,13 +4,15 @@ from math import pi
 import numpy as np
 import networkx as nx
 
-from src.params import Params
+from params import Params
 from components.thermal import Thermals
+from constants import MAX_FLOW
 
 def _get_isolated_subsystems(network:"Network") -> dict:
     """
-    Within a power system, there might be several subsystems that are not connected to any
-    other portion of the system through an AC branch (a transmission line or a transformer).
+    Within a power system, there might be several subsystems that are
+    not connected to any other portion of the system through an AC branch
+    (a transmission line or a transformer).
     Thus, each of these isolated subsystems has a separated PTDF matrix
     """
     G = nx.Graph()
@@ -25,7 +27,8 @@ def _get_isolated_subsystems(network:"Network") -> dict:
     for idx, component in enumerate(components):
         isolated_buses = isolated_buses - set(component.nodes())
         disjoint_subsystems[idx] = {'nodes': list(component.nodes()),
-                                                                'edges': list(component.edges())}
+                                    'edges': list(component.edges())
+        }
 
     isolated_buses = list(isolated_buses)
     isolated_buses.sort()
@@ -44,26 +47,32 @@ def get_buses_bounds_on_injections(
         thermals:Thermals
     ):
     """
-        for each bus in the system, get the most negative (largest load) and most positive
-        (largest generation) injections based on the elements connected to the bus
+        for each bus in the system, get the most negative (largest load)
+        and most positive (largest generation) injections based on the elements
+        connected to the bus
 
-        the bounds are given as minimum and maximum over the entire scheduling horizon
-        and also as per-period bounds
+        the bounds are given as minimum and maximum over the entire scheduling
+        horizon and also as per-period bounds
 
         in computing these bounds, transmission elements are not considered
     """
 
     # get first the minimum and maximum injections for each period of the scheduling horizon
-    min_inj_per_period = {bus: {t: 0 for t in range(params.T)} for bus in network.BUS_ID}
-    max_inj_per_period = {bus: {t: 0 for t in range(params.T)} for bus in network.BUS_ID}
+    min_inj_per_period = {bus: {t: 0 for t in range(params.T)}
+                          for bus in network.BUS_ID
+    }
+    max_inj_per_period = {bus: {t: 0 for t in range(params.T)}
+                          for bus in network.BUS_ID
+    }
 
     for g in thermals.UNIT_NAME.keys():
         for bus in thermals.BUS[g]:
             for t in range(params.T):
-                max_inj_per_period[bus][t] += thermals.BUS_COEFF[g][bus]*thermals.MAX_P[g]
+                max_inj_per_period[bus][t] += (thermals.BUS_COEFF[g][bus] *
+                                               thermals.MAX_P[g])
 
     non_zero_inj_buses = [bus for bus in network.BUS_ID
-                            if np.max(np.abs(network.NET_LOAD[network.BUS_HEADER[bus],:]),axis=0)>0]
+                          if np.max(np.abs(network.NET_LOAD[network.BUS_HEADER[bus],:]),axis=0)>0]
     for t in range(params.T):
         for bus in non_zero_inj_buses:
             min_inj_per_period[bus][t] = (min_inj_per_period[bus][t]
@@ -74,11 +83,14 @@ def get_buses_bounds_on_injections(
     # now compute the bounds over the entire scheduling horizon by basically taking the
     # minimum of the minimums and the maximum of the maximums
     min_inj = {bus: min(min_inj_per_period[bus][t] for t in range(params.T))
-                                                                        for bus in network.BUS_ID}
+               for bus in network.BUS_ID
+    }
     max_inj = {bus: max(max_inj_per_period[bus][t] for t in range(params.T))
-                                                                        for bus in network.BUS_ID}
+               for bus in network.BUS_ID
+    }
 
-    return (min_inj, max_inj, min_inj_per_period, max_inj_per_period)
+    return min_inj, max_inj, min_inj_per_period, max_inj_per_period
+
 
 def add_new_parallel_line(
                         resistance_line_1, reactance_line_1,
@@ -260,12 +272,14 @@ class Network:
         if row[header['Reference bus']].strip() == 'Ref':
             self.REF_BUS_ID.append(bus)
 
-    def _add_new_line(self:"Network", params:Params, line_id:int,
-                    from_id:int, to_id:int,
-                        reactance:float, resistance:float, shunt_conduc:float, shunt_suscep:float,
-                            line_rating:float, emergency_rating:float,
-                                tap_setting:float, min_tap:float, max_tap:float,
-                                    phase_shift:float, controlled_bus:int):
+    def _add_new_line(self:"Network", params: Params, line_id: int,
+                      from_id: int, to_id:int,
+                      reactance: float, resistance: float, shunt_conduc: float,
+                      shunt_suscep: float,
+                      line_rating: float, emergency_rating: float,
+                      tap_setting: float, min_tap: float, max_tap: float,
+                      phase_shift: float, controlled_bus: int
+    ):
         """Add a new transmission line to the network"""
 
         if from_id < to_id:
@@ -278,19 +292,23 @@ class Network:
         if (f, t) in self.LINE_F_T.values():
             l = [l for l in self.LINE_ID if self.LINE_F_T[l] == (f, t)][0]
 
-            (_, self.LINE_X[l], _1, _2, _3, _4, self.LINE_FLOW_UB[l], self.LINE_FLOW_LB[l],
-                                    _5, _6) = add_new_parallel_line(
-                                                    0, reactance, 0, 0,
-                                                    np.array(params.T*[cap/params.POWER_BASE]),
-                                                    -1*np.array(params.T*[cap/params.POWER_BASE]),
-                                                    np.array(params.T*[cap/params.POWER_BASE]),
-                                                    -1*np.array(params.T*[cap/params.POWER_BASE]),
-                                                    0,
-                                                    self.LINE_X[l], 0, 0,
-                                                    self.LINE_FLOW_UB[l], self.LINE_FLOW_LB[l],
-                                                    self.LINE_FLOW_UB[l], self.LINE_FLOW_LB[l])
+            (_, self.LINE_X[l],
+             _1, _2, _3, _4,
+             self.LINE_FLOW_UB[l],
+             self.LINE_FLOW_LB[l],
+                    _5, _6) = add_new_parallel_line(
+                                0, reactance, 0, 0,
+                                np.array(params.T*[cap/params.POWER_BASE]),
+                                -1*np.array(params.T*[cap/params.POWER_BASE]),
+                                np.array(params.T*[cap/params.POWER_BASE]),
+                                -1*np.array(params.T*[cap/params.POWER_BASE]),
+                                0,
+                                self.LINE_X[l], 0, 0,
+                                self.LINE_FLOW_UB[l], self.LINE_FLOW_LB[l],
+                                self.LINE_FLOW_UB[l], self.LINE_FLOW_LB[l]
+            )
 
-            self.ACTIVE_BOUNDS[l] = self.ACTIVE_BOUNDS[l] or cap < 99999
+            self.ACTIVE_BOUNDS[l] = self.ACTIVE_BOUNDS[l] or cap < MAX_FLOW
             self.ACTIVE_UB[l], self.ACTIVE_LB[l] = self.ACTIVE_BOUNDS[l], self.ACTIVE_BOUNDS[l]
 
             self.ACTIVE_UB_PER_PERIOD[l] = {t: self.ACTIVE_BOUNDS[l] for t in range(params.T)}
@@ -304,12 +322,17 @@ class Network:
             self.LINE_FLOW_LB[l] = -1*np.array(params.T*[cap/params.POWER_BASE])
             self.LINE_X[l] = reactance
 
-            self.ACTIVE_BOUNDS[l] = cap*params.POWER_BASE < 99999
+            self.ACTIVE_BOUNDS[l] = cap*params.POWER_BASE < MAX_FLOW
             self.ACTIVE_UB[l], self.ACTIVE_LB[l] = self.ACTIVE_BOUNDS[l], self.ACTIVE_BOUNDS[l]
-            self.ACTIVE_UB_PER_PERIOD[l] = {t: self.ACTIVE_BOUNDS[l] for t in range(params.T)}
-            self.ACTIVE_LB_PER_PERIOD[l] = {t: self.ACTIVE_BOUNDS[l] for t in range(params.T)}
+            self.ACTIVE_UB_PER_PERIOD[l] = {t: self.ACTIVE_BOUNDS[l]
+                                            for t in range(params.T)
+            }
+            self.ACTIVE_LB_PER_PERIOD[l] = {t: self.ACTIVE_BOUNDS[l]
+                                            for t in range(params.T)
+            }
 
-    def add_new_line(self:"Network", params:Params, row:list[str], header:dict[str, int]) -> None:
+    def add_new_line(self:"Network", params:Params,
+                     row:list[str], header:dict[str, int]) -> None:
         """Add a new line to the system
 
         :param self: the instance of Network to which the new line is to be added
@@ -336,23 +359,35 @@ class Network:
         if (f, t) in self.LINE_F_T.values():
             l = [l for l in self.LINE_ID if self.LINE_F_T[l] == (f, t)][0]
 
-            (_, self.LINE_X[l], _1, _2, _3, _4, self.LINE_FLOW_UB[l], self.LINE_FLOW_LB[l],
-                                    _5, _6) = add_new_parallel_line(
-                                                    0, x, 0, 0,
-                                                    np.array(params.T*[cap]),
-                                                    -1*np.array(params.T*[cap]),
-                                                    np.array(params.T*[cap]),
-                                                    -1*np.array(params.T*[cap]),
-                                                    0,
-                                                    self.LINE_X[l], 0, 0,
-                                                    self.LINE_FLOW_UB[l], self.LINE_FLOW_LB[l],
-                                                    self.LINE_FLOW_UB[l], self.LINE_FLOW_LB[l])
+            (_, self.LINE_X[l],
+             _1, _2, _3, _4,
+             self.LINE_FLOW_UB[l],
+             self.LINE_FLOW_LB[l],
+                        _5, _6) = add_new_parallel_line(
+                                    0, x, 0, 0,
+                                    np.array(params.T*[cap]),
+                                    -1*np.array(params.T*[cap]),
+                                    np.array(params.T*[cap]),
+                                    -1*np.array(params.T*[cap]),
+                                    0,
+                                    self.LINE_X[l], 0, 0,
+                                    self.LINE_FLOW_UB[l],
+                                    self.LINE_FLOW_LB[l],
+                                    self.LINE_FLOW_UB[l],
+                                    self.LINE_FLOW_LB[l]
+            )
 
-            self.ACTIVE_BOUNDS[l] = self.ACTIVE_BOUNDS[l] or cap*params.POWER_BASE < 99999
+            self.ACTIVE_BOUNDS[l] = (self.ACTIVE_BOUNDS[l] or
+                                     cap * params.POWER_BASE < MAX_FLOW
+            )
             self.ACTIVE_UB[l] = self.ACTIVE_BOUNDS[l]
             self.ACTIVE_LB[l] = self.ACTIVE_BOUNDS[l]
-            self.ACTIVE_UB_PER_PERIOD[l] = {t: self.ACTIVE_BOUNDS[l] for t in range(params.T)}
-            self.ACTIVE_LB_PER_PERIOD[l] = {t: self.ACTIVE_BOUNDS[l] for t in range(params.T)}
+            self.ACTIVE_UB_PER_PERIOD[l] = {t: self.ACTIVE_BOUNDS[l]
+                                            for t in range(params.T)
+            }
+            self.ACTIVE_LB_PER_PERIOD[l] = {t: self.ACTIVE_BOUNDS[l]
+                                            for t in range(params.T)
+            }
 
         else:
             l = max(self.LINE_ID,default=0) + 1
@@ -365,10 +400,14 @@ class Network:
             self.LINES_FROM_BUS[f].append(l)
             self.LINES_TO_BUS[t].append(l)
 
-            self.ACTIVE_BOUNDS[l] = cap*params.POWER_BASE < 99999
+            self.ACTIVE_BOUNDS[l] = cap*params.POWER_BASE < MAX_FLOW
             self.ACTIVE_UB[l], self.ACTIVE_LB[l] = self.ACTIVE_BOUNDS[l], self.ACTIVE_BOUNDS[l]
-            self.ACTIVE_UB_PER_PERIOD[l] = {t: self.ACTIVE_BOUNDS[l] for t in range(params.T)}
-            self.ACTIVE_LB_PER_PERIOD[l] = {t: self.ACTIVE_BOUNDS[l] for t in range(params.T)}
+            self.ACTIVE_UB_PER_PERIOD[l] = {t: self.ACTIVE_BOUNDS[l]
+                                            for t in range(params.T)
+            }
+            self.ACTIVE_LB_PER_PERIOD[l] = {t: self.ACTIVE_BOUNDS[l]
+                                            for t in range(params.T)
+            }
 
     def get_gen_buses(
             self:"Network",
@@ -376,18 +415,21 @@ class Network:
         ) -> set:
         """Get the buses to which controllable generating elements are connected to."""
 
-        return {bus for g in thermals.UNIT_NAME.keys() for bus in thermals.BUS[g]}
+        return {bus for g in thermals.UNIT_NAME.keys()
+                for bus in thermals.BUS[g]}
 
     def get_load_buses(
             self:"Network"
         ) -> set:
         """Get the buses for which in at least one period there is a nonzero net load."""
 
-        return {bus for bus in self.BUS_ID if np.max(self.NET_LOAD[self.BUS_HEADER[bus]][:]) > 0}
+        return {bus for bus in self.BUS_ID
+                if np.max(self.NET_LOAD[self.BUS_HEADER[bus]][:]) > 0}
 
     def get_renewable_gen_buses(
             self:"Network"
         ) -> set:
         """Get the buses for which in at least one period there is a nonzero fixed generation.
         """
-        return {bus for bus in self.BUS_ID if min(self.NET_LOAD[self.BUS_HEADER[bus]][:]) < 0}
+        return {bus for bus in self.BUS_ID
+                if min(self.NET_LOAD[self.BUS_HEADER[bus]][:]) < 0}

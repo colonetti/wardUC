@@ -3,6 +3,7 @@ from copy import deepcopy
 import numpy as np
 
 from components.network import add_new_parallel_line
+from constants import MAX_FLOW
 
 
 def _remove_many_connect_buses(params, network, thermals, bus_to_del:int):
@@ -11,12 +12,15 @@ def _remove_many_connect_buses(params, network, thermals, bus_to_del:int):
     """
 
     # get all lines connected to this bus
-    lines_connected_to_bus = network.LINES_FROM_BUS[bus_to_del]+network.LINES_TO_BUS[bus_to_del]
+    lines_connected_to_bus = (network.LINES_FROM_BUS[bus_to_del] +
+                              network.LINES_TO_BUS[bus_to_del]
+    )
 
     buses_connected = [
-                        bus for l in lines_connected_to_bus for bus in network.LINE_F_T[l]
+                        bus for l in lines_connected_to_bus
+                            for bus in network.LINE_F_T[l]
                                 if bus != bus_to_del
-                    ]
+    ]
 
     buses_connected.sort()
 
@@ -71,7 +75,7 @@ def _remove_many_connect_buses(params, network, thermals, bus_to_del:int):
                               connec[0], connec[1],
                               -1/B_front_front_new[buses_connected.index(connec[0]),
                                                    buses_connected.index(connec[1])],
-                              0, 0, 0, 99999, 99999, 0, 0, 0, 0, 0)
+                              0, 0, 0, MAX_FLOW, MAX_FLOW, 0, 0, 0, 0, 0)
 
     for l in lines_connected_to_bus:
         network.LINES_FROM_BUS[network.LINE_F_T[l][0]].remove(l)
@@ -82,7 +86,8 @@ def _remove_many_connect_buses(params, network, thermals, bus_to_del:int):
     del network.LINES_FROM_BUS[bus_to_del]
     del network.LINES_TO_BUS[bus_to_del]
 
-    update_load_and_network(network, thermals, [network.BUS_ID.index(bus_to_del)], [bus_to_del])
+    update_load_and_network(network, thermals,
+                            [network.BUS_ID.index(bus_to_del)], [bus_to_del])
 
 
 def _del_lines(network, list_of_lines:list):
@@ -110,7 +115,9 @@ def _del_lines(network, list_of_lines:list):
         del network.ACTIVE_LB_PER_PERIOD[l]
 
 
-def _reassign_injections(thermals, network, bus:int, new_bus:int, bus_coeff:float):
+def _reassign_injections(thermals, network,
+                         bus:int, new_bus:int, bus_coeff:float
+):
     """
     if a bus 'bus' is removed from the grid but there are either active or passive power injections
     to it, then these injections need to be reassigned to a new bus 'new_bus'
@@ -132,12 +139,14 @@ def _reassign_injections(thermals, network, bus:int, new_bus:int, bus_coeff:floa
 
 def update_load_and_network(network, thermals,
                             indices_of_buses_to_delete:list,
-                            buses_to_delete:list):
+                            buses_to_delete:list
+):
     """Buses and lines have been deleted. Update the the network object"""
 
     # The buses to be kept are
     indices_of_buses_to_keep = [b for b in range(len(network.BUS_ID))
-                                                        if b not in indices_of_buses_to_delete]
+                                        if b not in indices_of_buses_to_delete
+    ]
 
     indices_of_buses_to_keep.sort()
     # Update the load
@@ -157,7 +166,8 @@ def update_load_and_network(network, thermals,
                     break
 
     for bus in buses_to_delete:
-        thermal_units = [u for u in thermals.UNIT_NAME.keys() if bus in thermals.BUS[u]]
+        thermal_units = [u for u in thermals.UNIT_NAME.keys()
+                         if bus in thermals.BUS[u]]
         for g in thermal_units:
             thermals.BUS[g].remove(bus)
             del thermals.BUS_COEFF[g][bus]
@@ -166,7 +176,8 @@ def update_load_and_network(network, thermals,
 
 
 def _del_end_of_line_buses(network, buses_no_load_no_gen,
-                                        buses_to_delete, index_of_buses_to_delete):
+                           buses_to_delete, index_of_buses_to_delete
+):
     """Delete buses with no load and no generation connected to a single line"""
 
     for bus in buses_no_load_no_gen:
@@ -202,7 +213,8 @@ def _del_end_of_line_buses(network, buses_no_load_no_gen,
 
 
 def _del_mid_point_buses(params, network, buses_no_load_no_gen,
-                                    buses_to_delete, index_of_buses_to_delete):
+                         buses_to_delete, index_of_buses_to_delete
+):
     """Delete buses with no generation and no load connected only to two lines"""
 
     for bus in buses_no_load_no_gen:
@@ -324,13 +336,16 @@ def _remove_n_connections_buses(params, network, thermals):
 
         cand_buses = []
 
-        n_connections_of_buses = {bus: len(network.LINES_FROM_BUS[bus] + network.LINES_TO_BUS[bus])
+        n_connections_of_buses = {bus: len(network.LINES_FROM_BUS[bus]
+                                           + network.LINES_TO_BUS[bus])
                                         for bus in set(network.BUS_ID)
-                                            - buses_cannot_be_del}
+                                            - buses_cannot_be_del
+        }
 
         for nc in range(0, params.MAX_NUMBER_OF_CONNECTIONS + 1, 1):
             for bus in [bus for bus in set(network.BUS_ID) - buses_cannot_be_del
-                                                            if (n_connections_of_buses[bus] == nc)]:
+                                        if (n_connections_of_buses[bus] == nc)
+                ]:
                 cand_buses.append(bus)
 
         return cand_buses
@@ -346,7 +361,7 @@ def _remove_n_connections_buses(params, network, thermals):
 
         lines_connected_to_bus = (network.LINES_FROM_BUS[cand_buses[0]]
                                     + network.LINES_TO_BUS[cand_buses[0]]
-                                    )
+        )
 
         if len(lines_connected_to_bus) == 0:
             # in case there is no line connected to this bus
@@ -355,27 +370,32 @@ def _remove_n_connections_buses(params, network, thermals):
 
         if len(lines_connected_to_bus) > 5:
             buses_connected = [
-                                bus for l in lines_connected_to_bus for bus in network.LINE_F_T[l]
+                                bus for l in lines_connected_to_bus
+                                    for bus in network.LINE_F_T[l]
                                         if bus != cand_buses[0]
-                            ]
+            ]
 
             buses_connected.sort()
 
-            new_connections = [[bus_1, bus_2] for b_idx_1, bus_1 in enumerate(buses_connected)
-                                                        for bus_2 in buses_connected[b_idx_1+1:]]
+            new_connections = [[bus_1, bus_2]
+                               for b_idx_1, bus_1 in enumerate(buses_connected)
+                                    for bus_2 in buses_connected[b_idx_1+1:]
+            ]
 
             par_lines = 0
 
             for connec in new_connections:
                 # check if there is already a line between buses in buses_of_new_connection
                 lines_btw_buses = [l for l in network.LINE_ID
-                                                if network.LINE_F_T[l] == (connec[0], connec[1])]
+                                if network.LINE_F_T[l] == (connec[0],connec[1])
+                ]
                 if len(lines_btw_buses) > 0:
                     par_lines += 1
 
             if len(new_connections) - par_lines <= 1:
                 ini = time()
-                _remove_many_connect_buses(params, network, thermals, cand_buses[0])
+                _remove_many_connect_buses(params, network,
+                                           thermals, cand_buses[0])
                 total_removal += time() - ini
 
         else:
@@ -409,34 +429,39 @@ def reduce_network(params, thermals, network):
     total_time_mid_point_w_inj = 0
     total_time_many_connec = 0
 
-    while (it < MAX_IT):
+    while it < MAX_IT:
+        # this loop is only used to make sure that the updated network will
+        # be checked in each of the functions
 
-        initial_number_of_buses, initial_number_of_lines = len(network.BUS_ID), len(network.LINE_ID)
-
-        # this loop is only used to make sure that the updated network will be checked in each
-        # of the functions
+        initial_number_of_buses = len(network.BUS_ID)
+        initial_number_of_lines = len(network.LINE_ID)
 
         ini_n_inj = time()
 
-        #### Set of candidate buses to be deleted
+        # Set of candidate buses to be deleted
         buses_no_load_no_gen = (set(network.BUS_ID)
                                 - network.get_gen_buses(thermals)
                                 - network.get_renewable_gen_buses()
                                 - network.get_load_buses()
-                                )
+        )
 
 
         buses_to_delete, indices_of_buses_to_delete = [], []
         if params.MAX_NUMBER_OF_CONNECTIONS >= 1:
             _del_end_of_line_buses(network, buses_no_load_no_gen,
-                                   buses_to_delete, indices_of_buses_to_delete)
+                                   buses_to_delete, indices_of_buses_to_delete
+            )
         buses_no_load_no_gen = buses_no_load_no_gen - set(buses_to_delete)
 
         if params.MAX_NUMBER_OF_CONNECTIONS >= 2:
             _del_mid_point_buses(params, network, buses_no_load_no_gen,
-                                   buses_to_delete, indices_of_buses_to_delete)
+                                   buses_to_delete, indices_of_buses_to_delete
+            )
 
-        update_load_and_network(network, thermals, indices_of_buses_to_delete, buses_to_delete)
+        update_load_and_network(network, thermals,
+                                indices_of_buses_to_delete,
+                                buses_to_delete
+        )
 
         buses_rm_1 += initial_number_of_buses - len(network.BUS_ID)
         lines_rm_1 += initial_number_of_lines - len(network.LINE_ID)
@@ -450,7 +475,8 @@ def reduce_network(params, thermals, network):
         ini_b, ini_l = len(network.BUS_ID), len(network.LINE_ID)
 
         if params.MAX_NUMBER_OF_CONNECTIONS >= 1:
-           _remove_end_of_line_buses_with_injections(params, thermals, network)
+            _remove_end_of_line_buses_with_injections(params, thermals,
+                                                      network)
 
         buses_rm_2 += ini_b - len(network.BUS_ID)
         lines_rm_2 += ini_l - len(network.LINE_ID)
@@ -462,7 +488,7 @@ def reduce_network(params, thermals, network):
         ini_b, ini_l = len(network.BUS_ID), len(network.LINE_ID)
 
         if params.MAX_NUMBER_OF_CONNECTIONS >= 2:
-           _remove_mid_point_buses_with_injs(params, thermals, network)
+            _remove_mid_point_buses_with_injs(params, thermals, network)
 
         buses_rm_3 += ini_b - len(network.BUS_ID)
         lines_rm_3 += ini_l - len(network.LINE_ID)
@@ -473,7 +499,7 @@ def reduce_network(params, thermals, network):
 
         ini_b, ini_l = len(network.BUS_ID), len(network.LINE_ID)
         if params.MAX_NUMBER_OF_CONNECTIONS >= 1:
-           _remove_n_connections_buses(params, network, thermals)
+            _remove_n_connections_buses(params, network, thermals)
 
         buses_rm_4 += ini_b - len(network.BUS_ID)
         lines_rm_4 += ini_l - len(network.LINE_ID)
@@ -596,7 +622,7 @@ def _remove_end_of_line_buses_with_injections(params, thermals, network):
 
         buses_to_be_rm = []     # buses to be deleted
 
-        threshold_line_limit = (99999.00/params.POWER_BASE)
+        threshold_line_limit = MAX_FLOW / params.POWER_BASE
 
         for bus in single_line_buses:
             lines_connected = network.LINES_FROM_BUS[bus] + network.LINES_TO_BUS[bus]
@@ -638,18 +664,22 @@ def _remove_end_of_line_buses_with_injections(params, thermals, network):
 
     while len(buses_to_be_rm) > 0:
 
-        del_end_of_line_buses_and_reassign_injection(network, thermals, buses_to_be_rm)
+        del_end_of_line_buses_and_reassign_injection(network, thermals,
+                                                     buses_to_be_rm
+        )
 
         update_load_and_network(network, thermals,
                                 [network.BUS_ID.index(bus) for bus in buses_to_be_rm],
-                                buses_to_be_rm)
+                                buses_to_be_rm
+        )
 
         buses_to_be_rm = _get_buses_to_be_rm(params, network, thermals)
 
 
 def _remove_mid_bus_with_inj(params, network, thermals,
-                            buses_deleted,
-                            bus):
+                             buses_deleted,
+                             bus
+):
     """
         remove a mid-point bus `bus` that has injections connected to it
     """
@@ -899,9 +929,9 @@ def _remove_mid_bus_with_inj(params, network, thermals,
 
 def _remove_mid_point_buses_with_injs(params, thermals, network):
     """
-    Buses with injections connected to the network by two lines can be removed by reformulating
-    the power flow between the two terminals connected to the bus being removed
-    Thus, one bus and one line are removed
+    Buses with injections connected to the network by two lines can be removed
+    by reformulating the power flow in the lines connected to the bus being
+    removed. Thus, one bus and one line are removed
     """
 
     def _get_cand_buses(network, buses_cannot_be_del):
@@ -930,10 +960,13 @@ def _remove_mid_point_buses_with_injs(params, thermals, network):
         buses_deleted = []
 
         for bus in candidate_buses:
-            _remove_mid_bus_with_inj(params, network, thermals, buses_deleted, bus)
+            _remove_mid_bus_with_inj(params, network, thermals,
+                                     buses_deleted, bus
+            )
 
         update_load_and_network(network, thermals,
-                                [network.BUS_ID.index(bus) for bus in buses_deleted],
+                                [network.BUS_ID.index(bus)
+                                 for bus in buses_deleted],
                                 buses_deleted)
 
         candidate_buses = _get_cand_buses(network, buses_cannot_be_del)

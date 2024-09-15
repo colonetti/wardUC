@@ -1,7 +1,10 @@
+
 from typing import Union
 from numbers import Real
 import json
 import csv
+
+from constants import MAX_FLOW
 
 def convert_from_csv_to_json(params,
                              params_file: str,
@@ -24,7 +27,8 @@ def convert_from_csv_to_json(params,
 
     with open(params_file, encoding="ISO-8859-1") as csv_file:
         csv_reader = csv.reader(csv_file, delimiter = '\t')
-        for row in [r for r in csv_reader if len(r) > 0 and len(r[0]) > 0 and r[0][0]!="#"]:
+        for row in [r for r in csv_reader
+                    if len(r) > 0 and len(r[0]) > 0 and r[0][0]!="#"]:
             if row[0].strip() == "NETWORK_VIOL_UNIT_COST":
                 data["Parameters"]["Power balance penalty ($/MW)"] = float(row[1].strip())
 
@@ -45,7 +49,8 @@ def convert_from_csv_to_json(params,
             "Ramp-up limit (MW/h)": -9, "Ramp-down limit (MW/h)": -9,
             "Minimum up-time (h)": -9, "Minimum down-time (h)": -9,
             "Standard linear generation cost ($/MWh)": -9,
-            "Constant cost ($)": -9, "Start-up cost ($)": -9, "Shut-down cost ($)": -9}
+            "Constant cost ($)": -9, "Start-up cost ($)": -9,
+            "Shut-down cost ($)": -9}
 
     for h in header:
         header[h] = row.index(h)
@@ -462,7 +467,8 @@ def convert_from_json_to_csv(
     del f
 
     f = open(out_dir + 'case ' + case_name + '/'
-                "initial states of thermal units - " + system_name + " - case "+case_name+".csv",
+                "initial states of thermal units - " + system_name +
+                " - case "+case_name+".csv",
                 'w', encoding = 'ISO-8859-1')
     f.write("<BEGIN>\n")
     f.write("<Thermal plants>\n")
@@ -488,7 +494,9 @@ def convert_from_json_to_csv(
     f.close()
     del f
 
-    f = open(out_dir + "network - " + system_name + ".csv", 'w', encoding = 'ISO-8859-1')
+    f = open(out_dir + "network - " + system_name + ".csv", 'w',
+             encoding='ISO-8859-1'
+    )
     ref_defined = False
     f.write("<BEGIN>\n")
     f.write("<Buses>\n")
@@ -524,7 +532,7 @@ def convert_from_json_to_csv(
         if "Normal flow limit (MW)" in line.keys():
             f.write(str(line["Normal flow limit (MW)"]) + ';')
         else:
-            f.write('99999;')
+            f.write(f"{MAX_FLOW};")
         f.write(str(1/(line["Susceptance (S)"]/100)) + ';')
         f.write("\n")
         i += 1
@@ -538,8 +546,9 @@ def convert_from_json_to_csv(
     del f
 
     f = open(out_dir + '/case ' + case_name + '/'+
-                "gross load - " + system_name + " - case " + case_name + ".csv",
-                                                                    'w', encoding = 'ISO-8859-1')
+                "gross load - " + system_name + " - case " +
+                case_name + ".csv", 'w', encoding = 'ISO-8859-1'
+    )
     f.write('<BEGIN>\n')
     f.write('Bus/Hour;')
     for t in range(int(data["Parameters"]["Time horizon (h)"])):
@@ -563,7 +572,8 @@ def convert_from_json_to_csv(
     if 'Reserves' in data.keys():
         f = open(out_dir + '/case ' + case_name + '/'+
                  "reserves - " + system_name + " - case " + case_name + ".csv",
-                 'w', encoding = 'ISO-8859-1')
+                 'w', encoding = 'ISO-8859-1'
+        )
         f.write('<BEGIN>\n')
         f.write('Reserve ID;Hour;Reservse (MW)\n')
         for reserve in data['Reserves'].keys():
