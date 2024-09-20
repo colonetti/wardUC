@@ -51,7 +51,9 @@ def run_solver(params: Params, thermals: Thermals, network: Network):
 
     env = grbpy.Env(empty=True)
     env.setParam('OutputFlag', params.VERBOSE)
-    env.setParam('LogFile', params.OUT_DIR + f"/unit_commitment_{params.PS}.log")
+    env.setParam('LogFile', params.OUT_DIR +
+                 f"/unit_commitment_{params.PS}.log"
+    )
     env.start()
     m = grbpy.Model(name=f"unit_commitment_{params.PS}", env=env)
     m.setParam("LogToConsole", params.VERBOSE)
@@ -96,7 +98,8 @@ def run_solver(params: Params, thermals: Thermals, network: Network):
                                                 tg,
                                                 flow_periods=[],
                                                 single_bus_periods=
-                                                 list(range(params.T)))
+                                                 list(range(params.T))
+        )
 
     print(f'\n\n{dt() - ini:.2f} seconds to build the optimization model.\n\n',
           flush=True)

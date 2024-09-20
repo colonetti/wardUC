@@ -60,7 +60,8 @@ def main(args):
         build_ptdf(network)
         redundant_line_bounds(params, thermals, network,
                               time_limit=360,
-                              run_single_period_models=False)
+                              run_single_period_models=False
+        )
 
         reduce_network(params, thermals, network)
 
@@ -113,7 +114,8 @@ def main(args):
                        s_reserve,
                        theta,
                        branch_flow,
-                       s_load_curtailment, s_gen_surplus, s_renew_curtailment)
+                       s_load_curtailment, s_gen_surplus, s_renew_curtailment
+        )
 
         if (params.REDUCE_SYSTEM and
             (params.NETWORK_MODEL in (NetworkModel.B_THETA,

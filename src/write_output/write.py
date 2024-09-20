@@ -156,8 +156,8 @@ def write_event_tracker(params, event_tracker:list, W_RANK:int):
     del f
 
 def write_generation(params, thermals, network,
-                        hgEachBus, tg, dispStat,
-                            s_load_curtailment, s_gen_surplus, s_Renewable, s_reserve):
+                        hgEachBus, tg, disp_stat,
+                            s_load_curtailment, s_gen_surplus, s_renewable, s_reserve):
     """Write total generation per period of hydro and thermal plants to
         a csv file 'generation and load',
         along with net load, load curtailment, and generation surpluses
@@ -191,7 +191,7 @@ def write_generation(params, thermals, network,
 
     f.write('Renewable generation curtailment;')
     for t in range(params.T):
-        f.write(str(round(sum(s_Renewable[k] for k in s_Renewable.keys() if k[-1] == t)
+        f.write(str(round(sum(s_renewable[k] for k in s_renewable.keys() if k[-1] == t)
                                                                     *params.POWER_BASE, 4)) + ';')
     f.write('\n')
     for res in network.RESERVES.keys():
@@ -203,7 +203,7 @@ def write_generation(params, thermals, network,
         _r = 0
         for t in range(params.T):
             for g in [g for g in thermals.ID if thermals.RESERVE_ELEGIBILITY[g] == res]:
-                _r += (dispStat[g, t]*thermals.MAX_P[g] - tg[g, t])*params.POWER_BASE
+                _r += (disp_stat[g, t]*thermals.MAX_P[g] - tg[g, t])*params.POWER_BASE
             f.write(str(round(_r, 4)) + ";")
         f.write('\n')
         f.write(f'Reserves_{res}_slack;')
@@ -216,7 +216,7 @@ def write_generation(params, thermals, network,
         f.write('\n')
     f.close()
 
-def write_thermal_operation(params, thermals, stUpTG, stDwTG, dispStat, tgDisp, tg):
+def write_thermal_operation(params, thermals, stUpTG, stDwTG, disp_stat, tgDisp, tg):
     """Write the decisions for the thermal units"""
 
     f = open(params.OUT_DIR + 'thermal decisions - ' +
@@ -234,11 +234,11 @@ def write_thermal_operation(params, thermals, stUpTG, stDwTG, dispStat, tgDisp, 
             f.write(str(t) + ';')
             f.write(str(stUpTG[g, t]) + ';')
             f.write(str(stDwTG[g, t]) + ';')
-            f.write(str(dispStat[g, t]) + ';')
-            f.write(str(round((tgDisp[g, t]+thermals.MIN_P[g]*dispStat[g, t])*params.POWER_BASE, 4))
+            f.write(str(disp_stat[g, t]) + ';')
+            f.write(str(round((tgDisp[g, t]+thermals.MIN_P[g]*disp_stat[g, t])*params.POWER_BASE, 4))
                                                                                             + ';')
             f.write(str(round(tg[g, t]*params.POWER_BASE, 4))+';')
-            f.write(str(round(((thermals.MAX_P[g] - thermals.MIN_P[g])*dispStat[g, t]
+            f.write(str(round(((thermals.MAX_P[g] - thermals.MIN_P[g])*disp_stat[g, t]
                                 - tgDisp[g,t])*params.POWER_BASE, 4))+';')
             f.write(str(round(thermals.MIN_P[g]*params.POWER_BASE, 4))+';')
             f.write(str(round(thermals.MAX_P[g]*params.POWER_BASE, 4))+';')

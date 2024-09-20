@@ -187,7 +187,8 @@ def update_load_and_network(network, thermals, buses_to_delete:list):
 def _del_end_of_line_buses(network, buses_no_load_no_gen,
                            buses_to_delete
 ):
-    """Delete buses with no load and no generation connected to a single line"""
+    """Delete buses with no load and no generation connected to a single line
+    """
 
     for bus in [bus for bus in buses_no_load_no_gen
                             if ((len(network.LINES_FROM_BUS[bus]) +
@@ -307,7 +308,7 @@ def _del_mid_point_buses(params, network, buses_no_load_no_gen,
                                                                         for t in range(params.T)}
                 break
 
-            if not(found):
+            if not found:
                 # a line between the two end nodes was not found. create one
                 network.LINE_ID.append(l)
                 network.LINE_F_T[l] = (buses_of_new_connection[0], buses_of_new_connection[1])
@@ -546,11 +547,11 @@ def del_end_of_line_buses_and_reassign_injection(network, thermals, buses_to_be_
         # relocated to a new bus
         new_bus = -1e12
         for l in (network.LINES_FROM_BUS[bus] + network.LINES_TO_BUS[bus]):
-            if not(network.LINE_F_T[l][0] == bus):
+            if not network.LINE_F_T[l][0] == bus:
                 # Remove the line from the buses connected to 'bus'
                 network.LINES_FROM_BUS[network.LINE_F_T[l][0]].remove(l)
                 new_bus = network.LINE_F_T[l][0]
-            elif not(network.LINE_F_T[l][1] == bus):
+            elif not network.LINE_F_T[l][1] == bus:
                 # Remove the line from the buses connected to 'bus'
                 network.LINES_TO_BUS[network.LINE_F_T[l][1]].remove(l)
                 new_bus = network.LINE_F_T[l][1]
@@ -578,7 +579,7 @@ def _remove_end_of_line_buses_with_injections(params, thermals, network):
 
         constr_id = str(bus) + '_' + str(l)
         for t in range(params.T):
-            if not(t in network.SEC_CONSTRS):
+            if not t in network.SEC_CONSTRS:
                 network.SEC_CONSTRS[t] = {}
 
             network.SEC_CONSTRS[t][constr_id] = {
