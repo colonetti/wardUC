@@ -341,7 +341,8 @@ def add_thermal_cont(
     st_up_ub, _, st_dw_ub = _get_var_bounds(params, thermals, 'C')
 
 
-    # get the thermal units that need two generation variables: one dispatch, and one total gen
+    # get the thermal units that need two generation variables: one dispatch,
+    # and one total gen
     _two_vars_units = [g for g in thermals.ID if thermals.MIN_P[g] > 0]
 
     # and the units that need a single generation variable
@@ -351,38 +352,46 @@ def add_thermal_cont(
     t_g_disp = {}
     for g in _single_var_units:
         t_g_disp.update(
-            {(g, t): m.addVar(obj=thermals.GEN_COST[g], ub=thermals.MAX_P[g] - thermals.MIN_P[g],
-                               name=f"t_g_disp_{g}_{t}")
+            {(g, t): m.addVar(obj=thermals.GEN_COST[g],
+                              ub=thermals.MAX_P[g] - thermals.MIN_P[g],
+                               name=f"t_g_disp_{g}_{t}"
+                            )
              for t in range(params.T)
              }
         )
 
     for g in _two_vars_units:
-        t_g_disp.update({(g, t): m.addVar(name=f"t_g_disp_{g}_{t}") for t in range(params.T)})
+        t_g_disp.update({(g, t): m.addVar(name=f"t_g_disp_{g}_{t}")
+                         for t in range(params.T)}
+        )
 
     t_g = {(g, t): m.addVar(obj=thermals.GEN_COST[g], name=f'tg_{g}_{t}')
            for t in range(params.T)
            for g in _two_vars_units
            }
 
-    t_g.update({(g, t): t_g_disp[g, t] for t in range(params.T) for g in _single_var_units})
+    t_g.update({(g, t): t_g_disp[g, t] for t in range(params.T)
+                for g in _single_var_units}
+    )
 
     # lower and upper operating limits of thermal units
     for g in [g for g in thermals.ID if thermals.MIN_P[g] > 0]:
         gen_range = thermals.MAX_P[g] - thermals.MIN_P[g]
         for t in range(params.T):
-            m.addConstr(t_g_disp[g, t] - gen_range * disp_status[g, t] <= 0, name=f'max_p_{g}_{t}')
+            m.addConstr(t_g_disp[g, t] - gen_range * disp_status[g, t] <= 0,
+                        name=f'max_p_{g}_{t}')
 
     # total generation
     for g in [g for g in thermals.ID if thermals.MIN_P[g] > 0]:
         for t in range(params.T):
-            m.addConstr(t_g[g, t] - t_g_disp[g, t] - thermals.MIN_P[g] * disp_status[g, t]  == 0,
+            m.addConstr(t_g[g, t] - t_g_disp[g, t] -
+                        thermals.MIN_P[g] * disp_status[g, t] == 0,
                         name=f'gen_{g}_{t}'
-                        )
+            )
 
     # ramp limits
     for g in thermals.ID:
-        if not (thermals.STATE_0[g]):
+        if not thermals.STATE_0[g]:
             m.addConstr(t_g_disp[g, 0] <= 0, name=f'ramp_up_{g}_{0}')
         else:
             # Python might mess up the arithmetics, so round it
@@ -392,32 +401,37 @@ def add_thermal_cont(
             m.addConstr(- t_g_disp[g, 0] <= _rhs, name=f'ramp_down_{g}_{0}')
 
     for g in [g for g in thermals.ID
-              if (thermals.RAMP_UP[g] < (thermals.MAX_P[g] - thermals.MIN_P[g]))
-              ]:
+              if thermals.RAMP_UP[g] < (thermals.MAX_P[g] - thermals.MIN_P[g])
+    ]:
 
-        if st_up_ub[g] == 1 or st_dw_ub[g] == 1 or thermals.RAMP_UP[g] != thermals.RAMP_DOWN[g]:
+        if (st_up_ub[g] == 1 or
+            st_dw_ub[g] == 1 or
+            thermals.RAMP_UP[g] != thermals.RAMP_DOWN[g]
+        ):
             if st_up_ub[g] == 1:
                 for t in range(1, params.T, 1):
                     m.addConstr(t_g_disp[g, t] - t_g_disp[g, t - 1]
                                  <= thermals.RAMP_UP[g] * disp_status[g, t - 1],
                                  name=f'ramp_up_{g}_{t}'
-                                 )
+                    )
             else:
                 for t in range(1, params.T, 1):
-                    m.addConstr(t_g_disp[g, t] - t_g_disp[g, t - 1] <= thermals.RAMP_UP[g],
+                    m.addConstr(t_g_disp[g, t] - t_g_disp[g, t - 1]
+                                <= thermals.RAMP_UP[g],
                                  name=f'ramp_up_{g}_{t}'
-                                 )
+                    )
             if st_dw_ub[g] == 1:
                 for t in range(1, params.T, 1):
                     m.addConstr(- t_g_disp[g, t] + t_g_disp[g, t - 1]
                                  <= thermals.RAMP_DOWN[g] * disp_status[g, t],
                                  name=f'ramp_down_{g}_{t}'
-                                 )
+                    )
             else:
                 for t in range(1, params.T, 1):
-                    m.addConstr(- t_g_disp[g, t] + t_g_disp[g, t - 1] <= thermals.RAMP_DOWN[g],
+                    m.addConstr(- t_g_disp[g, t] + t_g_disp[g, t - 1]
+                                <= thermals.RAMP_DOWN[g],
                                  name=f'ramp_down_{g}_{t}'
-                                 )
+                    )
 
         else:
 
@@ -426,40 +440,52 @@ def add_thermal_cont(
                                           for t in range(1, params.T, 1)}
 
             for t in range(1, params.T, 1):
-                m.addConstr(- t_g_disp[g, t] + t_g_disp[g, t - 1] + aux_ramp[g, t]
+                m.addConstr(- t_g_disp[g, t] +
+                            t_g_disp[g, t - 1] + aux_ramp[g, t]
                              == thermals.RAMP_DOWN[g],
                              name=f'ramp_{g}_{t}'
-                             )
+                )
 
     # start-up and shut-down capabilities
     for g in [g for g in thermals.ID
-              if (thermals.RAMP_UP[g] >= (thermals.MAX_P[g] - thermals.MIN_P[g]))]:
-        # the following inequalities are only added for units that do not actually have meaningful
-        # ramp limits. For units with ramp limits, the inequalities ramp_up and ramp_down already
-        # guarantee that the unit operates at its minimum when it is started-up and right before
-        # being shut-down.
+                if (thermals.RAMP_UP[g] >=
+                    (thermals.MAX_P[g] - thermals.MIN_P[g]))
+    ]:
+        # the following inequalities are only added for units
+        # that do not actually have meaningful
+        # ramp limits. For units with ramp limits, the inequalities
+        # ramp_up and ramp_down already
+        # guarantee that the unit operates at its minimum when it is started-up
+        # and right before being shut-down.
         gen_range = thermals.MAX_P[g] - thermals.MIN_P[g]
         if st_up_ub[g] == 1:
             for t in range(1, params.T, 1):
-                m.addConstr(t_g_disp[g, t] <= gen_range * disp_status[g, t - 1],
+                m.addConstr(t_g_disp[g, t]
+                            <= gen_range * disp_status[g, t - 1],
                              name=f'start_up_cap_{g}_{t}'
-                             )
+                )
         if st_dw_ub[g] == 1:
             for t in range(1, params.T, 1):
-                m.addConstr(t_g_disp[g, t - 1] <= gen_range * disp_status[g, t],
+                m.addConstr(t_g_disp[g, t - 1]
+                            <= gen_range * disp_status[g, t],
                              name=f'shut_down_cap_{g}_{t}'
-                             )
+                )
 
     for g in thermals.ID:
-        if (thermals.STATE_0[g] and not (isinstance(st_dw_tg[g, 0], (int, float)))
-                and (thermals.MAX_P[g] - thermals.MIN_P[g]) > 0
+        if (thermals.STATE_0[g] and
+            not (isinstance(st_dw_tg[g, 0], (int, float))) and
+            (thermals.MAX_P[g] - thermals.MIN_P[g]) > 0
         ):
-            m.addConstr(thermals.T_G_0[g] - thermals.MAX_P[g] <=
-                            - (thermals.MAX_P[g] - thermals.MIN_P[g]) * st_dw_tg[g, 0],
-                            name=f'shut_down_cap_{g}_{0}')
+            m.addConstr(- (thermals.MAX_P[g] - thermals.T_G_0[g]) <=
+                        - (thermals.MAX_P[g] - thermals.MIN_P[g]) *
+                            st_dw_tg[g, 0],
+                        name=f'shut_down_cap_{g}_{0}'
+            )
 
     # additional constraints from the network reduction
     if len(network.SEC_CONSTRS) > 0:
-        _ = _add_sec_constraints_only_on_thermals(m, params, thermals, network, t_g)
+        _ = _add_sec_constraints_only_on_thermals(m, params, thermals, network,
+                                                  t_g
+        )
 
     return t_g, t_g_disp

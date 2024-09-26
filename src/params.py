@@ -100,11 +100,11 @@ def _set_attr_from_console(parameter_class: "Params",
         k = k.upper()
         if hasattr(parameter_class, k):
             old_v = getattr(parameter_class, k)
-            if not (isinstance(old_v, _enums)):
+            if not isinstance(old_v, _enums):
                 if (isinstance(old_v, list) and
                     (not (isinstance(v, list)) or len(v) == 1)
                 ):
-                    if not (isinstance(v, list)):
+                    if not isinstance(v, list):
                         v = (_str2bool(v) if isinstance(old_v[0], bool)
                                         else v
                         )
@@ -175,7 +175,7 @@ def _set_params_from_file(params, file_name):
     """
 
     print("\n\n")
-    print(f"Attributes found in file {params.IN_DIR+params.CASE+'/params.txt'}"
+    print(f"Attributes found in file {file_name}"
           + " will overwrite default values of parameters")
     with open(file_name, encoding="ISO-8859-1") as csv_file:
         csv_reader = reader(csv_file, delimiter='=')

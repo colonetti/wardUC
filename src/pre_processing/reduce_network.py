@@ -329,7 +329,6 @@ def _del_mid_point_buses(params, network, buses_no_load_no_gen,
             del network.LINES_TO_BUS[bus]
 
 
-
 def _remove_n_connections_buses(params, network, thermals):
     """
         delete buses with no active power injections connected exactly to three lines
@@ -945,11 +944,13 @@ def _remove_mid_point_buses_with_injs(params, thermals, network):
 
         # the bus must be connected to two lines
         # exactly one of the lines connected to the bus can be binding
-        # if a bus is removed, none of its immediate neighbouring buses can be removed
+        # if a bus is removed, none of its immediate neighbouring buses
+        # can be removed
         return [bus for bus in set(network.BUS_ID) - buses_cannot_be_del
-                        if len(network.LINES_FROM_BUS[bus] + network.LINES_TO_BUS[bus]) == 2
-                           and (len([l for l in network.LINES_FROM_BUS[bus] +
-                                network.LINES_TO_BUS[bus] if network.ACTIVE_BOUNDS[l]]) == 1)]
+                if len(network.LINES_FROM_BUS[bus] + network.LINES_TO_BUS[bus]) == 2
+                    and (len([l for l in network.LINES_FROM_BUS[bus] +
+                        network.LINES_TO_BUS[bus] if network.ACTIVE_BOUNDS[l]]) == 1)
+        ]
 
     MAX_IT = 10
 

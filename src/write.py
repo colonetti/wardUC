@@ -46,7 +46,8 @@ def write_solution(params, thermals, network,
                    s_reserve,
                    theta,
                    branch_flow,
-                   s_load_curtailment, s_gen_surplus, s_renew_curtailment
+                   s_load_curtailment, s_gen_surplus, s_renew_curtailment,
+                   suffix: str=""
 ):
 
     locale.setlocale(locale.LC_ALL, '')
@@ -57,7 +58,8 @@ def write_solution(params, thermals, network,
     print('\n\n', flush=True)
 
     f = open(params.OUT_DIR + '/angles and flows - '+
-                    params.PS + ' - case ' + str(params.CASE) + '.csv', 'w',
+                    params.PS + ' - case ' + str(params.CASE) +
+                    suffix + '.csv', 'w',
                     encoding = 'utf-8'
     )
     f.write('var;indices;period;x;max;min\n')
@@ -79,8 +81,9 @@ def write_solution(params, thermals, network,
     if params.NETWORK_SLACKS in (NetworkSlacks.BUS_SLACKS,
                                  NetworkSlacks.BUS_AND_LINE_SLACKS):
         f = open(params.OUT_DIR + '/network bus slacks - '+
-                    params.PS + ' - case ' + str(params.CASE) + '.csv', 'w',
-                    encoding = 'utf-8')
+                 params.PS + ' - case ' + str(params.CASE) +
+                 suffix + '.csv', 'w',
+                 encoding = 'utf-8')
         f.write('var;indices;period;x\n')
         for k, v in s_load_curtailment.items():
             f.write("s_load_curtailment" + ';' + str(k[0:len(k)-1]) + ';' +
@@ -109,17 +112,21 @@ def write_solution(params, thermals, network,
                      s_load_curtailment_x,
                      s_gen_surplus_x,
                      s_renew_curtailment_x,
-                     {k: v.x for k, v in s_reserve.items()}
+                     {k: v.x for k, v in s_reserve.items()},
+                     suffix=suffix
     )
 
     write_thermal_operation(params, thermals,
-                            {k: v.x for k, v in st_up_t_g.items()},
-                            {k: v.x for k, v in st_dw_t_g.items()},
-                            {k: v.x for k, v in disp_stat_t_g.items()},
+                            {k: v.x if not isinstance(v, int | float)
+                                    else v for k, v in st_up_t_g.items()},
+                            {k: v.x if not isinstance(v, int | float)
+                                    else v for k, v in st_dw_t_g.items()},
+                            {k: v.x if not isinstance(v, int | float)
+                                    else v for k, v in disp_stat_t_g.items()},
                             disp_stat_t_g_x,
-                            t_g_x
+                            t_g_x,
+                            suffix=suffix
     )
-
 
     if params.NETWORK_MODEL != NetworkModel.SINGLE_BUS:
         write_branch_flows(params,
@@ -130,13 +137,15 @@ def write_solution(params, thermals, network,
                            s_gen_surplus_x,
                            s_renew_curtailment_x,
                            ptdf_threshold=params.PTDF_COEFF_TOL,
-                           write_csv=True
+                           write_csv=True,
+                           suffix=suffix
         )
 
 
 def write_generation(params, thermals, network,
                      t_g, disp_stat,
-                     s_load_curtailment, s_gen_surplus, s_renewable, s_reserve
+                     s_load_curtailment, s_gen_surplus, s_renewable, s_reserve,
+                     suffix: str=""
 ):
     """Write total generation per period of hydro and thermal plants to
         a csv file 'generation and load',
@@ -144,7 +153,8 @@ def write_generation(params, thermals, network,
     """
 
     f = open(params.OUT_DIR + '/generation and load - ' +
-                params.PS + ' - case ' + str(params.CASE) + '.csv', 'w',
+                params.PS + ' - case ' + str(params.CASE) +
+                suffix + '.csv', 'w',
                 encoding='ISO-8859-1')
 
     for g, unit_name in thermals.UNIT_NAME.items():
@@ -210,12 +220,14 @@ def write_generation(params, thermals, network,
 
 
 def write_thermal_operation(params, thermals, st_up_t_g, st_dw_t_g, disp_stat,
-                            t_g_disp, t_g
+                            t_g_disp, t_g,
+                            suffix: str=""
 ):
     """Write the decisions for the thermal units"""
 
     f = open(params.OUT_DIR + '/thermal decisions - ' +
-                params.PS + ' - case ' + str(params.CASE) + '.csv', 'w',
+                params.PS + ' - case ' + str(params.CASE) +
+                suffix + '.csv', 'w',
                 encoding = 'ISO-8859-1'
     )
     f.write('ID;Name;Period;')
@@ -258,7 +270,8 @@ def write_branch_flows(params,
                         s_gen_surplus,
                         s_renew_curtailment,
                         ptdf_threshold=0,
-                        write_csv=True
+                        write_csv=True,
+                        suffix: str=""
 ) -> None:
     """
         write branch flows to a csv file
@@ -277,7 +290,8 @@ def write_branch_flows(params,
 
     if write_csv:
         f = open(params.OUT_DIR + '/branch flows - '+
-                        params.PS + ' - case ' + params.CASE + '.csv', 'w',
+                        params.PS + ' - case ' + params.CASE +
+                        suffix + '.csv', 'w',
                         encoding='utf-8'
         )
         f.write('sep=;\n')
@@ -338,7 +352,7 @@ def write_branch_flows(params,
         )
 
         sub_PTDF_act_lines = network.PTDF[:]
-        sub_PTDF_act_lines[np.where(abs(sub_PTDF_act_lines) < ptdf_threshold)] = 0
+        sub_PTDF_act_lines[np.where(abs(sub_PTDF_act_lines)<ptdf_threshold)] =0
 
         for l in network.LINE_ID:
 
@@ -373,8 +387,10 @@ def write_branch_flows(params,
                     )
 
                     if (
-                        (flow < (network.LINE_FLOW_LB[l][t] - 1/params.POWER_BASE))
-                        or (flow > (network.LINE_FLOW_UB[l][t] + 1/params.POWER_BASE))
+                        (flow <
+                         (network.LINE_FLOW_LB[l][t] - 1/params.POWER_BASE))
+                        or (flow >
+                            (network.LINE_FLOW_UB[l][t] + 1/params.POWER_BASE))
                     ):
                         violated_lines.append([l, (f_bus, t_bus), t,
                                 network.LINE_FLOW_UB[l][t]*params.POWER_BASE,

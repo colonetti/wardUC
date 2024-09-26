@@ -3,6 +3,9 @@ mpi4py.rc.thread_level = 'single'
 from mpi4py import MPI
 from copy import deepcopy
 
+import networkx as nx
+import matplotlib.pyplot as plt
+
 from read_input.read import read
 from solver import run_solver
 from write import write_solution, check_flows_full_network
@@ -103,7 +106,8 @@ def main(args):
      branch_flow,
      s_load_curtailment, s_gen_surplus,
                     s_renew_curtailment) = run_solver(params, thermals,
-                                                      network)
+                                                      network
+    )
 
     if m.SolCount >= 1:
         # if at least one solution was found
@@ -130,6 +134,50 @@ def main(args):
                                      s_gen_surplus,
                                      s_renew_curtailment
             )
+
+
+        if (params.REDUCE_SYSTEM and
+            (params.NETWORK_MODEL in (NetworkModel.B_THETA,
+                                      NetworkModel.FLUXES,
+                                      NetworkModel.PTDF))
+        ):
+
+            fixed_st_up_tg = {k: v.x if not isinstance(v, int | float)
+                              else v
+                              for k, v in st_up_tg.items()}
+            fixed_st_dw_tg = {k: v.x if not isinstance(v, int | float)
+                              else v
+                              for k, v in st_dw_tg.items()}
+            fixed_disp_stat_tg = {k: v.x if not isinstance(v, int | float)
+                              else v
+                              for k, v in disp_stat_tg.items()}
+
+            (m_full,
+            st_up_tg_full, st_dw_tg_full, disp_stat_tg_full,
+            t_g_full, t_g_disp_full,
+            s_reserve_full,
+            theta_full,
+            branch_flow_full,
+            s_load_curtailment_full, s_gen_surplus_full,
+                    s_renew_curtailment_full) = run_solver(params,
+                                                           original_thermals,
+                                                           original_network,
+                                                           fixed_st_up_tg,
+                                                           fixed_st_dw_tg,
+                                                           fixed_disp_stat_tg
+            )
+
+            write_solution(params, original_thermals, original_network,
+                           m_full,
+                           st_up_tg_full, st_dw_tg_full, disp_stat_tg_full,
+                           t_g_full, t_g_disp_full,
+                           s_reserve_full,
+                           theta_full,
+                           branch_flow_full,
+                           s_load_curtailment_full, s_gen_surplus_full,
+                           s_renew_curtailment_full
+            )
+
 
 if __name__ == '__main__':
     from treat_args import _treat_args

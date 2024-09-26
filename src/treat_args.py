@@ -18,9 +18,12 @@ def _treat_args(W_RANK:int, W_SIZE:int) -> dict:
         quit()
 
     class DummyParams:
-        '''A dummy class with all attributes of Params. This dummy class is simply used
-        to get the attributes of Params and treat the arguments from the command line.
-        The default values of the attributes here are set to arbitrary values.'''
+        '''A dummy class with all attributes of Params.
+        This dummy class is simply used
+        to get the attributes of Params and treat the arguments
+        from the command line.
+        The default values of the attributes here are set to arbitrary values.
+        '''
         EXP_NAME: str = 'nan'
         T: int = 0
         TIME_LIMIT: Real = -1.000
@@ -33,7 +36,7 @@ def _treat_args(W_RANK:int, W_SIZE:int) -> dict:
         DISCRETIZATION: Real = -1.0
         MILP_GAP: Real = -1e-4
         DEFICIT_COST: Real = -1e8
-        REDUCE_SYSTEM: bool = False
+        REDUCE_SYSTEM: bool = True
         POWER_BASE: Real = -100.0
         SCAL_OBJ_F: Real = -1e-3
         MIN_GEN_CUT_MW: Real = -1.00
@@ -51,7 +54,7 @@ def _treat_args(W_RANK:int, W_SIZE:int) -> dict:
     CLI = argparse.ArgumentParser(
                     prog = 'ward_UC',
                     description = 'Apply Ward reduction to UC models',
-                    epilog = 'For help, refer to https://github.com/colonetti/ward_UC_pscc2024',
+                    epilog = 'For help, refer to https://github.com/colonetti/wardUC',
                     formatter_class=lambda prog: argparse.HelpFormatter(prog,max_help_position=8,
                                                                                     width=100))
 

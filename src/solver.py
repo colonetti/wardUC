@@ -11,7 +11,10 @@ from model.add_network import add_network
 from model.add_thermal import add_thermal_bin, add_thermal_cont
 from model.add_global_constrs import add_global_constrs
 
-def run_solver(params: Params, thermals: Thermals, network: Network):
+def run_solver(params: Params, thermals: Thermals, network: Network,
+               fixed_st_up_tg: dict=None,
+               fixed_st_dw_tg: dict=None,
+               fixed_disp_stat_tg: dict=None):
     """
     Build the optimization model and solve it with Gurobi.
 
@@ -59,10 +62,16 @@ def run_solver(params: Params, thermals: Thermals, network: Network):
     m.setParam("LogToConsole", params.VERBOSE)
 
     # Add the thermal binary variables and related constraints to model
-    st_up_tg, st_dw_tg, disp_stat_tg = add_thermal_bin(m,
-                                                       params, thermals,
-                                                       vtype="B"
-    )
+    if all(f is not None
+           for f in [fixed_st_up_tg, fixed_st_dw_tg, fixed_disp_stat_tg]):
+        st_up_tg = fixed_st_up_tg
+        st_dw_tg = fixed_st_dw_tg
+        disp_stat_tg = fixed_disp_stat_tg
+    else:
+        st_up_tg, st_dw_tg, disp_stat_tg = add_thermal_bin(m,
+                                                           params, thermals,
+                                                           vtype="B"
+        )
 
     # Add the continuous part of the thermal units to the optimization model
     tg, t_g_disp = add_thermal_cont(m, params, thermals, network,
