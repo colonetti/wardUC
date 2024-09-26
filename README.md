@@ -7,7 +7,27 @@ unit-commitment models. The UC model we currently study has two main components:
 
 The resulting mathematical model is mixed-integer linear.
 
-For a lack of a better name, in the following, we refer to this package as `the package`.
+For the lack of a better name, in the following, we refer to this package as `the package`.
+
+### Test system 1354pegase with full network
+<img src="https://drive.google.com/uc?id=1HUGqtqFunX0rqG8CkmdaOJwKs5fY4o0Q"
+     alt="1354rte full"
+     style="width: 50%" />
+
+### Test system 1354pegase with reduced network
+<img src="https://drive.google.com/uc?id=1HP957gd5OvADYJGKJAv5fzy4rmZ7Auvn"
+     alt="1354rte reduced"
+     style="width: 50%" />
+
+### Test system 6515rte with full network
+<img src="https://drive.google.com/uc?id=1HcgPrdrQWcOslxPN6BeGm5ON07PxQsw5"
+     alt="6515rte full"
+     style="width: 50%" />
+     
+### Test system 6515rte with reduced network
+<img src="https://drive.google.com/uc?id=1HWdZ8o-KxSUk9ASqNsP11NXUaiuA4qep"
+     alt="6515rte reduced"
+     style="width: 50%" />
 
 ## Functionality
 
